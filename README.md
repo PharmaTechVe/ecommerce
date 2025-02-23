@@ -1,4 +1,4 @@
-# 🏥 FarmaTech - Healthcare Sales Management
+# FarmaTech - Healthcare Ecommerce
 
 This is a **Next.js** project created with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
