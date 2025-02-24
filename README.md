@@ -1,13 +1,18 @@
-![alt text](image.png)
+<p align="center">
+  <img src="image.png" alt="PharmaTech Logo" width="200">
+</p>
 
-## PharmaTech - Web Healthcare Ecommerce
+<h2 align="center">PharmaTech - Web Healthcare Ecommerce</h2>
 
-![Static Badge](https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/tailwindcss-0F172A?&logo=tailwindcss) ![Static Badge](https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">  <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white">
+  <img src="https://img.shields.io/badge/tailwindcss-0F172A?&logo=tailwindcss">
 
-This is a **Next.js** project created with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+</p>
 
 ## 📌 About the Project
 
+This is a **Next.js** project created with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 **PharmaTech** is a sales management platform for a network of pharmacy branches.  
 This system enables the administration and optimization of healthcare product sales and delivery,  
 offering an efficient experience for customers, employees, and pharmacy administrators.
@@ -19,7 +24,6 @@ PharmaTech optimizes order deliveries by:
 - Implementing **real-time order tracking**.
 - Utilizing **automated route optimization** for faster deliveries.
 - Enabling **quick order processing** with an intuitive interface for employees.
-- Supporting **multiple delivery methods**, including express and scheduled deliveries.
 - Offering **customer notifications** for order status updates.
 
 ## 📦 Pre-requisites
