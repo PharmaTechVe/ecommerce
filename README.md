@@ -1,14 +1,22 @@
-<p align="center">
-  <img src="image.png" alt="PharmaTech Logo" width="200">
-</p>
-
-<h2 align="center">PharmaTech - Web Healthcare Ecommerce</h2>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">  <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white">
-  <img src="https://img.shields.io/badge/tailwindcss-0F172A?&logo=tailwindcss">
-
-</p>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="image.png" alt="PharmaTech Logo" width="200">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <h2>PharmaTech - Web Healthcare Ecommerce</h2>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
+      <img src="https://img.shields.io/badge/tailwindcss-0F172A?&logo=tailwindcss">
+      <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white">
+    </td>
+  </tr>
+</table>
 
 ## 📌 About the Project
 
