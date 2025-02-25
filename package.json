@@ -10,8 +10,9 @@
     "lint:fix": "eslint src --ext js,jsx,ts,tsx --fix ",
     "lint:strict": "eslint src --ext ts,tsx,js,jsx --max-warnings 0 --no-eslintrc",
     "format": "prettier --check 'src/**/*.{js,jsx,ts,tsx,css,html}'",
-    "precommit": "npm run lint:fix && npm run format && git add .",
+    "precommit": "npm run lint:fix && npm run format && npm run test && git add .",
     "test": "vitest",
+    "test:watch": "vitest --watch",
     "prepare": "husky"
   },
   "dependencies": {
