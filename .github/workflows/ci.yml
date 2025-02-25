@@ -1,17 +1,8 @@
-name: Continuous Integration
+name: CI
 
-# this is trigger CI on push and PR for main branch only
-# on:
-#   push:
-#     branches: [ main ]
-#   pull_request:
-#     branches: [ main ]
-
-# this is trigger CI on all kinds of branches and PRs
 on:
-  push:
   pull_request:
-    branches: [main,dev]
+    branches: [main, dev]
 
 jobs:
   build:
@@ -20,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Obtiene todo el historial para todas las ramas y tags
+          fetch-depth: 0
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -33,7 +24,7 @@ jobs:
         run: npm run lint
 
       - name: Run format check
-        run: npm run format
+        run: npm run check-format
 
       - name: Run tests with vitest
         run: npm run test
