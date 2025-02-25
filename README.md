@@ -14,6 +14,7 @@
       <img src="https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
       <img src="https://img.shields.io/badge/tailwindcss-0F172A?&logo=tailwindcss">
       <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white">
+      <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
     </td>
   </tr>
 </table>
@@ -37,6 +38,7 @@ PharmaTech optimizes order deliveries by:
 ## 📦 Pre-requisites
 
 - [npm](https://www.npmjs.com/) (Node Package Manager)
+- [Node.js](https://nodejs.org/en)
 - The local backend is running, and the local database is populated with test user accounts.
 
 ## 🚀 Getting Started
