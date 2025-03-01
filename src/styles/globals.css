@@ -19,3 +19,11 @@ body {
   background: var(--background);
   font-family: var(--font-poppins), sans-serif;
 }
+
+.text-main {
+  color: #393938;
+}
+
+.icon-color {
+  color: #1c2143;
+}

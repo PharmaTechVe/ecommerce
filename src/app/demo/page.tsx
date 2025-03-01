@@ -1,5 +1,8 @@
+'use client';
 import React from 'react';
-import Button from '@/components/button';
+import Button from '@/components/Button';
+import CheckButton from '@/components/CheckButton';
+import RadioButton from '@/components/RadioButton';
 
 export default function DemoPage() {
   return (
@@ -40,6 +43,24 @@ export default function DemoPage() {
         >
           Disabled Button
         </Button>
+        {/* CheckButton */}
+        <CheckButton
+          initialChecked={false}
+          onChange={(checked) => console.log('Checked state: ', checked)}
+          text="Checkbox Text"
+        />
+
+        <RadioButton
+          initialChecked={false} // Estado inicial desmarcado
+          onChange={(checked) => console.log('Radio Button Checked:', checked)}
+          text="Select this option"
+        />
+
+        <RadioButton
+          initialChecked={true} // Estado inicial marcado
+          onChange={(checked) => console.log('Radio Button Checked:', checked)}
+          text="Another option"
+        />
       </main>
     </div>
   );

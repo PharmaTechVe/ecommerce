@@ -1,5 +1,5 @@
 import React from 'react';
-
+import '../styles/globals.css';
 type ButtonProps = {
   children: React.ReactNode;
   color?: string;
@@ -33,7 +33,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const variantStyles =
     variant === 'white'
-      ? `bg-white text-[#1C2143] border-2 border-[#1C2143] hover:bg-[#1C2143] hover:text-white`
+      ? `bg-white text-main border-2 border-[#1C2143] hover:bg-[#1C2143] hover:text-white`
       : `bg-${color} text-white border-none`;
 
   const disabledStyles = disabled
