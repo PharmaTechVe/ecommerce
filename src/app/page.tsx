@@ -1,4 +1,3 @@
-import Button from '@/components/button';
 import Image from 'next/image';
 
 export default function Home() {
@@ -98,18 +97,6 @@ export default function Home() {
           Go to nextjs.org →
         </a>
       </footer>
-      <div className="mt-6">
-        <Button
-          paddingX={6}
-          paddingY={3}
-          textSize=""
-          customWidth="376px"
-          customHeight="50px"
-          disabled={true}
-        >
-          Iniciar sesión
-        </Button>
-      </div>
     </div>
   );
 }
