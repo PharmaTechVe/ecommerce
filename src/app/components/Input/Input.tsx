@@ -1,0 +1,50 @@
+'use client';
+
+import React from 'react';
+import { LucideIcon } from 'lucide-react';
+
+interface InputProps {
+  label?: string;
+  borderSize?: string;
+  borderColor?: string;
+  placeholder?: string;
+  icon?: LucideIcon;
+  iconColor?: string;
+  helperText?: string;
+  helperTextColor?: string;
+}
+
+const Input: React.FC<InputProps> = ({
+  label,
+  borderSize = '1px',
+  borderColor = 'gray',
+  placeholder = '',
+  icon: Icon,
+  iconColor = 'gray',
+  helperText = '',
+  helperTextColor = 'gray',
+}) => {
+  return (
+    <div className="flex w-full flex-col bg-white text-black">
+      {label && <label className="mb-1 font-medium">{label}</label>}
+      <div
+        className="relative flex items-center rounded-lg px-3 py-2"
+        style={{ border: `${borderSize} solid ${borderColor}` }}
+      >
+        <input
+          type="text"
+          placeholder={placeholder}
+          className="w-full outline-none"
+        />
+        {Icon && <Icon className="mr-2" color={iconColor} />}
+      </div>
+      {helperText && (
+        <p className="mt-1 text-sm" style={{ color: helperTextColor }}>
+          {helperText}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default Input;
