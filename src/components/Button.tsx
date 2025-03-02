@@ -33,7 +33,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const variantStyles =
     variant === 'white'
-      ? `bg-white text-main border-2 border-[#1C2143] hover:bg-[#1C2143] hover:text-white`
+      ? `bg-white text-main border-2 border-[#1C2143] hover:bg-[#1C2143] hover:text-main`
       : `bg-${color} text-white border-none`;
 
   const disabledStyles = disabled
@@ -51,7 +51,11 @@ const Button: React.FC<ButtonProps> = ({
           : variant === 'white'
             ? 'white'
             : color,
-        color: disabled ? 'black' : variant === 'white' ? '#1C2143' : '#fff',
+        color: disabled
+          ? 'black'
+          : variant === 'white'
+            ? 'text-main'
+            : 'text-main',
         width: customWidth,
         height: customHeight,
         border: variant === 'white' ? '2px solid #1C2143' : 'none',
