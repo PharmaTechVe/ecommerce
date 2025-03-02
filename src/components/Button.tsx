@@ -1,6 +1,7 @@
 import React from 'react';
 import { IoIosAddCircleOutline } from 'react-icons/io';
 import '../styles/globals.css';
+import { Colors } from '../styles/styles';
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -15,12 +16,12 @@ type ButtonProps = {
   disabled?: boolean;
   className?: string;
   variant?: 'submit' | 'white' | 'light' | 'icon';
-  textColor?: string; // Nueva prop para el color del texto
+  textColor?: string;
 };
 
 const Button: React.FC<ButtonProps> = ({
   children,
-  color = '#1C2143',
+  color = `${Colors.primary}`,
   paddingX = 4,
   paddingY = 2,
   textSize = 'base',
@@ -37,9 +38,9 @@ const Button: React.FC<ButtonProps> = ({
 
   const variantStyles =
     variant === 'white'
-      ? `bg-white text-main border-2 border-[#1C2143] hover:bg-[#1C2143] hover:text-main`
+      ? `bg-white text-main border-2 border-[${Colors.primary}] hover:bg-[${Colors.primary}] hover:text-main`
       : variant === 'light'
-        ? `bg-button-variant-color text-black border-none hover:bg-opacity-60`
+        ? `bg-button-variant-color text-${Colors.textHighContrast} border-none hover:bg-opacity-60`
         : variant === 'icon'
           ? `bg-${color} text-${textColor} border-none flex items-center justify-center space-x-4`
           : `bg-${color} text-${textColor} border-none`;
@@ -55,22 +56,22 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       style={{
         backgroundColor: disabled
-          ? '#D3D3D3'
+          ? `${Colors.disabled}`
           : variant === 'white'
             ? 'white'
             : variant === 'light'
-              ? '#a3e4d7'
+              ? `${Colors.secondaryLight}`
               : color,
         color: disabled
-          ? 'black'
+          ? `${Colors.textHighContrast}`
           : variant === 'white'
             ? 'text-main'
             : variant === 'light'
-              ? 'black'
+              ? `${Colors.textHighContrast}`
               : textColor,
         width: customWidth,
         height: customHeight,
-        border: variant === 'white' ? '2px solid #1C2143' : 'none',
+        border: variant === 'white' ? `2px solid ${Colors.primary}` : 'none',
       }}
       className={`${baseStyles} ${variantStyles} ${disabledStyles} hover:opacity-50 ${className}`}
     >

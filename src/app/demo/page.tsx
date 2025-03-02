@@ -4,6 +4,7 @@ import Breadcrumb from '@/components/Breadcrumb';
 import Button from '@/components/Button';
 import CheckButton from '@/components/CheckButton';
 import RadioButton from '@/components/RadioButton';
+import { Colors } from '@/styles/styles';
 
 export default function DemoPage() {
   const [mounted, setMounted] = useState(false);
@@ -32,7 +33,7 @@ export default function DemoPage() {
             textSize="base"
             customWidth="250px"
             customHeight="50px"
-            color="#2ecc71"
+            color={`${Colors.secondary}`}
           >
             Submit Button
           </Button>
