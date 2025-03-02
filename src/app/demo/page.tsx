@@ -11,6 +11,7 @@ export default function DemoPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+  //rutas de ejemplo (a definir si se usaran desde RootLayout)
   const breadcrumbItems = [
     { label: 'Inicio', href: '/' },
     { label: 'Demo', href: '/demo' },

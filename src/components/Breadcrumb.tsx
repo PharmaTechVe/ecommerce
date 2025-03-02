@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { MdChevronRight } from 'react-icons/md';
 
+//estilo base (en revision respecto a manejar las rutas)
 type BreadcrumbItem = {
   label: string;
   href: string;
