@@ -1,5 +1,7 @@
 import React from 'react';
+import { IoIosAddCircleOutline } from 'react-icons/io';
 import '../styles/globals.css';
+
 type ButtonProps = {
   children: React.ReactNode;
   color?: string;
@@ -12,7 +14,8 @@ type ButtonProps = {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
-  variant?: 'submit' | 'white';
+  variant?: 'submit' | 'white' | 'light' | 'icon';
+  textColor?: string; // Nueva prop para el color del texto
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -28,13 +31,18 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   className = '',
   variant = 'submit',
+  textColor = 'white',
 }) => {
   const baseStyles = `font-medium transition duration-200 rounded-md shadow-sm border-transparent px-${paddingX} py-${paddingY} text-${textSize}`;
 
   const variantStyles =
     variant === 'white'
       ? `bg-white text-main border-2 border-[#1C2143] hover:bg-[#1C2143] hover:text-main`
-      : `bg-${color} text-white border-none`;
+      : variant === 'light'
+        ? `bg-button-variant-color text-black border-none hover:bg-opacity-60`
+        : variant === 'icon'
+          ? `bg-${color} text-${textColor} border-none flex items-center justify-center space-x-2`
+          : `bg-${color} text-${textColor} border-none`;
 
   const disabledStyles = disabled
     ? 'cursor-not-allowed opacity-50 bg-gray-300 text-black border-none'
@@ -50,18 +58,25 @@ const Button: React.FC<ButtonProps> = ({
           ? '#D3D3D3'
           : variant === 'white'
             ? 'white'
-            : color,
+            : variant === 'light'
+              ? '#a3e4d7'
+              : color,
         color: disabled
           ? 'black'
           : variant === 'white'
             ? 'text-main'
-            : 'text-main',
+            : variant === 'light'
+              ? 'black'
+              : textColor,
         width: customWidth,
         height: customHeight,
         border: variant === 'white' ? '2px solid #1C2143' : 'none',
       }}
-      className={`${baseStyles} ${variantStyles} ${disabledStyles} hover:opacity-30 ${className}`}
+      className={`${baseStyles} ${variantStyles} ${disabledStyles} hover:opacity-50 ${className}`}
     >
+      {variant === 'icon' && (
+        <IoIosAddCircleOutline size={textSize === 'base' ? 20 : 24} />
+      )}
       {children}
     </button>
   );
