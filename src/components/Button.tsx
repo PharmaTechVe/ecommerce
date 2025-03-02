@@ -41,7 +41,7 @@ const Button: React.FC<ButtonProps> = ({
       : variant === 'light'
         ? `bg-button-variant-color text-black border-none hover:bg-opacity-60`
         : variant === 'icon'
-          ? `bg-${color} text-${textColor} border-none flex items-center justify-center space-x-2`
+          ? `bg-${color} text-${textColor} border-none flex items-center justify-center space-x-4`
           : `bg-${color} text-${textColor} border-none`;
 
   const disabledStyles = disabled
