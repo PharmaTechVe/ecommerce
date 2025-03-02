@@ -54,8 +54,9 @@ export const FontSizes = {
   btnSmall: { size: 12, lineHeight: 16 },
   btnTiny: { size: 10, lineHeight: 12 },
 };
-
-export default {
+const theme = {
   Colors,
   FontSizes,
 };
+
+export default theme;
