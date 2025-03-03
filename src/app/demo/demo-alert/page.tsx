@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import Alert from '@/components/Alert'; 
+import Alert from '@/components/Alert';
 
 const AlertsPage: React.FC = () => {
   return (
