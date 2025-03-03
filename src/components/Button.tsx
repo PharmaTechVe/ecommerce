@@ -1,5 +1,5 @@
 import React from 'react';
-import { IoIosAddCircleOutline } from 'react-icons/io';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import '../styles/globals.css';
 import { Colors } from '../styles/styles';
 
@@ -73,7 +73,12 @@ const Button: React.FC<ButtonProps> = ({
       className={`${baseStyles} ${variantStyles} ${disabledStyles} hover:opacity-50 ${className}`}
     >
       {variant === 'icon' && (
-        <IoIosAddCircleOutline size={textSize === 'base' ? 20 : 24} />
+        <PlusCircleIcon
+          style={{
+            width: textSize === 'base' ? 20 : 24,
+            height: textSize === 'base' ? 20 : 24,
+          }}
+        />
       )}
       {children}
     </button>

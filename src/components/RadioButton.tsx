@@ -1,49 +1,38 @@
-'use client';
-import { useState } from 'react';
-import { ImRadioUnchecked } from 'react-icons/im';
-import { RiRadioButtonFill } from 'react-icons/ri';
-import { Colors } from '../styles/styles';
-import '../styles/globals.css';
+import React, { useState } from 'react';
 
-type RadioButtonProps = {
-  initialChecked?: boolean;
-  onChange?: (checked: boolean) => void;
-  text?: string;
-};
+const Checkbox5 = () => {
+  const [isChecked, setIsChecked] = useState(false);
 
-const RadioButton: React.FC<RadioButtonProps> = ({
-  initialChecked = false,
-  onChange,
-  text,
-}) => {
-  const [isChecked, setIsChecked] = useState(initialChecked);
-
-  const handleClick = () => {
-    const newCheckedState = !isChecked;
-    setIsChecked(newCheckedState);
-    if (onChange) {
-      onChange(newCheckedState);
-    }
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
   };
 
   return (
-    <button
-      onClick={handleClick}
-      className="flex h-auto w-auto items-center justify-center space-x-2 p-0 focus:outline-none"
-    >
-      {isChecked ? (
-        <RiRadioButtonFill size={20} color={Colors.primary} />
-      ) : (
-        <ImRadioUnchecked size={20} color={Colors.primary} />
-      )}
-
-      {text && (
-        <span style={{ color: Colors.textMain }} className="text-sm">
-          {text}
-        </span>
-      )}
-    </button>
+    <label className="text-dark flex cursor-pointer select-none items-center dark:text-white">
+      <div className="relative">
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={handleCheckboxChange}
+          className="sr-only"
+        />
+        <div
+          className={`box border-primary mr-4 flex h-5 w-5 items-center justify-center rounded-full border transition-all ${
+            isChecked
+              ? 'bg-primary border-primary'
+              : 'border-stroke bg-transparent'
+          }`}
+        >
+          <span
+            className={`h-[10px] w-[10px] rounded-full transition-all ${
+              isChecked ? 'dark:bg-dark bg-white' : 'bg-transparent'
+            }`}
+          ></span>
+        </div>
+      </div>
+      Checkbox Text
+    </label>
   );
 };
 
-export default RadioButton;
+export default Checkbox5;
