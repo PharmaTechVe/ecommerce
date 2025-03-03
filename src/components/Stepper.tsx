@@ -11,26 +11,22 @@ type StepperProps = {
   stepSize?: number;
   lineColor?: string;
   lineSize?: number;
+  marginBottom?: number; // Si se modifica stepSize se debe modificar marginBottom
 };
 
 const Stepper: React.FC<StepperProps> = ({
   steps,
-  initialStep = 0,
+  initialStep,
   onStepChange,
-  borderColor = '#1E1E1E',
-  backgroundColor = '#FFFFFF',
-  labelColor = '#1E1E1E',
-  stepSize = 40,
-  lineColor = '#1E1E1E',
-  lineSize = 2,
+  borderColor,
+  backgroundColor,
+  labelColor,
+  stepSize,
+  lineColor,
+  lineSize,
+  marginBottom,
 }) => {
-  const [currentStep, setCurrentStep] = useState(initialStep);
-
-  const handleStepClick = (index: number) => {
-    setCurrentStep(index);
-    console.log('Step selected:', index + 1);
-    if (onStepChange) onStepChange(index);
-  };
+  const [currentStep, setCurrentStep] = useState(initialStep ?? 0);
 
   return (
     <div className="flex items-center justify-center rounded-lg bg-white p-4 shadow-md">
@@ -38,24 +34,27 @@ const Stepper: React.FC<StepperProps> = ({
         <div key={index} className="flex items-center">
           {index !== 0 && (
             <div
-              className="mb-10"
               style={{
                 backgroundColor: index <= currentStep ? borderColor : lineColor,
                 width: `${lineSize}px`,
                 height: '2px',
-                marginTop: `${stepSize / 2 - 1}px`,
+                marginBottom: `${marginBottom}px`,
+                marginTop: `${(stepSize ?? 40) / 2 - 1}px`,
               }}
             ></div>
           )}
           <div
             className="flex cursor-pointer flex-col items-center"
-            onClick={() => handleStepClick(index)}
+            onClick={() => {
+              setCurrentStep(index);
+              if (onStepChange) onStepChange(index);
+            }}
           >
             <div
               className="flex items-center justify-center rounded-full border"
               style={{
-                width: stepSize,
-                height: stepSize,
+                width: stepSize ?? 40,
+                height: stepSize ?? 40,
                 backgroundColor:
                   index === currentStep ? borderColor : backgroundColor,
                 borderColor: borderColor,
