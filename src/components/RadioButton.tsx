@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { Colors } from '@/styles/styles';
+type RadioButtonProps = {
+  text: string;
+};
 
-const Checkbox5 = () => {
+const RadioButton: React.FC<RadioButtonProps> = ({ text }) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckboxChange = () => {
@@ -8,7 +12,7 @@ const Checkbox5 = () => {
   };
 
   return (
-    <label className="text-dark flex cursor-pointer select-none items-center dark:text-white">
+    <label className="flex cursor-pointer select-none items-center text-dark dark:text-white">
       <div className="relative">
         <input
           type="checkbox"
@@ -17,22 +21,18 @@ const Checkbox5 = () => {
           className="sr-only"
         />
         <div
-          className={`box border-primary mr-4 flex h-5 w-5 items-center justify-center rounded-full border transition-all ${
-            isChecked
-              ? 'bg-primary border-primary'
-              : 'border-stroke bg-transparent'
-          }`}
+          className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border`}
+          style={{
+            borderColor: Colors.primary,
+            backgroundColor: isChecked ? Colors.primary : 'transparent',
+          }}
         >
-          <span
-            className={`h-[10px] w-[10px] rounded-full transition-all ${
-              isChecked ? 'dark:bg-dark bg-white' : 'bg-transparent'
-            }`}
-          ></span>
+          <span className="h-[10px] w-[10px] rounded-full bg-white"></span>
         </div>
       </div>
-      Checkbox Text
+      <span style={{ color: Colors.textMain }}>{text}</span>
     </label>
   );
 };
 
-export default Checkbox5;
+export default RadioButton;

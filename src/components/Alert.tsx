@@ -45,7 +45,7 @@ const Alert: React.FC<AlertProps> = ({
     <div className={`${baseStyle} ${bgColorClass} ${variantStyles[variant]}`}>
       <div className="mr-3">{iconMap[color]}</div>
       <div className="flex-1">
-        <h4 className="font-poppins text-light text-black">{title}</h4>
+        <h4 className="font-poppins text-black text-light">{title}</h4>
         <p className="font-poppins mt-4 text-xs text-gray-700">{message}</p>
         {color === 'success' && backgroundColor === 'white' && (
           <div className="mt-2 flex items-center">

@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
+import { Colors } from '@/styles/styles';
 
-const Checkbox2 = () => {
+type CheckButtonProps = {
+  text: string;
+};
+
+const CheckButton: React.FC<CheckButtonProps> = ({ text }) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckboxChange = () => {
@@ -8,7 +13,7 @@ const Checkbox2 = () => {
   };
 
   return (
-    <label className="text-dark flex cursor-pointer select-none items-center dark:text-white">
+    <label className="flex cursor-pointer select-none items-center text-dark dark:text-white">
       <div className="relative">
         <input
           type="checkbox"
@@ -17,13 +22,13 @@ const Checkbox2 = () => {
           className="sr-only"
         />
         <div
-          className={`box border-stroke dark:border-dark-3 mr-4 flex h-5 w-5 items-center justify-center rounded border transition ${
-            isChecked ? 'bg-primary border-primary' : 'bg-transparent'
-          }`}
+          className={`mr-4 flex h-5 w-5 items-center justify-center rounded border transition-all duration-200`}
+          style={{
+            backgroundColor: isChecked ? Colors.primary : 'transparent',
+            borderColor: isChecked ? Colors.primary : Colors.primary,
+          }}
         >
-          <span
-            className={`transition ${isChecked ? 'opacity-100' : 'opacity-0'}`}
-          >
+          {isChecked && (
             <svg
               width="11"
               height="8"
@@ -38,12 +43,12 @@ const Checkbox2 = () => {
                 strokeWidth="0.4"
               />
             </svg>
-          </span>
+          )}
         </div>
       </div>
-      Checkbox Text
+      <span style={{ color: Colors.textMain }}>{text}</span>
     </label>
   );
 };
 
-export default Checkbox2;
+export default CheckButton;
