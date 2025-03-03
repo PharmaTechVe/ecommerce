@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
-// Tipo específico para los iconos (debe ser un componente de React)
 type IconType = React.FC<React.SVGProps<SVGSVGElement>>;
 
 interface InputProps {
@@ -23,7 +22,6 @@ interface InputProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-// Función para modificar el color (aclarar u oscurecer)
 const adjustColor = (color: string, amount: number) => {
   let usePound = false;
   if (color.startsWith('#')) {
@@ -69,9 +67,8 @@ const Input: React.FC<InputProps> = ({
     setPasswordVisible(!passwordVisible);
   };
 
-  // Calcular colores dinámicos para hover y focus
-  const hoverBorderColor = adjustColor(borderColor, 40); // Aclara el color en hover
-  const focusBorderColor = adjustColor(borderColor, -40); // Oscurece el color en focus
+  const hoverBorderColor = adjustColor(borderColor, 40);
+  const focusBorderColor = adjustColor(borderColor, -40);
 
   return (
     <div className="flex w-full flex-col">
@@ -94,7 +91,6 @@ const Input: React.FC<InputProps> = ({
         onMouseEnter={() => !disabled && setIsHovered(true)}
         onMouseLeave={() => !disabled && setIsHovered(false)}
       >
-        {/* Icono a la izquierda */}
         {Icon && iconPosition === 'left' && (
           <div className="absolute left-3 h-5 w-5" style={{ color: iconColor }}>
             <Icon className="h-5 w-5" />
@@ -115,7 +111,6 @@ const Input: React.FC<InputProps> = ({
           } ${Icon && iconPosition === 'left' ? 'pl-10' : ''} ${Icon && iconPosition === 'right' ? 'pr-10' : ''}`}
         />
 
-        {/* Icono a la derecha */}
         {Icon && iconPosition === 'right' && (
           <div
             className="absolute right-3 h-5 w-5"
@@ -125,13 +120,12 @@ const Input: React.FC<InputProps> = ({
           </div>
         )}
 
-        {/* Botón para ver/ocultar contraseña */}
         {showPasswordToggle && !disabled && (
           <button
             type="button"
             className="absolute right-3 top-1/2 -translate-y-1/2"
             onClick={handleToggleVisibility}
-            style={{ color: showPasswordToggleIconColor }} // Aplica el color correctamente
+            style={{ color: showPasswordToggleIconColor }}
           >
             {passwordVisible ? (
               <EyeSlashIcon className="h-5 w-5" />
@@ -142,7 +136,6 @@ const Input: React.FC<InputProps> = ({
         )}
       </div>
 
-      {/* Texto de ayuda */}
       {helperText && (
         <p className="mt-1 text-sm" style={{ color: helperTextColor }}>
           {helperText}
