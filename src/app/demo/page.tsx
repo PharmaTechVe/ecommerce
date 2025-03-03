@@ -31,8 +31,8 @@ export default function DemoPage() {
             paddingX={6}
             paddingY={3}
             textSize="base"
-            customWidth="250px"
-            customHeight="50px"
+            width="250px"
+            height="50px"
             color={`${Colors.secondary}`}
           >
             Submit Button
@@ -42,8 +42,8 @@ export default function DemoPage() {
             paddingX={6}
             paddingY={3}
             textSize="base"
-            customWidth="250px"
-            customHeight="50px"
+            width="250px"
+            height="50px"
             color="#2ecc71"
             textColor="black"
           >
@@ -55,8 +55,8 @@ export default function DemoPage() {
             paddingX={6}
             paddingY={3}
             textSize="base"
-            customWidth="250px"
-            customHeight="50px"
+            width="250px"
+            height="50px"
             color="#2ecc71"
           >
             Submit Button
@@ -67,8 +67,8 @@ export default function DemoPage() {
             paddingX={6}
             paddingY={3}
             textSize="base"
-            customWidth="250px"
-            customHeight="50px"
+            width="250px"
+            height="50px"
           >
             Submit Button
           </Button>
@@ -78,8 +78,8 @@ export default function DemoPage() {
             paddingX={6}
             paddingY={3}
             textSize="base"
-            customWidth="250px"
-            customHeight="50px"
+            width="250px"
+            height="50px"
           >
             Submit Button
           </Button>
@@ -89,8 +89,8 @@ export default function DemoPage() {
             paddingX={6}
             paddingY={3}
             textSize="base"
-            customWidth="250px"
-            customHeight="50px"
+            width="250px"
+            height="50px"
           >
             Submit Button
           </Button>
@@ -100,8 +100,8 @@ export default function DemoPage() {
             paddingX={6}
             paddingY={3}
             textSize="base"
-            customWidth="250px"
-            customHeight="50px"
+            width="250px"
+            height="50px"
             disabled={true}
           >
             Disabled Button

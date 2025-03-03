@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { IoCheckbox, IoSquareOutline } from 'react-icons/io5';
-import '../styles/globals.css';
+import { Colors } from '../styles/styles';
 
 type CheckButtonProps = {
   initialChecked?: boolean;
   onChange?: (checked: boolean) => void;
-  text?: string; // Nueva propiedad para el texto
+  text?: string;
 };
 
 const CheckButton: React.FC<CheckButtonProps> = ({
@@ -30,13 +30,16 @@ const CheckButton: React.FC<CheckButtonProps> = ({
       className="flex h-auto w-auto items-center justify-center space-x-2 p-0 focus:outline-none"
     >
       {isChecked ? (
-        <IoCheckbox size={20} className="icon-color" />
+        <IoCheckbox size={20} color={Colors.primary} />
       ) : (
-        <IoSquareOutline size={24} className="icon-color" />
+        <IoSquareOutline size={24} color={Colors.primary} />
       )}
 
-      {/* Campo de texto opcional */}
-      {text && <span className="text-main text-sm">{text}</span>}
+      {text && (
+        <span style={{ color: Colors.textMain }} className="text-sm">
+          {text}
+        </span>
+      )}
     </button>
   );
 };

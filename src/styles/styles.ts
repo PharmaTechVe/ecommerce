@@ -1,3 +1,5 @@
+import { Poppins } from 'next/font/google';
+
 export const Colors = {
   primary: '#1C2143',
   secondary: '#2ECC71',
@@ -39,24 +41,22 @@ export const FontSizes = {
   s1: { size: 18, lineHeight: 28 },
   s2: { size: 16, lineHeight: 24 },
   b1: { size: 16, lineHeight: 24 },
-  b2: { size: 16, lineHeight: 24 },
   b3: { size: 14, lineHeight: 20 },
-  b4: { size: 14, lineHeight: 20 },
   c1: { size: 12, lineHeight: 16 },
-  c2: { size: 12, lineHeight: 14 },
   c3: { size: 10, lineHeight: 14 },
   label: { size: 12, lineHeight: 16 },
-
-  // Button Fonts
-  btnGiant: { size: 18, lineHeight: 24 },
-  btnLarge: { size: 16, lineHeight: 20 },
-  btnMedium: { size: 14, lineHeight: 16 },
-  btnSmall: { size: 12, lineHeight: 16 },
-  btnTiny: { size: 10, lineHeight: 12 },
 };
+
+export const poppins = Poppins({
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+});
+
 const theme = {
   Colors,
   FontSizes,
+  poppins,
 };
 
 export default theme;

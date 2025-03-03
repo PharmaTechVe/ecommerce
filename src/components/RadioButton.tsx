@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { ImRadioUnchecked } from 'react-icons/im';
 import { RiRadioButtonFill } from 'react-icons/ri';
+import { Colors } from '../styles/styles';
+import '../styles/globals.css';
 
 type RadioButtonProps = {
   initialChecked?: boolean;
@@ -30,12 +32,16 @@ const RadioButton: React.FC<RadioButtonProps> = ({
       className="flex h-auto w-auto items-center justify-center space-x-2 p-0 focus:outline-none"
     >
       {isChecked ? (
-        <RiRadioButtonFill size={20} className="icon-color" />
+        <RiRadioButtonFill size={20} color={Colors.primary} />
       ) : (
-        <ImRadioUnchecked size={20} className="icon-color" />
+        <ImRadioUnchecked size={20} color={Colors.primary} />
       )}
 
-      {text && <span className="text-main text-sm">{text}</span>}
+      {text && (
+        <span style={{ color: Colors.textMain }} className="text-sm">
+          {text}
+        </span>
+      )}
     </button>
   );
 };

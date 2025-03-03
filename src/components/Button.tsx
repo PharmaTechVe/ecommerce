@@ -9,9 +9,8 @@ type ButtonProps = {
   paddingX?: number;
   paddingY?: number;
   textSize?: string;
-  customWidth?: string;
-  customHeight?: string;
-  buttonType?: 'submit';
+  width?: string;
+  height?: string;
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
@@ -25,9 +24,8 @@ const Button: React.FC<ButtonProps> = ({
   paddingX = 4,
   paddingY = 2,
   textSize = 'base',
-  customWidth = 'auto',
-  customHeight = 'auto',
-  buttonType = 'submit',
+  width = 'auto',
+  height = 'auto',
   onClick,
   disabled = false,
   className = '',
@@ -51,7 +49,6 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      type={buttonType}
       onClick={onClick}
       disabled={disabled}
       style={{
@@ -65,12 +62,12 @@ const Button: React.FC<ButtonProps> = ({
         color: disabled
           ? `${Colors.textHighContrast}`
           : variant === 'white'
-            ? 'text-main'
+            ? `${Colors.textMain}`
             : variant === 'light'
               ? `${Colors.textHighContrast}`
               : textColor,
-        width: customWidth,
-        height: customHeight,
+        width: width,
+        height: height,
         border: variant === 'white' ? `2px solid ${Colors.primary}` : 'none',
       }}
       className={`${baseStyles} ${variantStyles} ${disabledStyles} hover:opacity-50 ${className}`}
