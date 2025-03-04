@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
+import theme from '@/styles/styles';
 
 interface InputProps {
   label?: string;
@@ -28,7 +29,16 @@ const Input: React.FC<InputProps> = ({
 }) => {
   return (
     <div className="flex w-full flex-col bg-white text-black">
-      {label && <label className="mb-1 font-medium">{label}</label>}
+      {label && (
+        <label
+          className="mb-1 font-medium"
+          style={{
+            color: theme.Colors.textMain,
+          }}
+        >
+          {label}
+        </label>
+      )}
       <div
         className="relative flex items-center rounded-lg px-3 py-2"
         style={{ border: `${borderSize} solid ${borderColor}` }}
