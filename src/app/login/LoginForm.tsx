@@ -2,7 +2,6 @@
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
 import theme from '@/styles/styles';
-import Image from 'next/image';
 
 export default function LoginForm() {
   //const [email, setEmail] = useState("");
@@ -67,11 +66,6 @@ export default function LoginForm() {
           variant="white"
           className="flex w-full items-center justify-center gap-2 py-3"
         >
-          <Image
-            src="images/google-icon.svg"
-            alt="Google"
-            className="h-5 w-5"
-          />
           Iniciar sesión con Google
         </Button>
 

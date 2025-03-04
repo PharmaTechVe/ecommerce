@@ -9,7 +9,10 @@ export default function LoginPage() {
         <Image
           src="/images/logo-horizontal.svg"
           alt="Pharmatech"
-          className="w-32"
+          width={128}
+          height={32}
+          layout="responsive"
+          sizes="(max-width: 768px) 100vw, 128px"
         />
       </div>
 
@@ -22,11 +25,16 @@ export default function LoginPage() {
 
       {/* Sección Derecha - Imagen y Texto */}
       <div className="relative hidden md:block md:w-3/5">
-        <Image
-          src="/images/login-image.jpg"
-          alt="Farmacéutica trabajando"
-          className="h-full w-full rounded-l-2xl object-cover"
-        />
+        <div className="relative h-full w-full overflow-hidden rounded-l-2xl">
+          <Image
+            src="/images/login-image.jpg"
+            alt="Farmacéutica trabajando"
+            layout="fill"
+            objectFit="cover"
+            quality={100}
+          />
+        </div>
+
         <div
           className="absolute bottom-16 left-16 right-8 rounded-2xl bg-black bg-opacity-50 p-6 text-white"
           style={{
