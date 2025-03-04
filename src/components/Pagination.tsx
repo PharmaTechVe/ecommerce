@@ -1,81 +1,111 @@
 'use client';
+import '../styles/globals.css';
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faChevronLeft,
-  faChevronRight,
-} from '@fortawesome/free-solid-svg-icons';
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+} from '@heroicons/react/24/solid';
 interface PaginationProps {
   totalPages: number;
   previousText?: string;
   nextText?: string;
-  previousIcon?: React.ReactNode;
-  nextIcon?: React.ReactNode;
-  nextIcon2?: React.ReactNode;
-  buttonStyle?: 'rounded' | 'full';
-  activeButtonColor?: string;
-  inactiveButtonColor?: string;
+  previousIcon?: 'chevron' | 'arrow';
+  nextIcon?: 'chevron' | 'arrow';
+  buttonStyle?: string;
+  pageButtonStyle?: string;
+  activePageColor?: string;
+  inactivePageColor?: string;
+  buttonBorderStyle?: 'rounded' | 'full';
   backgroundColor?: string;
 }
 const Pagination: React.FC<PaginationProps> = ({
   totalPages,
-  previousText = 'Previous',
-  nextText = 'Next',
-  previousIcon = <FontAwesomeIcon icon={faChevronLeft} />,
-  nextIcon = <FontAwesomeIcon icon={faChevronRight} />,
-  buttonStyle = 'rounded',
-  activeButtonColor = 'bg-blue-900 text-white',
-  inactiveButtonColor = 'border-gray-300 text-gray-500',
-  backgroundColor = 'bg-white',
+  previousText = '',
+  nextText = '',
+  previousIcon = '',
+  nextIcon = '',
+  buttonStyle = '',
+  pageButtonStyle = '',
+  activePageColor = '',
+  inactivePageColor = '',
+  buttonBorderStyle = '',
+  backgroundColor = '',
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+  const isHexOrRgb = (color: string) =>
+    color.startsWith('#') || color.startsWith('rgb');
+
+  const buttonSize =
+    previousText || nextText ? 'h-[25px] w-[25px]' : 'h-[34px] w-[34px]';
   const renderPageNumbers = () => {
-    const pageNumbers = [];
+    const pages = [];
     const maxPagesToShow = 5;
-    const halfMaxPagesToShow = Math.floor(maxPagesToShow / 2);
-    let startPage = Math.max(1, currentPage - halfMaxPagesToShow);
-    let endPage = Math.min(totalPages, currentPage + halfMaxPagesToShow);
-    if (currentPage <= halfMaxPagesToShow) {
-      endPage = Math.min(totalPages, maxPagesToShow);
-    } else if (currentPage + halfMaxPagesToShow >= totalPages) {
-      startPage = Math.max(1, totalPages - maxPagesToShow + 1);
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
     for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(
+      const isActive = currentPage === i;
+      const activeBgColor =
+        activePageColor === '#9CB3FF'
+          ? { backgroundColor: activePageColor, color: '#000000' }
+          : { backgroundColor: activePageColor, color: '#FFFFFF' };
+      pages.push(
         <button
           key={i}
-          className={`mt-3 flex h-[35px] w-[50px] items-center justify-center border ${inactiveButtonColor} ${buttonStyle === 'rounded' ? 'rounded' : 'rounded-full'} ${currentPage === i ? activeButtonColor : ''}`}
           onClick={() => handlePageChange(i)}
+          className={`mt-2 flex ${buttonSize} items-center justify-center border ${buttonBorderStyle === 'full' ? 'rounded-full' : 'rounded-md'} ${pageButtonStyle} ${isActive ? '' : inactivePageColor}`}
+          style={
+            isActive
+              ? isHexOrRgb(activePageColor)
+                ? activeBgColor
+                : {}
+              : isHexOrRgb(inactivePageColor)
+                ? { backgroundColor: inactivePageColor }
+                : {}
+          }
         >
           {i}
         </button>,
       );
     }
-    return pageNumbers;
+    return pages;
   };
   return (
     <div
-      className={`mb-10 flex h-[58px] w-[350px] justify-center space-x-4 rounded-xl border px-2 ${backgroundColor}`}
+      className={`mb-10 flex h-[50px] w-[300px] justify-center space-x-2 rounded-xl border px-2 ${backgroundColor}`}
+      style={isHexOrRgb(backgroundColor) ? { backgroundColor } : {}}
     >
       <button
-        className="space-between-1 mt-3 flex h-[35px] w-[50px] items-center justify-center rounded-lg border border-gray-300 text-sm text-gray-950"
+        className={`mt-2 flex ${buttonSize} items-center justify-center border border-gray-300 text-xs text-gray-950 ${buttonStyle} ${buttonBorderStyle === 'full' ? 'rounded-full' : 'rounded-md'}`}
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        <span className="px-3">{previousIcon}</span>
-        <span className="text-xs text-gray-500">{previousText}</span>
+        {previousIcon === 'chevron' ? (
+          <ChevronLeftIcon className="h-4 w-4" />
+        ) : (
+          <ArrowLeftIcon className="h-4 w-4" />
+        )}
+        {previousText && <span className="ml-1 text-xs">{previousText}</span>}
       </button>
       {renderPageNumbers()}
       <button
-        className="space-between-1 mt-3 flex h-[35px] w-[50px] items-center justify-center rounded-lg border border-gray-300 text-sm text-gray-950"
+        className={`mt-2 flex ${buttonSize} items-center justify-center border border-gray-300 text-xs text-gray-950 ${buttonStyle} ${buttonBorderStyle === 'full' ? 'rounded-full' : 'rounded-md'}`}
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-        <span className="text-xs text-gray-500">{nextText}</span>
-        <span className="px-3">{nextIcon}</span>
+        {nextText && <span className="mr-1 text-xs">{nextText}</span>}
+        {nextIcon === 'chevron' ? (
+          <ChevronRightIcon className="h-4 w-4" />
+        ) : (
+          <ArrowRightIcon className="h-4 w-4" />
+        )}
       </button>
     </div>
   );
