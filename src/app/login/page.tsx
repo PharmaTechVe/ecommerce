@@ -30,6 +30,15 @@ export default function LoginPage() {
           <div className="flex w-5/6 justify-center md:w-4/6">
             <LoginForm />
           </div>
+          <div
+            className="absolute bottom-4 left-6 hidden md:block"
+            style={{
+              fontSize: theme.FontSizes.b3.size,
+              color: theme.Colors.textMain,
+            }}
+          >
+            <p>©2025 Pharmatech. Todos los derechos reservados</p>
+          </div>
         </div>
 
         {/* Sección Derecha - Imagen y Texto */}
@@ -57,7 +66,7 @@ export default function LoginPage() {
                 color: theme.Colors.textWhite,
               }}
             >
-              Somos Pharmatech, tu solución ideal en cada oportunidad
+              Innovación en salud: la farmacia del futuro, disponible hoy
             </h2>
             <p
               style={{
@@ -65,7 +74,25 @@ export default function LoginPage() {
                 color: theme.Colors.textWhite,
               }}
             >
-              Explora la tienda online de medicamentos más grande de Venezuela
+              Descubre la forma más sencilla de comprar medicamentos en línea,
+              con seguimiento en tiempo real y entrega segura
+            </p>
+          </div>
+          <div
+            className="absolute bottom-4 right-6"
+            style={{
+              fontSize: theme.FontSizes.b3.size,
+              color: theme.Colors.textWhite,
+            }}
+          >
+            <p>
+              <a href="#" className="hover:underline">
+                Política de privacidad
+              </a>{' '}
+              ·{' '}
+              <a href="#" className="hover:underline">
+                Términos y condiciones
+              </a>
             </p>
           </div>
         </div>
