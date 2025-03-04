@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { z } from 'zod';
 import { loginSchema } from '@/lib/validations/loginSchema';
 import Button from '@/components/Button';
-import Input from '@/components/Input/FixedInput';
+import Input from '@/components/Input/Input';
 import CheckButton from '@/components/CheckButton';
 import Image from 'next/image';
 import theme from '@/styles/styles';
