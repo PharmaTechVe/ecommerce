@@ -61,6 +61,7 @@ export default function LoginPage() {
             }}
           >
             <h2
+              className="pb-6"
               style={{
                 fontSize: theme.FontSizes.h3.size,
                 color: theme.Colors.textWhite,
