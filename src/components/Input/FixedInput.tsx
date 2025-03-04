@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import theme from '@/styles/styles';
 
 type IconType = React.FC<React.SVGProps<SVGSVGElement>>;
 
@@ -73,7 +74,15 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className="flex w-full flex-col">
       {label && (
-        <label className="mb-1 font-medium text-gray-700">{label}</label>
+        <label
+          className="mb-1 font-medium"
+          style={{
+            color: theme.Colors.textLowContrast,
+            fontSize: theme.FontSizes.b1.size,
+          }}
+        >
+          {label}
+        </label>
       )}
 
       <div
