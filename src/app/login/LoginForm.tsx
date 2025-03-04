@@ -37,6 +37,9 @@ export default function LoginForm() {
         }
 
         toast.success('Inicio de sesión exitoso');
+
+        setEmail('');
+        setPassword('');
       } catch (err) {
         console.error('Error en el login:', err);
 
@@ -84,6 +87,7 @@ export default function LoginForm() {
             label="Correo electrónico"
             placeholder="Ingresa tu correo electrónico"
             type="email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             borderColor="#393938"
             borderSize="1px"
@@ -93,6 +97,7 @@ export default function LoginForm() {
             label="Contraseña"
             placeholder="Ingresa tu contraseña"
             type="password"
+            value={password}
             showPasswordToggle={true}
             onChange={(e) => setPassword(e.target.value)}
             borderColor="#393938"

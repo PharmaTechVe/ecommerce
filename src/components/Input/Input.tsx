@@ -16,6 +16,7 @@ interface InputProps {
   helperTextColor?: string;
   disabled?: boolean;
   type?: 'text' | 'password' | 'email' | 'number';
+  value?: string;
   showPasswordToggle?: boolean;
   showPasswordToggleIconColor?: string;
   borderSize?: string;
@@ -47,6 +48,7 @@ const adjustColor = (color: string, amount: number) => {
 const Input: React.FC<InputProps> = ({
   label,
   placeholder,
+  value = '',
   icon: Icon,
   iconColor = 'text-gray-500',
   iconPosition = 'left',
@@ -111,6 +113,7 @@ const Input: React.FC<InputProps> = ({
             showPasswordToggle ? (passwordVisible ? 'text' : 'password') : type
           }
           placeholder={placeholder}
+          value={value}
           disabled={disabled}
           onChange={onChange}
           onFocus={() => !disabled && setIsFocused(true)}
