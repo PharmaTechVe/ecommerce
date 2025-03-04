@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import Button from '@/components/Button';
 import Input from '@/components/Input/FixedInput';
 import CheckButton from '@/components/CheckButton';
+import Image from 'next/image';
 import theme from '@/styles/styles';
 
 export default function LoginForm() {
@@ -126,6 +127,12 @@ export default function LoginForm() {
             variant="white"
             className="flex w-full items-center justify-center gap-2 py-3"
           >
+            <Image
+              src="/images/google-icon.svg"
+              alt="Google Icon"
+              width={20}
+              height={20}
+            />
             Iniciar sesión con Google
           </Button>
 
