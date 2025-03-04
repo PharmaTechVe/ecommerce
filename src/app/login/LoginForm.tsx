@@ -1,6 +1,7 @@
 'use client';
 import { PharmaTech } from '@pharmatech/sdk';
 import { useState, useCallback } from 'react';
+import { toast } from 'react-toastify';
 import Button from '@/components/Button';
 import Input from '@/components/Input/FixedInput';
 import CheckButton from '@/components/CheckButton';
@@ -31,6 +32,7 @@ export default function LoginForm() {
         if (remember) {
           localStorage.setItem('pharmatechToken', response.accessToken);
         }
+        toast.success('Inicio de sesión exitoso');
       } catch (err) {
         console.error('Error en el login:', err);
         setError('Error al iniciar sesión. Verifica tus credenciales.');
