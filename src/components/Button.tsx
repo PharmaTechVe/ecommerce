@@ -24,7 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   paddingX = 4,
   paddingY = 2,
   textSize = 'base',
-  width = 'auto',
+  width = '100%',
   height = 'auto',
   onClick,
   disabled = false,
