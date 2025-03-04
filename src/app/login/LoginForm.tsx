@@ -11,6 +11,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,6 +22,10 @@ export default function LoginForm() {
       const api = new PharmaTech(true);
       const response = await api.auth.login({ email, password });
       console.log('Access token:', response.accessToken);
+      sessionStorage.setItem('pharmatechToken', response.accessToken);
+      if (remember) {
+        localStorage.setItem('pharmatechToken', response.accessToken);
+      }
     } catch (err) {
       console.error('Error en el login:', err);
       setError('Error al iniciar sesión. Verifica tus credenciales.');
@@ -72,7 +77,11 @@ export default function LoginForm() {
           />
 
           <div className="flex w-full items-center justify-between whitespace-nowrap text-sm">
-            <CheckButton text="Recordar" />
+            <CheckButton
+              text="Recordar"
+              checked={remember}
+              onChange={(newValue) => setRemember(newValue)}
+            />
             <a
               href="#"
               className="hover:underline"
