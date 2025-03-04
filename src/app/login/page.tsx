@@ -5,7 +5,7 @@ import Image from 'next/image';
 export default function LoginPage() {
   return (
     <div className="relative flex h-screen flex-col md:flex-row">
-      <div className="absolute left-1/2 top-6 -translate-x-1/2 md:left-4 md:top-4 md:-translate-x-0">
+      <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 md:left-4 md:top-4 md:w-40 md:-translate-x-0">
         <Image
           src="/images/logo-horizontal.svg"
           alt="Pharmatech"
