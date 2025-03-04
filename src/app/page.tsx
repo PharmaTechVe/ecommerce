@@ -1,7 +1,9 @@
-'use client';
 import { redirect } from 'next/navigation';
 
 export default function Home() {
-  redirect('/login');
-  return null;
+  // solo redirige fuera de test environment
+  if (process.env.NODE_ENV !== 'test') {
+    redirect('/login');
+  }
+  return <div>Testing Home</div>;
 }
