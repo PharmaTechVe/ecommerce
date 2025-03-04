@@ -1,6 +1,7 @@
 'use client';
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
+import CheckButton from '@/components/CheckButton';
 import theme from '@/styles/styles';
 
 export default function LoginForm() {
@@ -42,7 +43,8 @@ export default function LoginForm() {
           //onChange={(e) => setPassword(e.target.value)}
         />
 
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex w-full items-center justify-between whitespace-nowrap text-sm">
+          <CheckButton text="Recordar" />
           <a
             href="#"
             className="hover:underline"
