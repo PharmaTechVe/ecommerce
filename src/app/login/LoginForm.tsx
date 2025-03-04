@@ -2,6 +2,8 @@
 import { PharmaTech } from '@pharmatech/sdk';
 import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { z } from 'zod';
+import { loginSchema } from '@/lib/validations/loginSchema';
 import Button from '@/components/Button';
 import Input from '@/components/Input/FixedInput';
 import CheckButton from '@/components/CheckButton';
@@ -18,25 +20,31 @@ export default function LoginForm() {
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!email.trim() || !password.trim()) {
-        setError('Por favor, completa todos los campos.');
-        return;
-      }
       setLoading(true);
       setError(null);
 
       try {
+        loginSchema.parse({ email, password });
+
         const api = new PharmaTech(true);
         const response = await api.auth.login({ email, password });
+
         console.log('Access token:', response.accessToken);
         sessionStorage.setItem('pharmatechToken', response.accessToken);
+
         if (remember) {
           localStorage.setItem('pharmatechToken', response.accessToken);
         }
+
         toast.success('Inicio de sesión exitoso');
       } catch (err) {
         console.error('Error en el login:', err);
-        setError('Error al iniciar sesión. Verifica tus credenciales.');
+
+        if (err instanceof z.ZodError) {
+          setError(err.errors[0].message);
+        } else {
+          setError('Error al iniciar sesión. Verifica tus credenciales.');
+        }
       } finally {
         setLoading(false);
       }
