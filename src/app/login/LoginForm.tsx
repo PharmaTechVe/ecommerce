@@ -1,6 +1,6 @@
 'use client';
 import { PharmaTech } from '@pharmatech/sdk';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Button from '@/components/Button';
 import Input from '@/components/Input/FixedInput';
 import CheckButton from '@/components/CheckButton';
@@ -13,29 +13,40 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const api = new PharmaTech(true);
-      const response = await api.auth.login({ email, password });
-      console.log('Access token:', response.accessToken);
-      sessionStorage.setItem('pharmatechToken', response.accessToken);
-      if (remember) {
-        localStorage.setItem('pharmatechToken', response.accessToken);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!email.trim() || !password.trim()) {
+        setError('Por favor, completa todos los campos.');
+        return;
       }
-    } catch (err) {
-      console.error('Error en el login:', err);
-      setError('Error al iniciar sesión. Verifica tus credenciales.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
+      setError(null);
+
+      try {
+        const api = new PharmaTech(true);
+        const response = await api.auth.login({ email, password });
+        console.log('Access token:', response.accessToken);
+        sessionStorage.setItem('pharmatechToken', response.accessToken);
+        if (remember) {
+          localStorage.setItem('pharmatechToken', response.accessToken);
+        }
+      } catch (err) {
+        console.error('Error en el login:', err);
+        setError('Error al iniciar sesión. Verifica tus credenciales.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [email, password, remember],
+  );
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="mx-auto w-full max-w-sm"
+      noValidate
+    >
       <div className="w-full max-w-sm">
         <h3
           className="mx-auto mb-4 text-center"
@@ -61,6 +72,7 @@ export default function LoginForm() {
           <Input
             label="Correo electrónico"
             placeholder="Ingresa tu correo electrónico"
+            type="email"
             onChange={(e) => setEmail(e.target.value)}
             borderColor="#393938"
             borderSize="1px"
@@ -93,12 +105,17 @@ export default function LoginForm() {
               ¿Olvidaste tu contraseña?
             </a>
           </div>
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error && (
+            <p className="text-xs text-red-500" role="alert">
+              {error}
+            </p>
+          )}
 
           <Button
             variant="submit"
             className="flex w-full items-center justify-center gap-2 py-3"
             disabled={loading}
+            aria-busy={loading}
           >
             {loading ? 'Cargando...' : 'Iniciar sesión'}
           </Button>

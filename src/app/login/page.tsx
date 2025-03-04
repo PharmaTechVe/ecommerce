@@ -1,65 +1,75 @@
 import LoginForm from './LoginForm';
 import theme from '@/styles/styles';
 import Image from 'next/image';
+import Head from 'next/head';
 
 export default function LoginPage() {
   return (
-    <div className="relative flex h-screen flex-col md:flex-row">
-      <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 md:left-4 md:top-4 md:w-40 md:-translate-x-0">
-        <Image
-          src="/images/logo-horizontal.svg"
-          alt="Pharmatech"
-          width={128}
-          height={32}
-          layout="responsive"
-          sizes="(max-width: 768px) 100vw, 128px"
+    <>
+      <Head>
+        <title>Iniciar Sesión | Pharmatech</title>
+        <meta
+          name="description"
+          content="Inicia sesión en Pharmatech y accede a la mejor solución para tu salud."
         />
-      </div>
-
-      {/* Sección Izquierda - Formulario */}
-      <div className="mt-32 flex w-full flex-col items-center justify-center p-0 md:mt-0 md:w-2/5 md:p-8">
-        <div className="flex w-5/6 justify-center md:w-4/6">
-          <LoginForm />
-        </div>
-      </div>
-
-      {/* Sección Derecha - Imagen y Texto */}
-      <div className="relative hidden md:block md:w-3/5">
-        <div className="relative h-full w-full overflow-hidden rounded-l-2xl">
+      </Head>
+      <div className="relative flex h-screen flex-col md:flex-row">
+        <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 md:left-4 md:top-4 md:w-40 md:-translate-x-0">
           <Image
-            src="/images/login-image.jpg"
-            alt="Farmacéutica trabajando"
-            layout="fill"
-            objectFit="cover"
-            quality={100}
+            src="/images/logo-horizontal.svg"
+            alt="Pharmatech"
+            width={128}
+            height={32}
+            layout="responsive"
+            sizes="(max-width: 768px) 100vw, 128px"
           />
         </div>
 
-        <div
-          className="absolute bottom-16 left-16 right-8 rounded-2xl bg-black bg-opacity-50 p-6 text-white"
-          style={{
-            fontSize: theme.FontSizes.s1.size,
-            backgroundColor: theme.Colors.primaryTransparent,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: theme.FontSizes.h3.size,
-              color: theme.Colors.textWhite,
-            }}
-          >
-            Somos Pharmatech, tu solución ideal en cada oportunidad
-          </h2>
-          <p
+        {/* Sección Izquierda - Formulario */}
+        <div className="mt-32 flex w-full flex-col items-center justify-center p-0 md:mt-0 md:w-2/5 md:p-8">
+          <div className="flex w-5/6 justify-center md:w-4/6">
+            <LoginForm />
+          </div>
+        </div>
+
+        {/* Sección Derecha - Imagen y Texto */}
+        <div className="relative hidden md:block md:w-3/5">
+          <div className="relative h-full w-full overflow-hidden rounded-l-2xl">
+            <Image
+              src="/images/login-image.jpg"
+              alt="Farmacéutica trabajando"
+              layout="fill"
+              objectFit="cover"
+              quality={100}
+            />
+          </div>
+
+          <div
+            className="absolute bottom-16 left-16 right-8 rounded-2xl bg-black bg-opacity-50 p-6 text-white"
             style={{
               fontSize: theme.FontSizes.s1.size,
-              color: theme.Colors.textWhite,
+              backgroundColor: theme.Colors.primaryTransparent,
             }}
           >
-            Explora la tienda online de medicamentos más grande de Venezuela
-          </p>
+            <h2
+              style={{
+                fontSize: theme.FontSizes.h3.size,
+                color: theme.Colors.textWhite,
+              }}
+            >
+              Somos Pharmatech, tu solución ideal en cada oportunidad
+            </h2>
+            <p
+              style={{
+                fontSize: theme.FontSizes.s1.size,
+                color: theme.Colors.textWhite,
+              }}
+            >
+              Explora la tienda online de medicamentos más grande de Venezuela
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
