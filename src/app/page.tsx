@@ -5,5 +5,9 @@ export default function Home() {
   if (process.env.NODE_ENV !== 'test') {
     redirect('/login');
   }
-  return <div>Testing Home</div>;
+  return (
+    <div>
+      <h1>Home</h1>
+    </div>
+  );
 }
