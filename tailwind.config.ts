@@ -1,5 +1,9 @@
 import type { Config } from "tailwindcss";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const tailgrids = require("tailgrids/plugin");
+
+
 export default {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -17,5 +21,6 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [tailgrids],
+
 } satisfies Config;
