@@ -1,5 +1,5 @@
 'use client';
-import { PharmaTech } from '@pharmatech/sdk';
+import { api } from '@/lib/sdkConfig';
 import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { z } from 'zod';
@@ -26,7 +26,6 @@ export default function LoginForm() {
       try {
         loginSchema.parse({ email, password });
 
-        const api = new PharmaTech(true);
         const response = await api.auth.login({ email, password });
 
         console.log('Access token:', response.accessToken);
