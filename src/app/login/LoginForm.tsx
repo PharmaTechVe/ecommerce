@@ -2,7 +2,6 @@
 import { api } from '@/lib/sdkConfig';
 import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { z } from 'zod';
 import { loginSchema } from '@/lib/validations/loginSchema';
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
@@ -13,15 +12,29 @@ import theme from '@/styles/styles';
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
-      setError(null);
+      setGeneralError(null);
+
+      const result = loginSchema.safeParse({ email, password });
+      if (!result.success) {
+        const { fieldErrors } = result.error.flatten();
+        setEmailError(fieldErrors.email?.[0] ?? '');
+        setPasswordError(fieldErrors.password?.[0] ?? '');
+        setLoading(false);
+        return;
+      }
+
+      setEmailError('');
+      setPasswordError('');
 
       try {
         loginSchema.parse({ email, password });
@@ -41,12 +54,7 @@ export default function LoginForm() {
         setPassword('');
       } catch (err) {
         console.error('Error en el login:', err);
-
-        if (err instanceof z.ZodError) {
-          setError(err.errors[0].message);
-        } else {
-          setError('Error al iniciar sesión. Verifica tus credenciales.');
-        }
+        setGeneralError('Error al iniciar sesión. Verifica tus credenciales.');
       } finally {
         setLoading(false);
       }
@@ -82,26 +90,45 @@ export default function LoginForm() {
         </p>
 
         <div className="space-y-4">
-          <Input
-            label="Correo electrónico"
-            placeholder="Ingresa tu correo electrónico"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            borderColor="#393938"
-            borderSize="1px"
-          />
-
-          <Input
-            label="Contraseña"
-            placeholder="Ingresa tu contraseña"
-            type="password"
-            value={password}
-            showPasswordToggle={true}
-            onChange={(e) => setPassword(e.target.value)}
-            borderColor="#393938"
-            borderSize="1px"
-          />
+          <div className="flex flex-col space-y-1">
+            <Input
+              label="Correo electrónico"
+              placeholder="Ingresa tu correo electrónico"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError('');
+              }}
+              borderColor="#393938"
+              borderSize="1px"
+            />
+            {emailError && (
+              <p className="my-0 text-xs text-red-500" role="alert">
+                {emailError}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col space-y-1">
+            <Input
+              label="Contraseña"
+              placeholder="Ingresa tu contraseña"
+              type="password"
+              value={password}
+              showPasswordToggle={true}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError('');
+              }}
+              borderColor="#393938"
+              borderSize="1px"
+            />
+            {passwordError && (
+              <p className="my-0 text-xs text-red-500" role="alert">
+                {passwordError}
+              </p>
+            )}
+          </div>
 
           <div className="flex w-full items-center justify-between whitespace-nowrap text-sm">
             <CheckButton
@@ -120,9 +147,9 @@ export default function LoginForm() {
               ¿Olvidaste tu contraseña?
             </a>
           </div>
-          {error && (
+          {generalError && (
             <p className="text-xs text-red-500" role="alert">
-              {error}
+              {generalError}
             </p>
           )}
 
