@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import theme from '../styles/styles';
 
 export const metadata: Metadata = {
-  title: 'Mi App',
-  description: 'Descripción de mi aplicación',
+  title: 'Pharmatech',
+  description: 'La farmacia más grande de Venezuela',
 };
 
 export default function RootLayout({
