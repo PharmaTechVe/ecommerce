@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Colors } from '@/styles/styles';
 
 type CheckButtonProps = {
   text: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
 };
 
-const CheckButton: React.FC<CheckButtonProps> = ({ text }) => {
-  const [isChecked, setIsChecked] = useState(false);
-
+const CheckButton: React.FC<CheckButtonProps> = ({
+  text,
+  checked,
+  onChange,
+}) => {
   const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
+    onChange(!checked);
   };
 
   return (
@@ -17,18 +21,18 @@ const CheckButton: React.FC<CheckButtonProps> = ({ text }) => {
       <div className="relative">
         <input
           type="checkbox"
-          checked={isChecked}
+          checked={checked}
           onChange={handleCheckboxChange}
           className="sr-only"
         />
         <div
           className={`mr-4 flex h-5 w-5 items-center justify-center rounded border transition-all duration-200`}
           style={{
-            backgroundColor: isChecked ? Colors.primary : 'transparent',
-            borderColor: isChecked ? Colors.primary : Colors.primary,
+            backgroundColor: checked ? Colors.primary : 'transparent',
+            borderColor: checked ? Colors.primary : Colors.primary,
           }}
         >
-          {isChecked && (
+          {checked && (
             <svg
               width="11"
               height="8"
