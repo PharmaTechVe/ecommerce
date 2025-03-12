@@ -39,7 +39,6 @@ export default function DatePicker1() {
 
   const handleSelectDate = (day: number) => {
     setSelectedDate(formatDate(day, month, year));
-    setIsCalendarOpen(false);
   };
 
   const handleClearDate = () => {
@@ -58,6 +57,7 @@ export default function DatePicker1() {
           type="text"
           placeholder="Selecciona una fecha"
           value={selectedDate || ''}
+          onChange={() => {}} //
           icon={CalendarIcon}
           iconColor={Colors.textLowContrast}
           iconPosition="right"
