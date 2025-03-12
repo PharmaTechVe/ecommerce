@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import Button from './Button';
 import Input from './Input/Input';
-import { CalendarIcon } from '@heroicons/react/24/outline';
+import {
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
 import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/DateUtils';
+
 export default function DatePicker1() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -26,6 +31,10 @@ export default function DatePicker1() {
 
   const handleNextMonth = () => {
     setCurrentDate(new Date(year, month + 1, 1));
+  };
+
+  const handleYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentDate(new Date(Number(event.target.value), month, 1));
   };
 
   const handleSelectDate = (day: number) => {
@@ -60,14 +69,28 @@ export default function DatePicker1() {
       {isCalendarOpen && (
         <div className="absolute mt-2 h-[532px] w-[509px] rounded-md bg-white p-4 shadow-lg">
           <div className="mb-4 flex items-center justify-between px-4">
-            <button onClick={handlePrevMonth} className="text-lg">
-              &lt;
+            <button
+              onClick={handlePrevMonth}
+              className="rounded-md p-2 text-lg hover:bg-gray-200"
+            >
+              <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
             </button>
-            <span className="text-xl font-semibold">
-              {MONTH_NAMES[month]} {year}
-            </span>
-            <button onClick={handleNextMonth} className="text-lg">
-              &gt;
+            <div className="flex items-center space-x-4">
+              <span className="text-xl font-medium">{MONTH_NAMES[month]}</span>
+              <input
+                type="number"
+                value={year}
+                onChange={handleYearChange}
+                className="w-16 appearance-none bg-transparent text-center text-lg font-medium outline-none"
+                min="1900"
+                max="2100"
+              />
+            </div>
+            <button
+              onClick={handleNextMonth}
+              className="rounded-md p-2 text-lg hover:bg-gray-200"
+            >
+              <ChevronRightIcon className="h-6 w-6 text-gray-600" />
             </button>
           </div>
 
@@ -101,6 +124,7 @@ export default function DatePicker1() {
               );
             })}
           </div>
+
           <div className="mt-4 flex justify-between">
             <Button
               variant="gray"
