@@ -1,4 +1,5 @@
 import { Poppins } from 'next/font/google';
+import '../styles/globals.css';
 
 export const Colors = {
   primary: '#1C2143',
@@ -8,6 +9,7 @@ export const Colors = {
   disabled: '#D3D3D3',
   primaryTransparent: 'rgb(28, 33, 67, .75)',
   neuter: '#6B7280',
+  ribbon: '#FFD569',
 
   textMain: '#393938',
   textWhite: '#FFFFFF',
@@ -52,7 +54,7 @@ export const FontSizes = {
 export const poppins = Poppins({
   variable: '--font-poppins',
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '900'],
 });
 
 const theme = {
