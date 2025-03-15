@@ -9,9 +9,9 @@ import { Colors } from '@/styles/styles';
 type SearchBarProps = {
   categories: string[];
   onSearch: (query: string, category: string) => void;
-  widthPx?: string;
-  heightPx?: string;
-  borderRadiusPx?: string;
+  width?: string;
+  height?: string;
+  borderRadius?: string;
   backgroundColor?: string;
   textColorDrop?: string;
   textplaceholderColor?: string;
@@ -21,9 +21,9 @@ type SearchBarProps = {
 export default function SearchBar({
   categories,
   onSearch,
-  widthPx = '',
-  heightPx = '',
-  borderRadiusPx = '',
+  width = '',
+  height = '',
+  borderRadius = '',
   backgroundColor = '',
   textColorDrop = '',
   textplaceholderColor = '',
@@ -41,9 +41,9 @@ export default function SearchBar({
     <div
       className="relative flex overflow-visible shadow-md"
       style={{
-        width: `${widthPx}px`,
-        height: `${heightPx}px`,
-        borderRadius: `${borderRadiusPx}px`,
+        width: `${width}`,
+        height: `${height}`,
+        borderRadius: `${borderRadius}`,
         backgroundColor: backgroundColor,
       }}
     >
@@ -54,8 +54,8 @@ export default function SearchBar({
           style={{
             color: textColorDrop,
             borderColor: '#d1d5db',
-            borderTopLeftRadius: `${borderRadiusPx}px`,
-            borderBottomLeftRadius: `${borderRadiusPx}px`,
+            borderTopLeftRadius: `${borderRadius}`,
+            borderBottomLeftRadius: `${borderRadius}`,
           }}
         >
           <span className="font-medium">{selectedCategory}</span>
@@ -70,7 +70,7 @@ export default function SearchBar({
             className="absolute z-10 mt-1 w-full shadow-md"
             style={{
               backgroundColor: Colors.menuWhite,
-              borderRadius: `${borderRadiusPx}px`,
+              borderRadius: `${borderRadius}`,
             }}
           >
             {categories.map((category) => (
@@ -117,8 +117,8 @@ export default function SearchBar({
         className="h-full border-l px-4 hover:bg-gray-100"
         style={{
           borderColor: '#d1d5db',
-          borderTopRightRadius: `${borderRadiusPx}px`,
-          borderBottomRightRadius: `${borderRadiusPx}px`,
+          borderTopRightRadius: `${borderRadius}`,
+          borderBottomRightRadius: `${borderRadius}`,
         }}
       >
         <MagnifyingGlassIcon className="h-5 w-5 text-gray-600" />
