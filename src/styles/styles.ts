@@ -6,6 +6,8 @@ export const Colors = {
   secondaryLight: '#A3E4D7',
   secondaryWhite: '#FFFFFF',
   disabled: '#D3D3D3',
+  primaryTransparent: 'rgb(28, 33, 67, .75)',
+  neuter: '#6B7280',
 
   textMain: '#393938',
   textWhite: '#FFFFFF',

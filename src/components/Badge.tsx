@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import '../styles/globals.css';
+import { Colors } from '../styles/styles';
 export interface BadgeProps {
   variant: 'filled' | 'outlined' | 'text';
   color: 'primary' | 'warning' | 'danger' | 'success' | 'info';
@@ -27,59 +28,59 @@ const Badge: React.FC<BadgeProps> = ({
 
   const colorClasses: Record<string, React.CSSProperties> = {
     primary: {
-      backgroundColor: '#1C2143',
-      color: '#FFFFFF',
-      borderColor: '##1C2143',
+      backgroundColor: Colors.primary,
+      color: Colors.textWhite,
+      borderColor: Colors.primary,
     },
     warning: {
-      backgroundColor: '#FFD569',
-      color: '#FFFFFF',
-      borderColor: '#FFD569',
+      backgroundColor: Colors.semanticWarning,
+      color: Colors.textWhite,
+      borderColor: Colors.semanticWarning,
     },
     danger: {
-      backgroundColor: '#F23030',
-      color: '#FFFFFF',
-      borderColor: '#F23030',
+      backgroundColor: Colors.semanticDanger,
+      color: Colors.textWhite,
+      borderColor: Colors.semanticDanger,
     },
     success: {
-      backgroundColor: '#22AD5C',
-      color: '#FFFFFF',
-      borderColor: '#22AD5C',
+      backgroundColor: Colors.semanticSuccess,
+      color: Colors.textWhite,
+      borderColor: Colors.semanticSuccess,
     },
     info: {
-      backgroundColor: '#A3E4D7',
-      color: '#FFFFFF',
-      borderColor: '#A3E4D7',
+      backgroundColor: Colors.semanticInfo,
+      color: Colors.textWhite,
+      borderColor: Colors.semanticInfo,
     },
   };
   const outlinedClasses: Record<string, React.CSSProperties> = {
     primary: {
-      color: '#1C2143',
-      border: '1px solid #1C2143',
+      color: Colors.primary,
+      border: `1px solid ${Colors.primary}`,
     },
     warning: {
-      color: '#FFD569',
-      border: '1px solid #FFD569',
+      color: Colors.semanticWarning,
+      border: `1px solid ${Colors.semanticWarning}`,
     },
     danger: {
-      color: '#F23030',
-      border: '1px solid #F23030',
+      color: Colors.semanticDanger,
+      border: `1px solid ${Colors.semanticDanger}`,
     },
     success: {
-      color: '#22AD5C',
-      border: '1px solid #22AD5C',
+      color: Colors.semanticSuccess,
+      border: `1px solid ${Colors.semanticSuccess}`,
     },
     info: {
-      color: '#01A9DB',
-      border: '1px solid #A3E4D7',
+      color: Colors.semanticInfo,
+      border: `1px solid ${Colors.semanticInfo}`,
     },
   };
   const textClasses: Record<string, React.CSSProperties> = {
-    primary: { color: '#1C2143' },
-    warning: { color: '#FFD569' },
-    danger: { color: '#F23030' },
-    success: { color: '#22AD5C' },
-    info: { color: '#A3E4D7' },
+    primary: { color: Colors.primary },
+    warning: { color: Colors.semanticWarning },
+    danger: { color: Colors.semanticDanger },
+    success: { color: Colors.semanticSuccess },
+    info: { color: Colors.semanticInfo },
   };
   const variantStyle = {
     filled: colorClasses[color],
