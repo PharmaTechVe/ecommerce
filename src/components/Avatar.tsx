@@ -1,4 +1,4 @@
-import { FaUser } from 'react-icons/fa';
+import { UserIcon } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -10,7 +10,7 @@ const Avatar = () => {
     <Menu as="div" className="relative inline-block text-left">
       <div>
         <Menu.Button className="flex items-center space-x-2 rounded-full bg-gray-200 p-2 hover:bg-gray-300">
-          <FaUser className="h-6 w-6 text-gray-700" />
+          <UserIcon className="h-6 w-6 text-gray-700" />
         </Menu.Button>
       </div>
 

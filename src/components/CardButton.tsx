@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Image from 'next/image'; // Importar el componente Image
+import Image from 'next/image';
 
 interface CardButtonProps {
   imageUrl: string;
@@ -33,13 +33,13 @@ const CardButton: React.FC<CardButtonProps> = ({
   return (
     <div className="w-72 rounded-lg border bg-white p-4 shadow-lg">
       <div className="relative">
-        <Image // Usar el componente Image
+        <Image
           src={imageUrl}
           alt={title}
-          width={288} // Ajusta el ancho según tus necesidades (72 * 4)
-          height={160} // Ajusta el alto según tus necesidades (40 * 4)
-          layout="responsive" // Para que la imagen se ajuste al contenedor
-          objectFit="cover" // Para que la imagen cubra el contenedor
+          width={288}
+          height={160}
+          layout="responsive"
+          objectFit="cover"
           className="cursor-pointer rounded-md"
           onClick={() => setIsModalOpen(true)}
         />
@@ -51,14 +51,22 @@ const CardButton: React.FC<CardButtonProps> = ({
       <h3 className="text-md mt-2 font-semibold">{title}</h3>
       <p className="text-sm text-gray-500">Stock: {stock}</p>
       <div className="mt-1 flex items-center gap-2">
-        <span className="text-gray-400 line-through">
-          ${originalPrice.toFixed(2)}
-        </span>
-        <span className="rounded bg-teal-100 px-1 text-sm text-teal-600">
-          -{discount}%
-        </span>
+        {discount > 0 && (
+          <>
+            <span className="text-gray-400 line-through">
+              ${originalPrice.toFixed(2)}
+            </span>
+            <span className="rounded bg-teal-100 px-1 text-sm text-teal-600">
+              -{discount}%
+            </span>
+          </>
+        )}
       </div>
-      <p className="text-xl font-bold">${discountedPrice.toFixed(2)}</p>
+      <p className="text-xl font-bold">
+        {discount > 0
+          ? `$${discountedPrice.toFixed(2)}`
+          : `$${originalPrice.toFixed(2)}`}
+      </p>
 
       <div className="mt-3 flex items-center gap-4">
         <button
@@ -87,11 +95,11 @@ const CardButton: React.FC<CardButtonProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-96 rounded-lg bg-white p-6">
             <h2 className="mb-2 text-lg font-bold">{title}</h2>
-            <Image // Usar el componente Image en el modal
+            <Image
               src={imageUrl}
               alt={title}
-              width={384} // Ajusta el ancho según tus necesidades (96 * 4)
-              height={160} // Ajusta el alto según tus necesidades (40 * 4)
+              width={384}
+              height={160}
               layout="responsive"
               objectFit="cover"
               className="mb-3 rounded-md"
@@ -100,12 +108,19 @@ const CardButton: React.FC<CardButtonProps> = ({
               <strong>Stock:</strong> {stock}
             </p>
             <p>
-              <strong>Price:</strong> ${discountedPrice.toFixed(2)}
+              <strong>Price:</strong>{' '}
+              {discount > 0
+                ? `$${discountedPrice.toFixed(2)}`
+                : `$${originalPrice.toFixed(2)}`}
             </p>
-            <p>
-              <strong>Original Price:</strong>{' '}
-              <span className="line-through">${originalPrice.toFixed(2)}</span>
-            </p>
+            {discount > 0 && (
+              <p>
+                <strong>Original Price:</strong>{' '}
+                <span className="line-through">
+                  ${originalPrice.toFixed(2)}
+                </span>
+              </p>
+            )}
             <button
               className="mt-3 w-full rounded-lg bg-blue-900 py-2 text-white"
               onClick={() => setIsModalOpen(false)}
