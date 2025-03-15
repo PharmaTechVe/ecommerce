@@ -9,10 +9,10 @@ import { Colors } from '@/styles/styles';
 type SearchBarProps = {
   categories: string[];
   onSearch: (query: string, category: string) => void;
-  widthPx?: number;
-  heightPx?: number;
-  borderRadiusPx?: number;
-  bgColor?: string;
+  widthPx?: string;
+  heightPx?: string;
+  borderRadiusPx?: string;
+  backgroundColor?: string;
   textColorDrop?: string;
   textplaceholderColor?: string;
   categoryColor?: string;
@@ -21,10 +21,10 @@ type SearchBarProps = {
 export default function SearchBar({
   categories,
   onSearch,
-  widthPx = 0,
-  heightPx = 0,
-  borderRadiusPx = 0,
-  bgColor = '',
+  widthPx = '',
+  heightPx = '',
+  borderRadiusPx = '',
+  backgroundColor = '',
   textColorDrop = '',
   textplaceholderColor = '',
   categoryColor = '',
@@ -44,7 +44,7 @@ export default function SearchBar({
         width: `${widthPx}px`,
         height: `${heightPx}px`,
         borderRadius: `${borderRadiusPx}px`,
-        backgroundColor: bgColor,
+        backgroundColor: backgroundColor,
       }}
     >
       <div className="relative">
