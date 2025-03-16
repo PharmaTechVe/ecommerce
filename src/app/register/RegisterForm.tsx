@@ -49,6 +49,10 @@ export default function RegisterForm() {
       setErrors({ ...errors, genero: '' });
     }
   };
+  const handleDateSelect = (date: string) => {
+    setFormData({ ...formData, fechaNacimiento: date });
+    setErrors({ ...errors, fechaNacimiento: '' });
+  };
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -223,8 +227,8 @@ export default function RegisterForm() {
                 }
               }}
             >
-              <div className="calendar-container relative z-50 rounded-md bg-white md:absolute">
-                <Calendar />
+              <div className="calendar-container relative z-50 rounded-md bg-white md:mb-1">
+                <Calendar onDateSelect={handleDateSelect} />
               </div>
             </div>
             <p

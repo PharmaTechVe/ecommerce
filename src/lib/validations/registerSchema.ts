@@ -38,12 +38,12 @@ export const registerSchema = z
       .string()
       .nonempty('La fecha de nacimiento es obligatoria')
       .regex(
-        /^\d{2}\/\d{2}\/\d{4}$/,
-        'Formato de fecha inválido (debe ser dd/mm/yyyy)',
+        /^\d{4}-\d{2}-\d{2}$/,
+        'Formato de fecha inválido (debe ser yyyy-mm-dd)',
       )
       .refine(
         (fecha) => {
-          const [day, month, year] = fecha.split('/').map(Number);
+          const [year, month, day] = fecha.split('-').map(Number);
           const fechaDate = new Date(year, month - 1, day);
           if (isNaN(fechaDate.getTime())) return false;
 
