@@ -8,11 +8,19 @@ import Image from 'next/image';
 import Head from 'next/head';
 import Stepper from '@/components/Stepper';
 import { ToastContainer } from 'react-toastify';
+import { ChevronLeftIcon } from '@heroicons/react/24/solid';
+import { useRouter } from 'next/navigation';
+
 export default function RecoverPasswordPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const router = useRouter();
 
   const handleNext = () => setCurrentStep((prev) => prev + 1);
   const handleBack = () => setCurrentStep((prev) => prev - 1);
+
+  const handleReturnToLogin = () => {
+    router.push('/login');
+  };
 
   const steps = ['Verificar correo', 'Ingresar código', 'Resetear contraseña'];
 
@@ -38,15 +46,14 @@ export default function RecoverPasswordPage() {
         />
       </Head>
       <div className="relative flex h-screen flex-col md:flex-row">
-        <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 md:left-4 md:top-4 md:w-40 md:-translate-x-0">
-          <Image
-            src="/images/logo-horizontal.svg"
-            alt="Pharmatech"
-            width={128}
-            height={32}
-            layout="responsive"
-            sizes="(max-width: 768px) 100vw, 128px"
-          />
+        <div className="md:left absolute left-1/2 left-28 top-6 z-50 -translate-x-1/2 md:left-4 md:top-4 md:-translate-x-0">
+          <div
+            className="mb-6 flex cursor-pointer items-center"
+            onClick={handleReturnToLogin}
+          >
+            <ChevronLeftIcon className="mr-1 h-5 w-5" />
+            <span className="text-sm">Volver al inicio de sesión</span>
+          </div>
         </div>
 
         {/* Sección Izquierda - Formulario */}

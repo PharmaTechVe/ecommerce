@@ -5,8 +5,8 @@ import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
 import { z } from 'zod';
 import theme from '@/styles/styles';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
 
-// Define el esquema de validación para resetear la contraseña
 const resetPasswordSchema = z
   .object({
     newPassword: z
@@ -60,8 +60,7 @@ export default function ResetPasswordForm({
       }
 
       try {
-        // Aquí iría la llamada a la API para actualizar la contraseña.
-        // Por ejemplo: await api.auth.resetPassword({ newPassword });
+        // llamada a la api
         toast.success('Contraseña actualizada correctamente');
         setNewPassword('');
         setConfirmPassword('');
@@ -85,7 +84,7 @@ export default function ResetPasswordForm({
       <div className="w-full max-w-sm">
         {onBack && (
           <p className="mb-4 cursor-pointer text-sm" onClick={onBack}>
-            Volver
+            <ArrowUturnLeftIcon className="mr-1 h-5 w-5" />
           </p>
         )}
         <h3
@@ -156,7 +155,7 @@ export default function ResetPasswordForm({
 
           <Button
             variant="submit"
-            className="flex w-full items-center justify-center gap-2 py-3"
+            className="mt-4 flex w-full items-center justify-center gap-2 py-3"
             disabled={loading}
             aria-busy={loading}
           >

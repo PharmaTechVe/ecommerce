@@ -6,7 +6,6 @@ import Input from '@/components/Input/Input';
 import { z } from 'zod';
 import theme from '@/styles/styles';
 
-// Esquema de validación para el email (puedes tenerlo en un archivo aparte)
 const emailSchema = z
   .string()
   .nonempty('El email es obligatorio')
@@ -22,7 +21,6 @@ export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const result = emailSchema.safeParse(email);
     if (!result.success) {
       setEmailError(result.error.errors[0].message);
@@ -30,25 +28,25 @@ export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
     }
     setEmailError('');
     toast.success('Email verificado, se ha enviado el código.');
-    // Aquí puedes realizar alguna llamada a API para enviar el código si lo requieres.
-    onNext(); // Avanza al siguiente paso
+    onNext();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      <div className="flex flex-col space-y-1">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      {/* Título y tagline */}
+      <div className="flex flex-col items-center">
         <h3
-          className="mx-auto mb-4 text-center"
+          className="mb-4 text-center"
           style={{
             fontSize: theme.FontSizes.h3.size,
-            lineHeight: `${theme.FontSizes.h2.lineHeight}px`,
+            lineHeight: `${theme.FontSizes.h3.lineHeight}px`,
             color: theme.Colors.textMain,
           }}
         >
           Enviar correo electrónico
         </h3>
         <p
-          className="mx-auto mb-6 py-2 text-center"
+          className="mt-4 text-center"
           style={{
             fontSize: theme.FontSizes.b1.size,
             color: theme.Colors.textMain,
@@ -57,6 +55,9 @@ export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
           Ingresa el correo electrónico asociado a la cuenta para recuperar tu
           contraseña
         </p>
+      </div>
+
+      <div className="flex flex-col space-y-2">
         <Input
           label="Correo electrónico"
           placeholder="Ingresa tu correo electrónico"
@@ -75,7 +76,13 @@ export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
           </p>
         )}
       </div>
-      <Button variant="submit">Enviar código</Button>
+
+      <Button
+        variant="submit"
+        className="flex w-full items-center justify-center gap-2 py-3"
+      >
+        Enviar código
+      </Button>
     </form>
   );
 }

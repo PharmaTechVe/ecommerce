@@ -3,6 +3,7 @@ import { useState, useRef, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import Button from '@/components/Button';
 import theme from '@/styles/styles';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
 
 type EnterCodeFormProps = {
   onBack: () => void;
@@ -80,7 +81,7 @@ export default function EnterCodeForm({ onBack, onNext }: EnterCodeFormProps) {
     >
       <div className="w-full max-w-sm">
         <p className="mb-4 cursor-pointer text-sm" onClick={onBack}>
-          Volver
+          <ArrowUturnLeftIcon className="mr-1 h-5 w-5" />
         </p>
         <h3
           className="mx-auto mb-4 text-center"
@@ -131,7 +132,7 @@ export default function EnterCodeForm({ onBack, onNext }: EnterCodeFormProps) {
           </p>
         )}
 
-        <div className="mt-4 flex items-center justify-center">
+        <div className="mt-8 flex items-center justify-center">
           <Button
             variant="submit"
             className="flex w-full items-center justify-center gap-2 py-3"
