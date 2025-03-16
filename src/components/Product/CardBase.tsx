@@ -6,7 +6,7 @@ import CartButton from '../CardButton';
 export type ImageType = string | StaticImageData;
 
 interface CardBaseProps {
-  variant?: 'default' | 'large' | 'compact' | 'responsive';
+  variant?: 'regular' | 'large' | 'compact' | 'responsive';
   showRibbon?: boolean;
   imageSrc?: ImageType;
   ribbonText?: string;
@@ -15,7 +15,7 @@ interface CardBaseProps {
 }
 
 const CardBase: React.FC<CardBaseProps> = ({
-  variant = 'default',
+  variant = 'regular',
   showRibbon = false,
   imageSrc,
   ribbonText,
@@ -23,21 +23,21 @@ const CardBase: React.FC<CardBaseProps> = ({
   children,
 }) => {
   const cardDimensions = {
-    default: 'h-[610px] w-[351px]',
+    regular: 'h-[610px] w-[351px]',
     large: 'h-[879.99px] w-[533px]',
     compact: 'h-[302px] w-[170px] sm:h-[274px]',
     responsive: 'h-[274px] w-[170px]',
   }[variant];
 
   const imageContainerStyles = {
-    default: 'h-[249px] w-[249px] p-[24px]',
+    regular: 'h-[249px] w-[249px] p-[24px]',
     large: 'h-[389px] w-[389px]  mt-[110px]',
     compact: 'h-[100px] w-[100px] p-[20px] sm:h-[90px]',
     responsive: 'h-[90px] w-[90px] p-[12px] mt-[38px]',
   }[variant];
 
   const ribbonDimensions = {
-    default: {
+    regular: {
       width: '97.73px',
       height: '97.2px',
       svgWidth: 99,
@@ -82,7 +82,7 @@ const CardBase: React.FC<CardBaseProps> = ({
                   : 'text-sm font-bold'
             }`}
             style={{
-              marginTop: variant === 'default' ? '-5%' : '',
+              marginTop: variant === 'regular' ? '-5%' : '',
             }}
           >
             <span className="whitespace-pre-wrap text-center text-sm font-black text-white">

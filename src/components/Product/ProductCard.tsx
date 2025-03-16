@@ -13,7 +13,7 @@ type ProductCardProps = {
   currentPrice: number;
   lastPrice?: number;
   discountPercentage?: number;
-  variant?: 'default' | 'large' | 'compact';
+  variant?: 'regular' | 'large' | 'compact';
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({

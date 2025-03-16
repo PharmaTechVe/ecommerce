@@ -53,7 +53,9 @@ const MinimalProductCard: React.FC<MinimalProductCardProps> = ({
         </h2>
 
         {stock !== undefined && (
-          <p className="mt-2 text-xs text-gray-600">Stock: {stock}</p>
+          <p className="mt-2 text-xs" style={{ color: Colors.textMain }}>
+            Stock: {stock}
+          </p>
         )}
 
         {lastPrice !== undefined && (
