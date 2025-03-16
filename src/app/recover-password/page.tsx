@@ -57,7 +57,7 @@ export default function RecoverPasswordPage() {
         </div>
 
         {/* Sección Izquierda - Formulario */}
-        <div className="mt-32 flex w-full flex-col items-center justify-center p-0 md:mt-0 md:w-2/5 md:p-8">
+        <div className="mt-16 flex w-full flex-col items-center justify-center p-0 md:mt-0 md:w-2/5 md:p-8">
           <div className="flex w-5/6 justify-center md:w-4/6">
             <div className="mx-auto max-w-xl p-4">
               {/* El Stepper indica el progreso */}
