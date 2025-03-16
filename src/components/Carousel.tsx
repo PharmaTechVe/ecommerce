@@ -10,7 +10,7 @@ type Slide = {
 type Props = {
   slides: Slide[];
 };
-export default function ProductCarousel({ slides }: Props) {
+export default function Carousel({ slides }: Props) {
   const [current, setCurrent] = useState(0);
   const prevSlide = () =>
     setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
