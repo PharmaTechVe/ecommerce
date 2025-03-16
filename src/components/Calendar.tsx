@@ -8,48 +8,45 @@ import {
 } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
 import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/DateUtils';
-
-export default function DatePicker1() {
+type DatePicker1Props = {
+  onDateSelect?: (date: string) => void;
+};
+export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-
   const formatDate = (day: number, month: number, year: number) => {
     const dayStr = day < 10 ? `0${day}` : `${day}`;
     const monthStr = month + 1 < 10 ? `0${month + 1}` : `${month + 1}`;
     return `${dayStr}/${monthStr}/${year}`;
   };
-
   const handlePrevMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1));
   };
-
   const handleNextMonth = () => {
     setCurrentDate(new Date(year, month + 1, 1));
   };
-
   const handleYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentDate(new Date(Number(event.target.value), month, 1));
   };
-
   const handleSelectDate = (day: number) => {
-    setSelectedDate(formatDate(day, month, year));
+    const newDate = formatDate(day, month, year);
+    setSelectedDate(newDate);
+    if (onDateSelect) {
+      onDateSelect(newDate);
+    }
   };
-
   const handleClearDate = () => {
     setSelectedDate(null);
     setIsCalendarOpen(false);
   };
-
   const handleDone = () => {
     setIsCalendarOpen(false);
   };
-
   return (
     <div className="relative">
       <div onClick={() => setIsCalendarOpen(!isCalendarOpen)}>
@@ -57,7 +54,7 @@ export default function DatePicker1() {
           type="text"
           placeholder="Selecciona una fecha"
           value={selectedDate || ''}
-          onChange={() => {}} //
+          onChange={() => {}}
           icon={CalendarIcon}
           iconColor={Colors.textLowContrast}
           iconPosition="right"
@@ -65,7 +62,6 @@ export default function DatePicker1() {
           borderColor={Colors.stroke}
         />
       </div>
-
       {isCalendarOpen && (
         <div className="absolute mt-2 h-[532px] w-[509px] rounded-md bg-white p-4 shadow-lg">
           <div className="mb-4 flex items-center justify-between px-4">
@@ -93,7 +89,6 @@ export default function DatePicker1() {
               <ChevronRightIcon className="h-6 w-6 text-gray-600" />
             </button>
           </div>
-
           <div className="mb-2 grid grid-cols-7 gap-2 text-center font-semibold">
             {WEEK_DAYS.map((day, index) => (
               <div key={index} className="text-gray-600">
@@ -101,7 +96,6 @@ export default function DatePicker1() {
               </div>
             ))}
           </div>
-
           <div className="grid grid-cols-7 gap-2 text-center">
             {[...Array(firstDayOfMonth)].map((_, i) => (
               <div key={`empty-${i}`} className="h-12 w-12"></div>
@@ -124,7 +118,6 @@ export default function DatePicker1() {
               );
             })}
           </div>
-
           <div className="mt-4 flex justify-between">
             <Button
               variant="gray"
@@ -137,7 +130,6 @@ export default function DatePicker1() {
             >
               Quitar
             </Button>
-
             <Button
               variant="submit"
               paddingX={6}

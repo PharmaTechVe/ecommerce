@@ -194,7 +194,7 @@ export default function RegisterForm() {
           <div>
             <Input
               label="Número de teléfono"
-              placeholder="584141234567"
+              placeholder="+584141234567"
               value={formData.telefono}
               onChange={handleInputChange('telefono')}
               borderColor={Colors.stroke}
@@ -223,7 +223,7 @@ export default function RegisterForm() {
                 }
               }}
             >
-              <div className="calendar-container absolute z-50 rounded-md bg-white">
+              <div className="calendar-container relative z-50 rounded-md bg-white md:absolute">
                 <Calendar />
               </div>
             </div>
@@ -240,12 +240,16 @@ export default function RegisterForm() {
               Género
             </label>
             <div className="flex gap-6">
-              <div onClick={() => handleGenderClick('hombre')}>
-                <RadioButton key={`h-${formData.genero}`} text="Hombre" />
-              </div>
-              <div onClick={() => handleGenderClick('mujer')}>
-                <RadioButton key={`m-${formData.genero}`} text="Mujer" />
-              </div>
+              <RadioButton
+                text="Hombre"
+                selected={formData.genero === 'hombre'}
+                onSelect={() => handleGenderClick('hombre')}
+              />
+              <RadioButton
+                text="Mujer"
+                selected={formData.genero === 'mujer'}
+                onSelect={() => handleGenderClick('mujer')}
+              />
             </div>
             <p
               className={`min-h-[16px] text-xs text-red-500 ${

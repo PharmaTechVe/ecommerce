@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function RegisterPage() {
   return (
     <div className="relative min-h-screen bg-white">
-      <div className="absolute left-6 top-6 w-40">
+      <div className="flex w-full justify-center md:absolute md:left-6 md:top-6 md:w-40 md:justify-start">
         <Image
           src="/images/logo-horizontal.svg"
           alt="Pharmatech Logo"
@@ -23,7 +23,7 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="absolute mt-4 flex w-full justify-between px-6 pb-8 pt-8 text-sm text-gray-600">
+      <div className="absolute mt-4 hidden w-full justify-between px-6 pb-8 pt-8 text-sm text-gray-600 md:flex">
         <p>©2025 Pharmatech. Todos los derechos reservados</p>
         <p>
           <Link href="#" className="hover:underline">

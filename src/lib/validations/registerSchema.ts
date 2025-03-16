@@ -37,14 +37,28 @@ export const registerSchema = z
     fechaNacimiento: z
       .string()
       .nonempty('La fecha de nacimiento es obligatoria')
-      .refine((fecha) => {
-        const [day, month, year] = fecha.split('/').map(Number);
-        const fechaDate = new Date(year, month - 1, day);
-        const today = new Date();
-        const ageInMs = today.getTime() - fechaDate.getTime();
-        const ageInYears = ageInMs / (1000 * 60 * 60 * 24 * 365.25);
-        return ageInYears >= 18;
-      }, 'Debes tener al menos 18 años'),
+      .regex(
+        /^\d{2}\/\d{2}\/\d{4}$/,
+        'Formato de fecha inválido (debe ser dd/mm/yyyy)',
+      )
+      .refine(
+        (fecha) => {
+          const [day, month, year] = fecha.split('/').map(Number);
+          const fechaDate = new Date(year, month - 1, day);
+          if (isNaN(fechaDate.getTime())) return false;
+
+          const today = new Date();
+          const minAllowedDate = new Date(
+            today.getFullYear() - 13,
+            today.getMonth(),
+            today.getDate(),
+          );
+          return fechaDate <= minAllowedDate;
+        },
+        {
+          message: 'Debes tener al menos 13 años',
+        },
+      ),
 
     genero: z.enum(['hombre', 'mujer'], {
       errorMap: () => ({ message: 'Selecciona un género' }),
