@@ -3,13 +3,8 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
-import { z } from 'zod';
 import theme from '@/styles/styles';
-
-const emailSchema = z
-  .string()
-  .nonempty('El email es obligatorio')
-  .email('Formato de email inválido');
+import { emailSchema } from '@/lib/validations/recoverPasswordSchema';
 
 type VerifyEmailFormProps = {
   onNext: () => void;
@@ -21,6 +16,7 @@ export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const result = emailSchema.safeParse(email);
     if (!result.success) {
       setEmailError(result.error.errors[0].message);

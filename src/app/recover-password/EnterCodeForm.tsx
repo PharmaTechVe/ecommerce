@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import Button from '@/components/Button';
 import theme from '@/styles/styles';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
+import { codeSchema } from '@/lib/validations/recoverPasswordSchema'; // Importa el esquema externo
 
 type EnterCodeFormProps = {
   onBack: () => void;
@@ -52,8 +53,10 @@ export default function EnterCodeForm({ onBack, onNext }: EnterCodeFormProps) {
 
       const codeString = code.join('');
 
-      if (codeString.length < 6 || code.some((char) => char === '')) {
-        setCodeError('Por favor, ingresa el código completo de 6 dígitos.');
+      const result = codeSchema.safeParse(codeString);
+
+      if (!result.success) {
+        setCodeError(result.error.errors[0].message);
         setLoading(false);
         return;
       }

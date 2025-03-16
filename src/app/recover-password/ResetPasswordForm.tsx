@@ -3,25 +3,9 @@ import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
-import { z } from 'zod';
+import { resetPasswordSchema } from '@/lib/validations/recoverPasswordSchema';
 import theme from '@/styles/styles';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
-
-const resetPasswordSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .nonempty('La contraseña es obligatoria')
-      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
-    confirmPassword: z
-      .string()
-      .nonempty('La confirmación es obligatoria')
-      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword'],
-  });
 
 type ResetPasswordFormProps = {
   onBack?: () => void;
