@@ -56,14 +56,9 @@ export default function RecoverPasswordPage() {
               {/* El Stepper indica el progreso */}
               <Stepper
                 steps={steps}
-                initialStep={currentStep}
-                borderColor={theme.Colors.primary}
-                backgroundColor="#fff"
-                labelColor={theme.Colors.textMain}
+                currentStep={currentStep + 1}
                 stepSize={40}
-                lineColor={theme.Colors.primary}
-                lineSize={100}
-                marginBottom={10}
+                clickable={false}
               />
               <div className="mt-6">{renderStepContent()}</div>
             </div>
