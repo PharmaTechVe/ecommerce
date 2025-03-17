@@ -6,16 +6,13 @@ import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
 import { resetPasswordSchema } from '@/lib/validations/recoverPasswordSchema';
 import theme from '@/styles/styles';
-import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
 
 type ResetPasswordFormProps = {
-  onBack?: () => void;
   onSuccess?: () => void;
 };
 
 export default function ResetPasswordForm({
-  onBack,
   onSuccess,
 }: ResetPasswordFormProps) {
   const [newPassword, setNewPassword] = useState('');
@@ -87,11 +84,6 @@ export default function ResetPasswordForm({
       noValidate
     >
       <div className="w-full max-w-sm">
-        {onBack && (
-          <p className="mb-4 cursor-pointer text-sm" onClick={onBack}>
-            <ArrowUturnLeftIcon className="mr-1 h-5 w-5" />
-          </p>
-        )}
         <h3
           className="mx-auto mb-4 text-center"
           style={{
