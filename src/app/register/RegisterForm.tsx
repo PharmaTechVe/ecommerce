@@ -130,6 +130,7 @@ export default function RegisterForm() {
       } catch (err) {
         console.error('Error creating account:', err);
         setGeneralError('Error al crear la cuenta. Intenta de nuevo.');
+        toast.error('Error al crear la cuenta, intenta nuevamente por favor.');
       } finally {
         setLoading(false);
       }
