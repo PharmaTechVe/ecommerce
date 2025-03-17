@@ -1,19 +1,24 @@
-import { UserIcon } from '@heroicons/react/24/outline';
+'use client';
+
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { UserIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-const Avatar = () => {
-  const location = useLocation();
+export default function Avatar() {
+  const pathname = usePathname();
 
   return (
     <Menu as="div" className="relative inline-block text-left">
+      {/* Botón principal (ícono de usuario) */}
       <div>
         <Menu.Button className="flex items-center space-x-2 rounded-full bg-gray-200 p-2 hover:bg-gray-300">
           <UserIcon className="h-6 w-6 text-gray-700" />
         </Menu.Button>
       </div>
 
+      {/* Transición y contenido del menú */}
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"
@@ -28,9 +33,9 @@ const Avatar = () => {
             <Menu.Item>
               {() => (
                 <Link
-                  to="/perfil"
+                  href="/perfil"
                   className={`block rounded-md px-4 py-2 ${
-                    location.pathname === '/perfil'
+                    pathname === '/perfil'
                       ? 'bg-blue-500 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
@@ -39,12 +44,13 @@ const Avatar = () => {
                 </Link>
               )}
             </Menu.Item>
+
             <Menu.Item>
               {() => (
                 <Link
-                  to="/configuracion"
+                  href="/configuracion"
                   className={`block rounded-md px-4 py-2 ${
-                    location.pathname === '/configuracion'
+                    pathname === '/configuracion'
                       ? 'bg-blue-500 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
@@ -53,9 +59,13 @@ const Avatar = () => {
                 </Link>
               )}
             </Menu.Item>
+
             <Menu.Item>
               {() => (
-                <button className="block w-full rounded-md px-4 py-2 text-left text-red-600 hover:bg-red-100">
+                <button
+                  onClick={() => console.log('Cerrando sesión...')}
+                  className="block w-full rounded-md px-4 py-2 text-left text-red-600 hover:bg-red-100"
+                >
                   Cerrar sesión
                 </button>
               )}
@@ -65,6 +75,4 @@ const Avatar = () => {
       </Transition>
     </Menu>
   );
-};
-
-export default Avatar;
+}
