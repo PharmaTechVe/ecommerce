@@ -1,4 +1,5 @@
 'use client';
+import { api } from '@/lib/sdkConfig';
 import { useState, useRef, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import Button from '@/components/Button';
@@ -62,7 +63,11 @@ export default function EnterCodeForm({ onBack, onNext }: EnterCodeFormProps) {
       }
 
       try {
-        // Lógica de la API
+        const response = await api.auth.resetPassword(codeString);
+        sessionStorage.setItem('jwt', response.accessToken);
+
+        console.log('Reset Password response:', response);
+
         toast.success('Código verificado correctamente');
         if (onNext) onNext();
         setCode(Array(6).fill(''));

@@ -1,4 +1,5 @@
 'use client';
+import { api } from '@/lib/sdkConfig';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import Button from '@/components/Button';
@@ -13,18 +14,42 @@ type VerifyEmailFormProps = {
 export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setGeneralError(null);
 
-    const result = emailSchema.safeParse(email);
+    const trimmedEmail = email.trim();
+
+    const result = emailSchema.safeParse(trimmedEmail);
+
     if (!result.success) {
       setEmailError(result.error.errors[0].message);
+      setLoading(false);
       return;
     }
     setEmailError('');
-    toast.success('Email verificado, se ha enviado el código.');
-    onNext();
+
+    try {
+      emailSchema.safeParse(email);
+      const response = await api.auth.forgotPassword(trimmedEmail);
+
+      console.log('Forgot Password response:', response);
+
+      toast.success('Email verificado, se ha enviado el código.');
+      onNext();
+    } catch (err) {
+      console.error('Error en el forgotPassword:', err);
+      setGeneralError('Error al enviar el correo');
+      toast.error(
+        'Email no encontrado, verifica que el correo sea de una cuenta existente.',
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,11 +98,19 @@ export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
         )}
       </div>
 
+      {generalError && (
+        <p className="text-xs text-red-500" role="alert">
+          {generalError}
+        </p>
+      )}
+
       <Button
         variant="submit"
         className="flex w-full items-center justify-center gap-2 py-3"
+        disabled={loading}
+        aria-busy={loading}
       >
-        Enviar código
+        {loading ? 'Cargando...' : 'Enviar código'}
       </Button>
     </form>
   );

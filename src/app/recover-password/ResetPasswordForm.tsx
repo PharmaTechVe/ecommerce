@@ -1,4 +1,5 @@
 'use client';
+import { api } from '@/lib/sdkConfig';
 import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import Button from '@/components/Button';
@@ -44,7 +45,18 @@ export default function ResetPasswordForm({
       }
 
       try {
-        // llamada a la api
+        const jwt = sessionStorage.getItem('jwt');
+        if (!jwt) {
+          setGeneralError(
+            'No se encontró el token. Por favor, reintenta el proceso',
+          );
+          setLoading(false);
+          return;
+        }
+
+        const response = await api.auth.updatePassword(newPassword, jwt);
+
+        console.log('Change Password response:', response);
         toast.success('Contraseña actualizada correctamente');
         setNewPassword('');
         setConfirmPassword('');
