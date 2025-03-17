@@ -1,12 +1,11 @@
 import React from 'react';
 import Image, { StaticImageData } from 'next/image';
-import { Colors } from '@/styles/styles';
-import CartButton from '../CardButton';
+import { Colors, CardDimensions } from '@/styles/styles';
 
 export type ImageType = string | StaticImageData;
 
 interface CardBaseProps {
-  variant?: 'regular' | 'large' | 'compact' | 'responsive';
+  variant?: 'regular' | 'minimal' | 'responsive';
   showRibbon?: boolean;
   imageSrc?: ImageType;
   ribbonText?: string;
@@ -22,85 +21,50 @@ const CardBase: React.FC<CardBaseProps> = ({
   label,
   children,
 }) => {
-  const cardDimensions = {
-    regular: 'h-[610px] w-[351px]',
-    large: 'h-[879.99px] w-[533px]',
-    compact: 'h-[302px] w-[170px] sm:h-[274px]',
-    responsive: 'h-[274px] w-[170px]',
-  }[variant];
-
-  const imageContainerStyles = {
-    regular: 'h-[249px] w-[249px] p-[24px]',
-    large: 'h-[389px] w-[389px]  mt-[110px]',
-    compact: 'h-[100px] w-[100px] p-[20px] sm:h-[90px]',
-    responsive: 'h-[90px] w-[90px] p-[12px] mt-[38px]',
-  }[variant];
-
-  const ribbonDimensions = {
-    regular: {
-      width: '97.73px',
-      height: '97.2px',
-      svgWidth: 99,
-      svgHeight: 98,
-    },
-    large: { width: '140px', height: '140px', svgWidth: 140, svgHeight: 140 },
-    compact: { width: '70px', height: '70px', svgWidth: 70, svgHeight: 70 },
-    responsive: { width: '65px', height: '65px', svgWidth: 65, svgHeight: 65 },
-  }[variant];
+  const cardSize = CardDimensions.cardSizes[variant];
+  const imageContainerSize = CardDimensions.imageContainerSizes[variant];
+  const ribbonDim = CardDimensions.ribbonDimensions[variant];
 
   return (
     <div
-      className={`relative ${cardDimensions} rounded-lg bg-white p-6 shadow-lg`}
+      className={`relative ${cardSize} box-border rounded-[16px] border bg-white`}
     >
-      {/* Ribbon SVG */}
-      {showRibbon && ribbonText && (
+      {/* Condición para no mostrar el ribbon si la variante es 'responsive' */}
+      {variant !== 'responsive' && showRibbon && ribbonText && (
         <div
-          className="absolute left-0 top-0 ml-[-1.2px] overflow-hidden"
+          className="absolute left-[-1%] top-[-1%] z-10 overflow-hidden"
           style={{
-            width: ribbonDimensions.width,
-            height: ribbonDimensions.height,
+            width: ribbonDim.width,
+            height: ribbonDim.height,
           }}
         >
           <svg
-            width={ribbonDimensions.svgWidth}
-            height={ribbonDimensions.svgHeight}
-            viewBox="0 0 99 98"
+            width={ribbonDim.svgWidth}
+            height={ribbonDim.svgHeight}
+            viewBox="0 0 81 76"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M0.0679756 91.5485C8.43593 95.0826 17.4044 96.9579 26.4803 97.0712C65.5363 97.5842 97.6122 66.1679 98.128 26.9013C98.2536 17.7761 96.6247 8.7127 93.331 0.209198L1.28367 -0.99991L0.0679756 91.5485Z"
+              d="M16 0.5H76L81 6.5V20L76 39.5L71 49.5L62 59.5L53 66L43.5 70.5L25.5 76H16L7 73.5L1 70.5V23.5V14L4 6.5L7 3L11 0.5H16Z"
               fill={Colors.ribbon}
             />
           </svg>
-          <div
-            className={`absolute left-0 top-0 flex h-full w-full items-center justify-center ${
-              variant === 'large'
-                ? 'm-[-10%] text-[40px] font-black'
-                : variant === 'responsive'
-                  ? 'text-xs font-medium'
-                  : 'text-sm font-bold'
-            }`}
-            style={{
-              marginTop: variant === 'regular' ? '-5%' : '',
-            }}
-          >
-            <span className="whitespace-pre-wrap text-center text-sm font-black text-white">
+          <div className="absolute inset-0 flex items-center justify-center text-sm font-black text-white">
+            <span className="whitespace-pre-wrap text-center">
               {ribbonText.split(' ').join('\n')}
             </span>
           </div>
         </div>
       )}
 
-      {/* Badge (Etiqueta de producto) */}
+      {/* Etiqueta */}
       {label && (
         <div
-          className={`absolute right-4 top-4 rounded-full px-3 py-1 text-sm ${
-            variant === 'large' ? 'px-10 py-20 text-xl' : ''
-          }`}
+          className="absolute right-4 top-4 rounded-full px-3 py-1 text-sm"
           style={{
             backgroundColor: Colors.secondaryLight,
-            color: Colors.textHighContrast,
+            color: Colors.textWhite,
           }}
         >
           {label}
@@ -109,32 +73,19 @@ const CardBase: React.FC<CardBaseProps> = ({
 
       {/* Contenedor de la imagen */}
       <div
-        className={`relative mx-auto ${variant === 'compact' || variant === 'responsive' ? 'mt-[25px]' : 'mt-[70px]'} flex items-center justify-center rounded-md ${imageContainerStyles}`}
-        style={{ backgroundColor: Colors.textWhite }}
+        className={`relative mt-[15%] flex items-center justify-center rounded-md ${imageContainerSize} bg-white`}
       >
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt="Product Image"
-            fill
             className="rounded-md object-contain"
           />
         ) : (
           <span style={{ color: Colors.textMain }}>Sin imagen</span>
         )}
-
-        {variant === 'responsive' && (
-          <div className="absolute bottom-2 right-2">
-            <CartButton size="compact" />
-          </div>
-        )}
-
-        {variant === 'compact' && (
-          <div className="absolute bottom-2 right-2">
-            <CartButton size="compact" />
-          </div>
-        )}
       </div>
+
       {/* Contenido dinámico */}
       {children}
     </div>

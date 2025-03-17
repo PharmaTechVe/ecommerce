@@ -4,25 +4,44 @@ import { Colors } from '@/styles/styles';
 
 type CartButtonProps = {
   size?: 'default' | 'compact';
+  onToggleDetails?: (isHidden: boolean) => void;
 };
 
-const CartButton: React.FC<CartButtonProps> = ({ size = 'default' }) => {
+const CartButton: React.FC<CartButtonProps> = ({
+  size = 'default',
+  onToggleDetails,
+}) => {
   const [quantity, setQuantity] = useState<number>(0);
+  const [isHidden, setIsHidden] = useState<boolean>(false);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setQuantity(quantity + 1);
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+
+    if (!isHidden && newQuantity === 1) {
+      setIsHidden(true);
+      onToggleDetails?.(true);
+    }
   };
 
   const handleSubtract = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (quantity > 1) setQuantity(quantity - 1);
-    else setQuantity(0);
+    const newQuantity = quantity - 1;
+
+    if (newQuantity >= 1) {
+      setQuantity(newQuantity);
+    } else {
+      setQuantity(0);
+      if (isHidden) {
+        setIsHidden(false);
+        onToggleDetails?.(false);
+      }
+    }
   };
 
-  // Estilos  según el tamaño
   const buttonStyles = {
-    default: 'w-32 h-10',
+    default: 'w-38 h-12',
     compact: 'w-20 h-6',
   };
 

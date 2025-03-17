@@ -51,6 +51,24 @@ export const FontSizes = {
   label: { size: 12, lineHeight: 16 },
 };
 
+export const CardDimensions = {
+  cardSizes: {
+    regular: 'w-[351px] h-[610px]',
+    minimal: 'w-[253px] h-[399px]',
+    responsive: 'w-[170px] h-[302px]',
+  },
+  imageContainerSizes: {
+    regular: 'w-[297px] h-[297px] pt-[46px] pl-[24] pr-[24]',
+    minimal: 'w-[172px] h-[172px] pt-[12px] pl-[24] pr-[24]',
+    responsive: 'w-[125px] h-[129.5px] pt-[-10px] pl-[24] pr-[24]',
+  },
+  ribbonDimensions: {
+    regular: { width: '98px', height: '100px', svgWidth: 98, svgHeight: 98 },
+    minimal: { width: '70px', height: '70px', svgWidth: 70, svgHeight: 70 },
+    responsive: { width: '', height: '', svgWidth: 0, svgHeight: 0 },
+  },
+};
+
 export const poppins = Poppins({
   variable: '--font-poppins',
   subsets: ['latin'],
