@@ -62,7 +62,7 @@ export default function LoginForm() {
         setLoading(false);
       }
     },
-    [email, password, remember, router],
+    [email, password, remember],
   );
 
   return (
