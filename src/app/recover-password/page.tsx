@@ -31,7 +31,7 @@ export default function RecoverPasswordPage() {
       case 1:
         return <EnterCodeForm onNext={handleNext} onBack={handleBack} />;
       case 2:
-        return <ResetPasswordForm onBack={() => setCurrentStep(1)} />;
+        return <ResetPasswordForm />;
       default:
         return null;
     }
