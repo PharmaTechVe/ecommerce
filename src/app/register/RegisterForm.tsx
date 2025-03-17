@@ -1,4 +1,5 @@
 'use client';
+import { api } from '@/lib/sdkConfig';
 import React, { useState, useCallback } from 'react';
 import { registerSchema } from '@/lib/validations/registerSchema';
 import Button from '@/components/Button';
@@ -8,6 +9,8 @@ import Calendar from '@/components/Calendar';
 import { Colors } from '@/styles/styles';
 import RadioButton from '@/components/RadioButton';
 import theme from '@/styles/styles';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -36,6 +39,8 @@ export default function RegisterForm() {
 
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const handleInputChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,19 +83,56 @@ export default function RegisterForm() {
         return;
       }
 
-      setFormData({
-        nombre: '',
-        apellido: '',
-        email: '',
-        cedula: '',
-        telefono: '',
-        fechaNacimiento: '',
-        genero: '',
-        password: '',
-        confirmPassword: '',
-      });
+      enum UserGender {
+        MALE = 'm',
+        FEMALE = 'f',
+      }
 
-      setLoading(false);
+      const mappedGender: UserGender =
+        formData.genero === 'hombre'
+          ? UserGender.MALE
+          : formData.genero === 'mujer'
+            ? UserGender.FEMALE
+            : (() => {
+                throw new Error('Invalid gender');
+              })();
+
+      const payload = {
+        firstName: formData.nombre,
+        lastName: formData.apellido,
+        email: formData.email,
+        password: formData.password,
+        documentId: formData.cedula,
+        phoneNumber: formData.telefono,
+        birthDate: formData.fechaNacimiento,
+        gender: mappedGender,
+      };
+
+      try {
+        const response = await api.auth.signUp(payload);
+        console.log('SignUp response:', response);
+        toast.success('Cuenta creada correctamente');
+        setFormData({
+          nombre: '',
+          apellido: '',
+          email: '',
+          cedula: '',
+          telefono: '',
+          fechaNacimiento: '',
+          genero: '',
+          password: '',
+          confirmPassword: '',
+        });
+
+        setTimeout(() => {
+          router.push('/login');
+        }, 5000);
+      } catch (err) {
+        console.error('Error creating account:', err);
+        setGeneralError('Error al crear la cuenta. Intenta de nuevo.');
+      } finally {
+        setLoading(false);
+      }
     },
     [formData],
   );
