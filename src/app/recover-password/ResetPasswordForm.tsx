@@ -7,6 +7,7 @@ import Input from '@/components/Input/Input';
 import { resetPasswordSchema } from '@/lib/validations/recoverPasswordSchema';
 import theme from '@/styles/styles';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
+import { useRouter } from 'next/navigation';
 
 type ResetPasswordFormProps = {
   onBack?: () => void;
@@ -23,6 +24,8 @@ export default function ResetPasswordForm({
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -60,7 +63,13 @@ export default function ResetPasswordForm({
         toast.success('Contraseña actualizada correctamente');
         setNewPassword('');
         setConfirmPassword('');
+        sessionStorage.removeItem('jwt');
+
         if (onSuccess) onSuccess();
+
+        setTimeout(() => {
+          router.push('/login');
+        }, 5000);
       } catch (err) {
         console.error('Error al cambiar la contraseña:', err);
         setGeneralError('Error al cambiar la contraseña. Intenta de nuevo.');

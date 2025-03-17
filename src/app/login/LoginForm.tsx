@@ -8,6 +8,7 @@ import Input from '@/components/Input/Input';
 import CheckButton from '@/components/CheckButton';
 import Image from 'next/image';
 import theme from '@/styles/styles';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -17,6 +18,8 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -138,6 +141,10 @@ export default function LoginForm() {
             />
             <a
               href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push('/recover-password');
+              }}
               className="hover:underline"
               style={{
                 fontSize: theme.FontSizes.b3.size,
