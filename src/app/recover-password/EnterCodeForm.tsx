@@ -74,6 +74,7 @@ export default function EnterCodeForm({ onBack, onNext }: EnterCodeFormProps) {
       } catch (err) {
         console.error('Error al verificar el código:', err);
         setGeneralError('Error al verificar el código. Intenta de nuevo.');
+        toast.error('Error al verificar el código. Intenta de nuevo.');
       } finally {
         setLoading(false);
       }
