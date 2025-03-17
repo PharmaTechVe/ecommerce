@@ -1,77 +1,100 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
+import theme from '@/styles/styles';
 
 type StepperProps = {
   steps: string[];
-  initialStep?: number;
+  currentStep: number;
+  stepSize: number;
+  clickable?: boolean;
   onStepChange?: (step: number) => void;
-  borderColor?: string;
-  backgroundColor?: string;
-  labelColor?: string;
-  stepSize?: number;
-  lineColor?: string;
-  lineSize?: number;
-  marginBottom?: number; // Si se modifica stepSize se debe modificar marginBottom
 };
 
-const Stepper: React.FC<StepperProps> = ({
+export default function Stepper({
   steps,
-  initialStep,
-  onStepChange,
-  borderColor,
-  backgroundColor,
-  labelColor,
+  currentStep,
   stepSize,
-  lineColor,
-  lineSize,
-  marginBottom,
-}) => {
-  const [currentStep, setCurrentStep] = useState(initialStep ?? 0);
+  clickable = false,
+  onStepChange,
+}: StepperProps) {
+  const primary = theme.Colors.primary;
+  const mainTextColor = theme.Colors.textMain;
+  const b1Size = theme.FontSizes.b1.size;
+
+  const totalSteps = steps.length;
 
   return (
-    <div className="flex items-center justify-center rounded-lg bg-white p-4 shadow-md">
-      {steps.map((step, index) => (
-        <div key={index} className="flex items-center">
-          {index !== 0 && (
+    <div style={{ position: 'relative', width: '100%', padding: '16px 0' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: '25%',
+          left: `${50 / totalSteps}%`,
+          right: `${50 / totalSteps}%`,
+          height: 2,
+          backgroundColor: primary,
+          zIndex: 0,
+        }}
+      />
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 2,
+        }}
+      >
+        {steps.map((stepLabel, index) => {
+          const stepIndex = index + 1;
+          const isActive = currentStep >= stepIndex;
+          return (
             <div
+              key={index}
               style={{
-                backgroundColor: index <= currentStep ? borderColor : lineColor,
-                width: `${lineSize}px`,
-                height: '2px',
-                marginBottom: `${marginBottom}px`,
-                marginTop: `${(stepSize ?? 40) / 2 - 1}px`,
-              }}
-            ></div>
-          )}
-          <div
-            className="flex cursor-pointer flex-col items-center"
-            onClick={() => {
-              setCurrentStep(index);
-              if (onStepChange) onStepChange(index);
-            }}
-          >
-            <div
-              className="flex items-center justify-center rounded-full border"
-              style={{
-                width: stepSize ?? 40,
-                height: stepSize ?? 40,
-                backgroundColor:
-                  index === currentStep ? borderColor : backgroundColor,
-                borderColor: borderColor,
-                color: index === currentStep ? backgroundColor : borderColor,
-                fontWeight: 'bold',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
-              {index + 1}
+              <div
+                onClick={() => {
+                  if (clickable && onStepChange) {
+                    onStepChange(index);
+                  }
+                }}
+                style={{
+                  width: stepSize,
+                  height: stepSize,
+                  borderRadius: stepSize / 2,
+                  border: `2px solid ${primary}`,
+                  backgroundColor: isActive ? primary : 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: isActive ? '#fff' : primary,
+                  fontWeight: 'bold',
+                  cursor: clickable ? 'pointer' : 'default',
+                }}
+              >
+                {stepIndex}
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: b1Size,
+                  textAlign: 'center',
+                  color: mainTextColor,
+                  fontWeight: 400,
+                }}
+              >
+                {stepLabel}
+              </div>
             </div>
-            <span className="mt-2 text-sm" style={{ color: labelColor }}>
-              {step}
-            </span>
-          </div>
-        </div>
-      ))}
+          );
+        })}
+      </div>
     </div>
   );
-};
-
-export default Stepper;
+}
