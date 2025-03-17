@@ -77,7 +77,7 @@ export default function ResetPasswordForm({
         setLoading(false);
       }
     },
-    [newPassword, confirmPassword, onSuccess],
+    [newPassword, confirmPassword, onSuccess, router],
   );
 
   return (
