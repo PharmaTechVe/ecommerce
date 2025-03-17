@@ -186,6 +186,10 @@ export default function LoginForm() {
             ¿No tienes cuenta?{' '}
             <a
               href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push('/register');
+              }}
               className="hover:underline"
               style={{
                 fontSize: theme.FontSizes.b3.size,
