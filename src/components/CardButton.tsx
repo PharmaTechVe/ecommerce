@@ -1,28 +1,19 @@
 'use client';
 import React, { useState } from 'react';
-import { Colors } from '@/styles/styles';
+import { Colors, FontSizes } from '@/styles/styles';
 
 type CartButtonProps = {
-  size?: 'default' | 'compact';
-  onToggleDetails?: (isHidden: boolean) => void;
+  onToggleDetails?: () => void;
+  onClick?: () => void;
 };
 
-const CartButton: React.FC<CartButtonProps> = ({
-  size = 'default',
-  onToggleDetails,
-}) => {
+const CartButton: React.FC<CartButtonProps> = ({}) => {
   const [quantity, setQuantity] = useState<number>(0);
-  const [isHidden, setIsHidden] = useState<boolean>(false);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     const newQuantity = quantity + 1;
     setQuantity(newQuantity);
-
-    if (!isHidden && newQuantity === 1) {
-      setIsHidden(true);
-      onToggleDetails?.(true);
-    }
   };
 
   const handleSubtract = (e: React.MouseEvent) => {
@@ -33,22 +24,13 @@ const CartButton: React.FC<CartButtonProps> = ({
       setQuantity(newQuantity);
     } else {
       setQuantity(0);
-      if (isHidden) {
-        setIsHidden(false);
-        onToggleDetails?.(false);
-      }
     }
-  };
-
-  const buttonStyles = {
-    default: 'w-38 h-12',
-    compact: 'w-20 h-6',
   };
 
   const containerStyles =
     quantity === 0
-      ? 'w-10 h-10 rounded-full'
-      : `w-32 h-10 ${buttonStyles[size]} rounded-full`;
+      ? 'w-[48px] h-[48px] rounded-full'
+      : 'w-[129px] h-[48px] rounded-full px-[25px]';
 
   return (
     <div
@@ -57,26 +39,32 @@ const CartButton: React.FC<CartButtonProps> = ({
       {quantity === 0 ? (
         <div
           onClick={handleAdd}
-          className="flex flex-1 cursor-pointer select-none items-center justify-center text-white"
+          className="font-regular flex flex-1 cursor-pointer select-none items-center justify-center text-white"
+          style={{ fontSize: FontSizes.b1.size }}
         >
-          +
+          <span>+</span>
         </div>
       ) : (
         <>
           <div
             onClick={handleSubtract}
-            className="flex flex-1 cursor-pointer select-none items-center justify-center text-white"
+            className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
+            style={{ marginRight: 12, fontSize: FontSizes.b1.size }}
           >
-            -
+            <span>-</span>
           </div>
-          <div className="flex flex-1 select-none items-center justify-center text-white">
+          <h5
+            className="flex-1 select-none text-center text-white"
+            style={{ fontSize: FontSizes.h5.size }}
+          >
             {quantity}
-          </div>
+          </h5>
           <div
             onClick={handleAdd}
-            className="flex flex-1 cursor-pointer select-none items-center justify-center text-white"
+            className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
+            style={{ marginLeft: 12, fontSize: FontSizes.b1.size }}
           >
-            +
+            <span>+</span>
           </div>
         </>
       )}

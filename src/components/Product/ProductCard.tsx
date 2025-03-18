@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import CardBase from './CardBase';
 import { ImageType } from './CardBase';
 import { Colors, FontSizes } from '@/styles/styles';
@@ -28,15 +28,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   discountPercentage,
   variant,
 }) => {
-  const [hideDetails, setHideDetails] = useState(false);
-
-  // Esto maneja el estado de ocultar los detalles y cambiar el color del price como se muestra en el figma
-  const handleToggleDetails = () => {
-    if (variant === 'responsive') {
-      setHideDetails((prev) => !prev);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center">
       <CardBase
@@ -47,100 +38,152 @@ const ProductCard: React.FC<ProductCardProps> = ({
         label={label}
       >
         <div
-          className={`flex flex-grow flex-col px-[24px] ${variant === 'responsive' ? 'pt-[10px]' : 'pt-[18px]'}`}
+          className={`flex flex-grow flex-col px-[24px] ${
+            variant === 'responsive' ? 'pt-[10px]' : 'pt-[18px]'
+          }`}
         >
           {variant === 'responsive' && (
             <div className="mb-[5px] flex justify-end">
-              <CardButton
-                size="default"
-                onToggleDetails={handleToggleDetails}
-              />
+              <CardButton />
             </div>
           )}
 
           <p
             className="w-full text-left"
             style={{
-              fontSize: `${variant === 'minimal' ? FontSizes.s1.size : variant === 'responsive' ? FontSizes.b1.size : FontSizes.h5.size}px`,
-              lineHeight: `${variant === 'minimal' ? FontSizes.s1.lineHeight : variant === 'responsive' ? FontSizes.b1.lineHeight : FontSizes.h5.lineHeight}px`,
+              fontSize: `${
+                variant === 'minimal'
+                  ? FontSizes.s1.size
+                  : variant === 'responsive'
+                    ? FontSizes.b1.size
+                    : FontSizes.h5.size
+              }px`,
+              lineHeight: `${
+                variant === 'minimal'
+                  ? FontSizes.s1.lineHeight
+                  : variant === 'responsive'
+                    ? FontSizes.b1.lineHeight
+                    : FontSizes.h5.lineHeight
+              }px`,
               color: Colors.textMain,
               wordBreak: 'break-word',
+              whiteSpace: 'normal',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxHeight: '3em',
             }}
           >
             {productName}
           </p>
 
-          {(variant !== 'responsive' || !hideDetails) && (
-            <p
-              className={`${variant === 'minimal' ? 'mb-[5px] mt-[20px]' : variant === 'responsive' ? 'mb-[2px] mt-[10px]' : 'mb-[20px] mt-[38px]'}`}
-              style={{
-                fontSize: `${variant === 'minimal' ? FontSizes.b3.size : variant === 'responsive' ? FontSizes.b3.size : FontSizes.b1.size}px`,
-                lineHeight: `${variant === 'minimal' ? FontSizes.b3.lineHeight : variant === 'responsive' ? FontSizes.b3.lineHeight : FontSizes.b1.lineHeight}px`,
-                color: Colors.textMain,
-              }}
-            >
-              Stock: {stock}
-            </p>
-          )}
+          <p
+            className={`${
+              variant === 'minimal'
+                ? 'mb-[5px] mt-[20px]'
+                : variant === 'responsive'
+                  ? 'mb-[2px] mt-[10px]'
+                  : 'mb-[20px] mt-[38px]'
+            }`}
+            style={{
+              fontSize: `${
+                variant === 'minimal'
+                  ? FontSizes.b3.size
+                  : variant === 'responsive'
+                    ? FontSizes.b3.size
+                    : FontSizes.b1.size
+              }px`,
+              lineHeight: `${
+                variant === 'minimal'
+                  ? FontSizes.b3.lineHeight
+                  : variant === 'responsive'
+                    ? FontSizes.b3.lineHeight
+                    : FontSizes.b1.lineHeight
+              }px`,
+              color: Colors.textMain,
+            }}
+          >
+            Stock: {stock}
+          </p>
 
           <div
-            className={`mt-4 flex w-full flex-row items-end justify-between ${variant === 'minimal' ? 'pb-[16px]' : variant === 'responsive' ? 'pb-[6px]' : 'pb-[30px]'}`} // Ajuste del margen inferior
+            className={`mt-4 flex w-full flex-row items-end justify-between ${
+              variant === 'minimal'
+                ? 'pb-[16px]'
+                : variant === 'responsive'
+                  ? 'pb-[6px]'
+                  : 'pb-[30px]'
+            }`}
           >
             <div className="flex flex-col">
-              {(variant !== 'responsive' || !hideDetails) &&
-                lastPrice !== undefined && (
-                  <div
-                    className={`${variant === 'responsive' ? 'mt-[5px]' : 'mt-[10px]'} flex items-center`}
+              {lastPrice !== undefined && (
+                <div
+                  className={`${
+                    variant === 'responsive' ? 'mt-[5px]' : 'mt-[10px]'
+                  } flex items-center`}
+                  style={{
+                    flexShrink: 0,
+                  }}
+                >
+                  <p
+                    className="line-through"
+                    style={{
+                      fontSize: `${FontSizes.s1.size}px`,
+                      lineHeight: `${FontSizes.s1.lineHeight}px`,
+                      color: Colors.textMain,
+                    }}
                   >
-                    <p
-                      className="line-through"
+                    ${lastPrice.toFixed(2)}
+                  </p>
+                  {discountPercentage !== undefined && (
+                    <div
+                      className="ml-[10px] flex items-center justify-center"
                       style={{
-                        fontSize: `${FontSizes.s1.size}px`,
-                        lineHeight: `${FontSizes.s1.lineHeight}px`,
-                        color: Colors.textMain,
+                        width: '50px',
+                        height: '28px',
+                        backgroundColor: Colors.secondaryLight,
+                        color: Colors.textHighContrast,
+                        borderRadius: '3px',
+                        fontSize: FontSizes.b1.size,
+                        flexShrink: 0,
                       }}
                     >
-                      ${lastPrice.toFixed(2)}
-                    </p>
-                    {discountPercentage !== undefined && (
-                      <div
-                        className="ml-[10px] flex items-center justify-center"
-                        style={{
-                          width: '50px',
-                          height: '28px',
-                          backgroundColor: Colors.secondaryLight,
-                          color: Colors.textHighContrast,
-                          borderRadius: '3px',
-                          fontSize: FontSizes.b1.size,
-                        }}
-                      >
-                        -{discountPercentage}%
-                      </div>
-                    )}
-                  </div>
-                )}
+                      -{discountPercentage}%
+                    </div>
+                  )}
+                </div>
+              )}
 
               <p
-                className={`font-medium ${variant === 'minimal' ? 'mt-[10px]' : variant === 'responsive' ? 'mt-[5px]' : 'mt-[16px]'}`}
+                className={`font-medium ${
+                  variant === 'minimal'
+                    ? 'mt-[10px]'
+                    : variant === 'responsive'
+                      ? 'mt-[5px]'
+                      : 'mt-[16px]'
+                }`}
                 style={{
-                  fontSize: `${variant === 'minimal' ? FontSizes.s1.size : variant === 'responsive' ? FontSizes.h5.size : FontSizes.h5.size}px`,
-                  lineHeight: `${variant === 'minimal' ? FontSizes.s1.lineHeight : variant === 'responsive' ? FontSizes.b3.lineHeight : FontSizes.h5.lineHeight}px`,
-                  color:
-                    hideDetails && variant === 'responsive'
-                      ? Colors.secondaryLight
-                      : Colors.textHighContrast,
+                  fontSize: `${
+                    variant === 'minimal'
+                      ? FontSizes.h5.size
+                      : variant === 'responsive'
+                        ? FontSizes.b1.size
+                        : FontSizes.h5.size
+                  }px`,
+                  lineHeight: `${
+                    variant === 'minimal'
+                      ? FontSizes.s1.lineHeight
+                      : variant === 'responsive'
+                        ? FontSizes.s1.lineHeight
+                        : FontSizes.h5.lineHeight
+                  }px`,
+                  color: Colors.textHighContrast,
                 }}
               >
                 ${currentPrice.toFixed(2)}
               </p>
             </div>
 
-            {variant !== 'responsive' && (
-              <CardButton
-                size="default"
-                onToggleDetails={handleToggleDetails}
-              />
-            )}
+            {variant !== 'responsive' && <CardButton />}
           </div>
         </div>
       </CardBase>

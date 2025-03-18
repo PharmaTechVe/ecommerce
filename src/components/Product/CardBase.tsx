@@ -1,6 +1,6 @@
-import React from 'react';
-import Image, { StaticImageData } from 'next/image';
-import { Colors, CardDimensions } from '@/styles/styles';
+import type React from 'react';
+import Image, { type StaticImageData } from 'next/image';
+import { Colors, CardDimensions, imageSizes } from '@/styles/styles';
 
 export type ImageType = string | StaticImageData;
 
@@ -22,14 +22,14 @@ const CardBase: React.FC<CardBaseProps> = ({
   children,
 }) => {
   const cardSize = CardDimensions.cardSizes[variant];
-  const imageContainerSize = CardDimensions.imageContainerSizes[variant];
   const ribbonDim = CardDimensions.ribbonDimensions[variant];
+  const currentImageSize = imageSizes[variant];
 
   return (
     <div
       className={`relative ${cardSize} box-border rounded-[16px] border bg-white`}
     >
-      {/* Condición para no mostrar el ribbon si la variante es 'responsive' */}
+      {/* Ribbon (se muestra solo en variantes que no sean 'responsive') */}
       {variant !== 'responsive' && showRibbon && ribbonText && (
         <div
           className="absolute left-[-1%] top-[-1%] z-10 overflow-hidden"
@@ -73,14 +73,18 @@ const CardBase: React.FC<CardBaseProps> = ({
 
       {/* Contenedor de la imagen */}
       <div
-        className={`relative mt-[15%] flex items-center justify-center rounded-md ${imageContainerSize} bg-white`}
+        className={`relative mt-[80px] flex items-center justify-center bg-white`}
       >
         {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt="Product Image"
-            className="rounded-md object-contain"
-          />
+          <div className="relative flex h-full w-full items-center justify-center">
+            <Image
+              src={imageSrc}
+              alt="Product Image"
+              width={currentImageSize.width}
+              height={currentImageSize.height}
+              className="rounded-md object-contain"
+            />
+          </div>
         ) : (
           <span style={{ color: Colors.textMain }}>Sin imagen</span>
         )}

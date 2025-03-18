@@ -57,16 +57,46 @@ export const CardDimensions = {
     minimal: 'w-[253px] h-[399px]',
     responsive: 'w-[170px] h-[302px]',
   },
-  imageContainerSizes: {
-    regular: 'w-[297px] h-[297px] pt-[46px] pl-[24] pr-[24]',
-    minimal: 'w-[172px] h-[172px] pt-[12px] pl-[24] pr-[24]',
-    responsive: 'w-[125px] h-[129.5px] pt-[-10px] pl-[24] pr-[24]',
-  },
+
   ribbonDimensions: {
     regular: { width: '98px', height: '100px', svgWidth: 98, svgHeight: 98 },
-    minimal: { width: '70px', height: '70px', svgWidth: 70, svgHeight: 70 },
+    minimal: { width: '90px', height: '90px', svgWidth: 90, svgHeight: 90 },
     responsive: { width: '', height: '', svgWidth: 0, svgHeight: 0 },
   },
+};
+export const baseStyles = {
+  container: {
+    paddingX: {
+      regular: 'px-[16px]',
+      minimal: 'px-[24px]',
+      responsive: 'px-[24px]',
+    },
+  },
+  responsiveButtonMargin: 'mt-[-10px] mb-[5px]',
+  stockSpacing: {
+    minimal: 'mb-[5px] mt-[20px]',
+    responsive: 'mb-[2px] mt-[10px]',
+    regular: 'mb-[20px] mt-[38px]',
+  },
+  priceContainerPaddingBottom: {
+    minimal: 'pb-[16px]',
+    responsive: 'pb-[6px]',
+    default: 'pb-[30px]',
+  },
+  lastPriceMarginTop: {
+    responsive: 'mt-[5px]',
+    regular: 'mt-[10px]',
+  },
+  currentPriceMarginTop: {
+    minimal: 'mt-[10px]',
+    responsive: 'mt-[5px]',
+    regular: 'mt-[16px]',
+  },
+};
+export const imageSizes = {
+  regular: { width: 300, height: 300 },
+  minimal: { width: 200, height: 200 },
+  responsive: { width: 150, height: 150 },
 };
 
 export const poppins = Poppins({
@@ -79,6 +109,8 @@ const theme = {
   Colors,
   FontSizes,
   poppins,
+  baseStyles,
+  imageSizes,
 };
 
 export default theme;
