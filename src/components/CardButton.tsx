@@ -40,7 +40,7 @@ const CartButton: React.FC<CartButtonProps> = ({}) => {
         <div
           onClick={handleAdd}
           className="font-regular flex flex-1 cursor-pointer select-none items-center justify-center text-white"
-          style={{ fontSize: FontSizes.b1.size }}
+          style={{ fontSize: FontSizes.h5.size }}
         >
           <span>+</span>
         </div>
@@ -49,7 +49,7 @@ const CartButton: React.FC<CartButtonProps> = ({}) => {
           <div
             onClick={handleSubtract}
             className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
-            style={{ marginRight: 12, fontSize: FontSizes.b1.size }}
+            style={{ marginRight: 12, fontSize: FontSizes.h5.size }}
           >
             <span>-</span>
           </div>
@@ -62,7 +62,7 @@ const CartButton: React.FC<CartButtonProps> = ({}) => {
           <div
             onClick={handleAdd}
             className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
-            style={{ marginLeft: 12, fontSize: FontSizes.b1.size }}
+            style={{ marginLeft: 12, fontSize: FontSizes.h5.size }}
           >
             <span>+</span>
           </div>
