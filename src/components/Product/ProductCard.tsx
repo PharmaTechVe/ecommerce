@@ -38,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         label={label}
       >
         <div
-          className={`flex flex-grow flex-col px-[24px] ${
+          className={`flex flex-col px-[24px] ${
             variant === 'responsive' ? 'pt-[10px]' : 'pt-[18px]'
           }`}
         >
@@ -106,7 +106,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </p>
 
           <div
-            className={`mt-4 flex w-full flex-row items-end justify-between ${
+            className={`mt-4 flex w-full items-end justify-between ${
               variant === 'minimal'
                 ? 'pb-[16px]'
                 : variant === 'responsive'

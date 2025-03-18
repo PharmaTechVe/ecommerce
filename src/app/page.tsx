@@ -68,6 +68,8 @@ export default function Home() {
                 ribbonText={singleProduct.ribbonText}
                 label={singleProduct.label}
                 variant="minimal"
+                discountPercentage={10}
+                lastPrice={15}
               />
 
               <ProductCard
@@ -78,6 +80,8 @@ export default function Home() {
                 label={singleProduct.label}
                 ribbonText="Nuevo!!"
                 variant="regular"
+                discountPercentage={10}
+                lastPrice={15}
               />
               <ProductCard
                 imageSrc={Image2}
@@ -86,6 +90,8 @@ export default function Home() {
                 currentPrice={singleProduct.currentPrice}
                 label={singleProduct.label}
                 variant="regular"
+                discountPercentage={10}
+                lastPrice={15}
               />
             </div>
           </div>

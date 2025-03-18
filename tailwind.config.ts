@@ -10,6 +10,12 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  //Esto es necesario para que las cartas se ajusten a los anchos deseados y debe coincidir con el indicado en cardDimensions 
+  safelist: [
+    'w-[300px]',
+    'w-[280px]',
+    'w-[170px]',
+  ],
   theme: {
     extend: {
       colors: {

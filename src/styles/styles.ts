@@ -53,9 +53,9 @@ export const FontSizes = {
 
 export const CardDimensions = {
   cardSizes: {
-    regular: 'w-[351px] h-[610px]',
-    minimal: 'w-[253px] h-[399px]',
-    responsive: 'w-[170px] h-[302px]',
+    regular: 'w-[300px] h-auto',
+    minimal: 'w-[280px] h-auto',
+    responsive: 'w-[170px] h-auto',
   },
 
   ribbonDimensions: {
@@ -68,8 +68,8 @@ export const baseStyles = {
   container: {
     paddingX: {
       regular: 'px-[16px]',
-      minimal: 'px-[24px]',
-      responsive: 'px-[24px]',
+      minimal: 'px-[16px]',
+      responsive: 'px-[px]',
     },
   },
   responsiveButtonMargin: 'mt-[-10px] mb-[5px]',
@@ -94,9 +94,9 @@ export const baseStyles = {
   },
 };
 export const imageSizes = {
-  regular: { width: 300, height: 300 },
-  minimal: { width: 200, height: 200 },
-  responsive: { width: 150, height: 150 },
+  regular: { width: 200, height: 200 },
+  minimal: { width: 170, height: 170 },
+  responsive: { width: 100, height: 100 },
 };
 
 export const poppins = Poppins({
