@@ -156,7 +156,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <p
                 className={`font-medium ${
                   variant === 'minimal'
-                    ? 'mt-[10px]'
+                    ? 'mt-[10px] pr-[6px]'
                     : variant === 'responsive'
                       ? 'mt-[5px]'
                       : 'mt-[16px]'
