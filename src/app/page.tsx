@@ -34,6 +34,7 @@ export default function Home() {
         <NavBar {...navBarProps} />
       </div>
       <main className="p-4 pt-[124px]">
+        <h1 className="text-2xl font-bold">Pharmatech</h1>
         <div className="mx-auto w-full max-w-[95vw] p-2 md:max-w-6xl md:p-4">
           <Carousel slides={slides} />
         </div>
