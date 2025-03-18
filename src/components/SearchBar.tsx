@@ -5,7 +5,7 @@ import {
   ChevronUpIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
-import { Colors } from '@/styles/styles';
+import { Colors } from '../styles/styles';
 
 type SearchBarProps = {
   categories: string[];

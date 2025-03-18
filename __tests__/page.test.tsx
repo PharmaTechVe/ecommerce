@@ -1,8 +1,13 @@
-import { expect, test } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import Page from '../src/app/page'
- 
-test('Page', () => {
-  render(<Page />)
-  expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeDefined()
-})
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import Home from '@/app/page';
+import { describe, it, expect } from 'vitest';
+
+describe('Home Page', () => {
+  it('displays the main heading', () => {
+    render(<Home />);
+    const heading = screen.getByText('Pharmatech');
+    expect(heading).toBeTruthy(); // Check if the element exists
+  });
+
+});

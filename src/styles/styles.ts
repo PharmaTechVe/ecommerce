@@ -1,4 +1,4 @@
-import { Poppins } from 'next/font/google';
+import { Poppins } from '@next/font/google';
 
 export const Colors = {
   primary: '#1C2143',
