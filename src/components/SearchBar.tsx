@@ -5,7 +5,8 @@ import {
   ChevronUpIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
-import { Colors } from '@/styles/styles';
+import { Colors } from '../styles/styles';
+
 type SearchBarProps = {
   categories: string[];
   onSearch: (query: string, category: string) => void;
@@ -17,7 +18,9 @@ type SearchBarProps = {
   textplaceholderColor?: string;
   categoryColor?: string;
   inputPlaceholder?: string;
+  disableDropdown?: boolean;
 };
+
 export default function SearchBar({
   categories,
   onSearch,
@@ -29,6 +32,7 @@ export default function SearchBar({
   textplaceholderColor = '',
   categoryColor = '',
   inputPlaceholder = '',
+  disableDropdown = false,
 }: SearchBarProps) {
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [isOpen, setIsOpen] = useState(false);
@@ -37,9 +41,10 @@ export default function SearchBar({
   const handleSearch = () => {
     onSearch(searchTerm, selectedCategory);
   };
+
   return (
     <div
-      className="relative flex overflow-visible shadow-md"
+      className="relative flex overflow-visible border"
       style={{
         width: `${width}`,
         height: `${height}`,
@@ -47,57 +52,61 @@ export default function SearchBar({
         backgroundColor: backgroundColor,
       }}
     >
-      <div className="relative">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex h-full items-center gap-1 border-r px-4"
-          style={{
-            color: textColorDrop,
-            borderColor: '#d1d5db',
-            borderTopLeftRadius: `${borderRadius}`,
-            borderBottomLeftRadius: `${borderRadius}`,
-          }}
-        >
-          <span className="font-medium">{selectedCategory}</span>
-          {isOpen ? (
-            <ChevronUpIcon className="h-4 w-4 transition duration-200" />
-          ) : (
-            <ChevronDownIcon className="h-4 w-4 transition duration-200" />
-          )}
-        </button>
-        {isOpen && (
-          <ul
-            className="absolute z-10 mt-1 w-full shadow-md"
+      {/* Renderiza el dropdown solo si disableDropdown es false */}
+      {!disableDropdown && (
+        <div className="relative">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex h-full items-center gap-1 border-r px-4"
             style={{
-              backgroundColor: Colors.menuWhite,
-              borderRadius: `${borderRadius}`,
+              color: textColorDrop,
+              borderColor: '#d1d5db',
+              borderTopLeftRadius: `${borderRadius}`,
+              borderBottomLeftRadius: `${borderRadius}`,
             }}
           >
-            {categories.map((category) => (
-              <li
-                key={category}
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setIsOpen(false);
-                }}
-                className="cursor-pointer px-4 py-2 text-sm"
-                style={{
-                  backgroundColor:
-                    category === selectedCategory
-                      ? categoryColor
-                      : Colors.menuWhite,
-                  color:
-                    category === selectedCategory
-                      ? Colors.menuWhite
-                      : textColorDrop,
-                }}
-              >
-                {category}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+            <span className="font-medium">{selectedCategory}</span>
+            {isOpen ? (
+              <ChevronUpIcon className="h-4 w-4 transition duration-200" />
+            ) : (
+              <ChevronDownIcon className="h-4 w-4 transition duration-200" />
+            )}
+          </button>
+          {isOpen && (
+            <ul
+              className="absolute z-10 mt-1 w-full shadow-md"
+              style={{
+                backgroundColor: Colors.menuWhite,
+                borderRadius: `${borderRadius}`,
+              }}
+            >
+              {categories.map((category) => (
+                <li
+                  key={category}
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setIsOpen(false);
+                  }}
+                  className="cursor-pointer px-4 py-2 text-sm"
+                  style={{
+                    backgroundColor:
+                      category === selectedCategory
+                        ? categoryColor
+                        : Colors.menuWhite,
+                    color:
+                      category === selectedCategory
+                        ? Colors.menuWhite
+                        : textColorDrop,
+                  }}
+                >
+                  {category}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       <input
         type="text"
         placeholder={inputPlaceholder}

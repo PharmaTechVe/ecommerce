@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import Input from './Input/Input';
 import {
@@ -8,48 +8,64 @@ import {
 } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
 import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/DateUtils';
-
-export default function DatePicker1() {
+type DatePicker1Props = {
+  onDateSelect?: (date: string) => void;
+};
+export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [yearInput, setYearInput] = useState(
+    currentDate.getFullYear().toString(),
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-
   const formatDate = (day: number, month: number, year: number) => {
     const dayStr = day < 10 ? `0${day}` : `${day}`;
     const monthStr = month + 1 < 10 ? `0${month + 1}` : `${month + 1}`;
-    return `${dayStr}/${monthStr}/${year}`;
+    return `${year}-${monthStr}-${dayStr}`;
   };
-
   const handlePrevMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1));
   };
-
   const handleNextMonth = () => {
     setCurrentDate(new Date(year, month + 1, 1));
   };
+  // Sincroniza el valor del input del año con currentDate cuando cambie
+  useEffect(() => {
+    setYearInput(currentDate.getFullYear().toString());
+  }, [currentDate]);
 
   const handleYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentDate(new Date(Number(event.target.value), month, 1));
+    const newYearStr = event.target.value;
+    // Permitir solo números y un máximo de 4 caracteres
+    if (/^\d{0,4}$/.test(newYearStr)) {
+      setYearInput(newYearStr);
+      if (newYearStr.length === 4) {
+        const newYear = Number(newYearStr);
+        if (!isNaN(newYear)) {
+          setCurrentDate(new Date(newYear, month, 1));
+        }
+      }
+    }
   };
-
   const handleSelectDate = (day: number) => {
-    setSelectedDate(formatDate(day, month, year));
+    const newDate = formatDate(day, month, year);
+    setSelectedDate(newDate);
+    console.log(newDate);
+    if (onDateSelect) {
+      onDateSelect(newDate);
+    }
   };
-
   const handleClearDate = () => {
     setSelectedDate(null);
     setIsCalendarOpen(false);
   };
-
   const handleDone = () => {
     setIsCalendarOpen(false);
   };
-
   return (
     <div className="relative">
       <div onClick={() => setIsCalendarOpen(!isCalendarOpen)}>
@@ -57,7 +73,7 @@ export default function DatePicker1() {
           type="text"
           placeholder="Selecciona una fecha"
           value={selectedDate || ''}
-          onChange={() => {}} //
+          onChange={() => {}}
           icon={CalendarIcon}
           iconColor={Colors.textLowContrast}
           iconPosition="right"
@@ -65,9 +81,8 @@ export default function DatePicker1() {
           borderColor={Colors.stroke}
         />
       </div>
-
       {isCalendarOpen && (
-        <div className="absolute mt-2 h-[532px] w-[509px] rounded-md bg-white p-4 shadow-lg">
+        <div className="relative mt-2 w-full max-w-md rounded-md bg-white p-4 shadow-lg sm:h-[532px] sm:h-auto sm:w-[509px]">
           <div className="mb-4 flex items-center justify-between px-4">
             <button
               onClick={handlePrevMonth}
@@ -79,11 +94,11 @@ export default function DatePicker1() {
               <span className="text-xl font-medium">{MONTH_NAMES[month]}</span>
               <input
                 type="number"
-                value={year}
+                value={yearInput}
                 onChange={handleYearChange}
-                className="w-16 appearance-none bg-transparent text-center text-lg font-medium outline-none"
-                min="1900"
-                max="2100"
+                className="w-16 appearance-auto bg-transparent text-center text-lg font-medium outline-none md:appearance-auto"
+                min="0"
+                max="3000"
               />
             </div>
             <button
@@ -93,7 +108,6 @@ export default function DatePicker1() {
               <ChevronRightIcon className="h-6 w-6 text-gray-600" />
             </button>
           </div>
-
           <div className="mb-2 grid grid-cols-7 gap-2 text-center font-semibold">
             {WEEK_DAYS.map((day, index) => (
               <div key={index} className="text-gray-600">
@@ -101,10 +115,12 @@ export default function DatePicker1() {
               </div>
             ))}
           </div>
-
-          <div className="grid grid-cols-7 gap-2 text-center">
+          <div className="grid grid-cols-7 gap-1 text-center">
             {[...Array(firstDayOfMonth)].map((_, i) => (
-              <div key={`empty-${i}`} className="h-12 w-12"></div>
+              <div
+                key={`empty-${i}`}
+                className="h-10 w-10 sm:h-12 sm:w-12"
+              ></div>
             ))}
             {[...Array(daysInMonth)].map((_, i) => {
               const dayNumber = i + 1;
@@ -113,7 +129,7 @@ export default function DatePicker1() {
                 <button
                   key={dayNumber}
                   onClick={() => handleSelectDate(dayNumber)}
-                  className={`h-12 w-12 rounded-md text-lg font-medium ${
+                  className={`h-10 w-10 rounded-md text-sm font-medium sm:h-12 sm:w-12 sm:text-lg ${
                     selectedDate === currentFormattedDate
                       ? 'bg-[#1C2143] text-white'
                       : 'hover:bg-gray-200'
@@ -124,27 +140,23 @@ export default function DatePicker1() {
               );
             })}
           </div>
-
-          <div className="mt-4 flex justify-between">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-between">
             <Button
               variant="gray"
               paddingX={6}
               paddingY={3}
               textSize="base"
-              width="215px"
-              height="50px"
+              className="h-11 w-full sm:h-[50px] sm:w-[215px]"
               onClick={handleClearDate}
             >
               Quitar
             </Button>
-
             <Button
               variant="submit"
               paddingX={6}
               paddingY={3}
               textSize="base"
-              width="215px"
-              height="50px"
+              className="h-11 w-full sm:h-[50px] sm:w-[215px]"
               onClick={handleDone}
             >
               Hecho
