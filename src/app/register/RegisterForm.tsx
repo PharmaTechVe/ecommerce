@@ -123,10 +123,13 @@ export default function RegisterForm() {
           password: '',
           confirmPassword: '',
         });
-
-        setTimeout(() => {
-          router.push('/login');
-        }, 5000);
+        // TODO: redirect to home
+        const loginResponse = await api.auth.login({
+          email: formData.email,
+          password: formData.password,
+        });
+        console.log('Access token:', loginResponse.accessToken);
+        localStorage.setItem('pharmatechToken', loginResponse.accessToken);
       } catch (err) {
         console.error('Error creating account:', err);
         setGeneralError('Error al crear la cuenta. Intenta de nuevo.');
