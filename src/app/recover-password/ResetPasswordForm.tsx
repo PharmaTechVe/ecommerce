@@ -70,6 +70,7 @@ export default function ResetPasswordForm({
       } catch (err) {
         console.error('Error al cambiar la contraseña:', err);
         setGeneralError('Error al cambiar la contraseña. Intenta de nuevo.');
+        toast.error('Error al cambiar la contraseña. Intenta de nuevo.');
       } finally {
         setLoading(false);
       }
