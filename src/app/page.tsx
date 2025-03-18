@@ -1,7 +1,7 @@
 'use client';
 import NavBar, { NavBarProps } from '@/components/Navbar';
 
-export default function TestPage() {
+export default function Home() {
   const avatarProps = {
     name: 'Juan Pérez',
     imageUrl: '/images/profilePic.jpeg',
