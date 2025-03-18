@@ -21,20 +21,17 @@ export default function Avatar({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
 
-  /** Toggle the dropdown if enabled. */
   const handleToggleDropdown = () => {
     if (withDropdown) {
       setDropdownOpen(!dropdownOpen);
     }
   };
 
-  /** Navigate to a route and close the dropdown. */
   const handleOptionClick = (route: string) => {
     router.push(route);
     setDropdownOpen(false);
   };
 
-  /** Generate initials if no image is available. */
   const initials = name
     .split(' ')
     .map((word) => word[0]?.toUpperCase() || '')
@@ -58,7 +55,6 @@ export default function Avatar({
             fill
             className="rounded-full object-cover"
             sizes={`${size}px`}
-            /* Optional: Provide a sizes prop for Next 13 */
           />
         ) : (
           <span style={{ fontSize: size * 0.4 }}>{initials || '?'}</span>
