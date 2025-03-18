@@ -63,7 +63,7 @@ export default function Avatar({
 
       {/* Dropdown Menu (if enabled) */}
       {withDropdown && dropdownOpen && dropdownOptions.length > 0 && (
-        <div className="absolute right-0 z-10 mt-2 w-40 rounded-md bg-white shadow-lg">
+        <div className="absolute left-0 right-auto z-10 mt-2 w-40 rounded-md bg-white shadow-lg md:left-auto md:right-0">
           <ul className="py-1">
             {dropdownOptions.map((option) => (
               <li
