@@ -2,6 +2,8 @@ import type { Config } from "tailwindcss";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const tailgrids = require("tailgrids/plugin");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const hideScrollBar = require("tailwind-scrollbar-hide");
 
 
 export default {
@@ -21,6 +23,6 @@ export default {
       },
     },
   },
-  plugins: [tailgrids],
+  plugins: [tailgrids, hideScrollBar],
 
 } satisfies Config;
