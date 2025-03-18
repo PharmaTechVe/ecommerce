@@ -1,78 +1,86 @@
 'use client';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
-import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
-import { UserIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+export type AvatarProps = {
+  name: string;
+  imageUrl?: string;
+  size?: number;
+  withDropdown?: boolean;
+  dropdownOptions?: { label: string; route: string }[];
+};
 
-export default function Avatar() {
-  const pathname = usePathname();
+export default function Avatar({
+  name,
+  imageUrl,
+  size = 48,
+  withDropdown = false,
+  dropdownOptions = [],
+}: AvatarProps) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
+
+  /** Toggle the dropdown if enabled. */
+  const handleToggleDropdown = () => {
+    if (withDropdown) {
+      setDropdownOpen(!dropdownOpen);
+    }
+  };
+
+  /** Navigate to a route and close the dropdown. */
+  const handleOptionClick = (route: string) => {
+    router.push(route);
+    setDropdownOpen(false);
+  };
+
+  /** Generate initials if no image is available. */
+  const initials = name
+    .split(' ')
+    .map((word) => word[0]?.toUpperCase() || '')
+    .join('');
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      {/* Botón principal (ícono de usuario) */}
-      <div>
-        <Menu.Button className="flex items-center space-x-2 rounded-full bg-gray-200 p-2 hover:bg-gray-300">
-          <UserIcon className="h-6 w-6 text-gray-700" />
-        </Menu.Button>
+    <div
+      className="relative inline-block"
+      style={{ width: size, height: size }}
+    >
+      {/* Avatar Circle */}
+      <div
+        className="flex cursor-pointer items-center justify-center overflow-hidden rounded-full bg-gray-200"
+        style={{ width: size, height: size }}
+        onClick={handleToggleDropdown}
+      >
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            className="rounded-full object-cover"
+            sizes={`${size}px`}
+            /* Optional: Provide a sizes prop for Next 13 */
+          />
+        ) : (
+          <span style={{ fontSize: size * 0.4 }}>{initials || '?'}</span>
+        )}
       </div>
 
-      {/* Transición y contenido del menú */}
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg">
-          <div className="p-2">
-            <Menu.Item>
-              {() => (
-                <Link
-                  href="/perfil"
-                  className={`block rounded-md px-4 py-2 ${
-                    pathname === '/perfil'
-                      ? 'bg-blue-500 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Perfil
-                </Link>
-              )}
-            </Menu.Item>
-
-            <Menu.Item>
-              {() => (
-                <Link
-                  href="/configuracion"
-                  className={`block rounded-md px-4 py-2 ${
-                    pathname === '/configuracion'
-                      ? 'bg-blue-500 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Configuración
-                </Link>
-              )}
-            </Menu.Item>
-
-            <Menu.Item>
-              {() => (
-                <button
-                  onClick={() => console.log('Cerrando sesión...')}
-                  className="block w-full rounded-md px-4 py-2 text-left text-red-600 hover:bg-red-100"
-                >
-                  Cerrar sesión
-                </button>
-              )}
-            </Menu.Item>
-          </div>
-        </Menu.Items>
-      </Transition>
-    </Menu>
+      {/* Dropdown Menu (if enabled) */}
+      {withDropdown && dropdownOpen && dropdownOptions.length > 0 && (
+        <div className="absolute right-0 z-10 mt-2 w-40 rounded-md bg-white shadow-lg">
+          <ul className="py-1">
+            {dropdownOptions.map((option) => (
+              <li
+                key={option.label}
+                className="cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => handleOptionClick(option.route)}
+              >
+                {option.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
