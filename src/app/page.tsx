@@ -162,7 +162,7 @@ export default function Home() {
           </div>
 
           {/* Sección: Productos en Oferta Exclusiva */}
-          <div className="fflex mt-8 flex-col pt-4 md:flex-row md:items-center md:justify-between">
+          <div className="mt-8 flex flex-col pt-4 md:flex-row md:items-center md:justify-between">
             <h3 className="pt-4 text-[32px] text-[#1C2143]">
               Productos en Oferta Exclusiva
             </h3>
@@ -182,7 +182,7 @@ export default function Home() {
           </div>
 
           {/* Sección: Categoría Medicamentos */}
-          <div className="flex flex-col pb-[10px] md:flex-row md:items-center md:justify-between">
+          <div className="mt-8 flex flex-col pt-4 md:flex-row md:items-center md:justify-between">
             <h3 className="text-[32px] text-[#1C2143]">
               Categoría Medicamentos
             </h3>

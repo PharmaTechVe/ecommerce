@@ -59,7 +59,7 @@ export default function ProductSlider({
   const cardVariant =
     itemsPerSection === 4 && variant === 'regular' ? 'minimal' : variant;
 
-  const gapValuePx = variant === 'responsive' ? 8 : 16;
+  const gapValuePx = variant === 'responsive' ? 6 : 10;
   const gapBetweenClass = variant === 'responsive' ? 'gap-2' : 'gap-4';
 
   const scroll = (direction: 'left' | 'right') => {
