@@ -12,8 +12,6 @@ import Image2 from '@/lib/utils/images/product_4.webp';
 import Image3 from '@/lib/utils/images/Rectangle 1 (4).png';
 import Image4 from '@/lib/utils/images/product_5 (1).png';
 
-import Banner1 from '@/lib/utils/images/v3.png';
-import Banner2 from '@/lib/utils/images/banner_quality_3__figma_.png';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
 
 export type Product = {
@@ -62,9 +60,9 @@ export default function Home() {
   };
 
   const slides = [
-    { id: 1, imageUrl: Banner2 },
-    { id: 2, imageUrl: Banner2 },
-    { id: 3, imageUrl: Banner1 },
+    { id: 1, imageUrl: Banner3 },
+    { id: 2, imageUrl: Banner3 },
+    { id: 3, imageUrl: Banner3 },
     { id: 4, imageUrl: Banner3 },
   ];
 
@@ -149,8 +147,6 @@ export default function Home() {
       </div>
 
       <main className="p-4 pt-[124px]">
-        <h1 className="text-2xl font-bold">Pharmatech</h1>
-
         <div className="mx-auto w-full max-w-[95vw] p-2 md:max-w-6xl md:p-4">
           <div className="hidden md:block">
             <Carousel slides={slides} />
