@@ -1,11 +1,14 @@
 'use client';
 import { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 import { Colors } from '../styles/styles';
+
+export type ImageType = string | StaticImageData;
+
 type Slide = {
   id: number;
-  imageUrl: string;
+  imageUrl: string | ImageType;
 };
 type Props = {
   slides: Slide[];

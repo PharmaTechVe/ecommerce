@@ -7,7 +7,7 @@ export type ImageType = string | StaticImageData;
 interface CardBaseProps {
   variant?: 'regular' | 'minimal' | 'responsive';
   showRibbon?: boolean;
-  imageSrc?: ImageType;
+  imageSrc?: string | ImageType;
   ribbonText?: string;
   label?: string;
   children: React.ReactNode;
@@ -76,7 +76,7 @@ const CardBase: React.FC<CardBaseProps> = ({
         className={`relative mt-[80px] flex items-center justify-center bg-white`}
       >
         {imageSrc ? (
-          <div className="relative flex h-full w-full items-center justify-center">
+          <div className="relative flex items-center justify-center">
             <Image
               src={imageSrc}
               alt="Product Image"

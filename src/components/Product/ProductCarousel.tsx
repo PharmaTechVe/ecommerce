@@ -1,93 +1,127 @@
 'use client';
-import { ReactNode, useRef } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+
+import { useState, useRef, useEffect } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import type { ImageType } from '@/components/Product/CardBase';
+import ProductCard from '@/components/Product/ProductCard';
 import { Colors } from '@/styles/styles';
-import { useWindowWidth } from '@/lib/hooks/useProductCarousel';
 
-interface ProductCarouselProps {
-  children: ReactNode[];
-  isLargeCarousel?: boolean;
-}
+export type Product = {
+  id: number;
+  productName: string;
+  stock: number;
+  currentPrice: number;
+  lastPrice?: number;
+  discountPercentage?: number;
+  ribbonText?: string;
+  imageSrc: ImageType;
+  label?: string;
+};
 
-export default function ProductCarousel({
-  children,
-  isLargeCarousel = false,
-}: ProductCarouselProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const width = useWindowWidth();
+export type ProductSliderProps = {
+  title?: string;
+  products: Product[];
+  carouselType?: 'regular' | 'large';
+};
 
-  // Determinar la variante según el ancho de pantalla
-  let variant: 'responsive' | 'minimum' | 'regular' = 'regular';
-  if (width < 640) {
-    variant = 'responsive'; // Móvil
-  } else if (width >= 640 && width < 1024) {
-    variant = 'minimum'; // Pantalla mediana
-  } else {
-    variant = 'regular'; // Pantalla grande
-  }
+export default function ProductSlider({
+  title,
+  products,
+  carouselType = 'large',
+}: ProductSliderProps) {
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [visibleProducts, setVisibleProducts] = useState(3);
+  const [variant, setVariant] = useState<'responsive' | 'minimal' | 'regular'>(
+    'regular',
+  );
 
-  // Definir cuántas tarjetas mostrar según variante y tamaño del carrusel
-  let visibleCards = 1;
-  if (variant === 'responsive') {
-    visibleCards = 1;
-  } else if (variant === 'minimum') {
-    visibleCards = isLargeCarousel ? 2 : 3;
-  } else if (variant === 'regular') {
-    visibleCards = isLargeCarousel ? 3 : 4;
-  }
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setVariant('responsive');
+        setVisibleProducts(1);
+      } else if (width < 1111) {
+        setVariant('minimal');
+        setVisibleProducts(2);
+      } else {
+        setVariant('regular');
+        setVisibleProducts(3);
+      }
+    };
 
-  // Cálculo dinámico del ancho de cada tarjeta
-  const containerPadding = 48; // px padding horizontal
-  const gap = 48; // px gap entre tarjetas
-  const totalGapWidth = gap * (visibleCards - 1);
-  const availableWidth = width - containerPadding * 2 - totalGapWidth;
-  const cardWidth = Math.floor(availableWidth / visibleCards);
-  const totalScroll = cardWidth + gap;
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [carouselType]);
 
-  const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -totalScroll, behavior: 'smooth' });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: totalScroll, behavior: 'smooth' });
+  const scroll = (direction: 'left' | 'right') => {
+    if (!sliderRef.current) return;
+    const containerWidth = sliderRef.current.clientWidth;
+    const itemWidth = containerWidth / visibleProducts;
+    const scrollValue = direction === 'left' ? -itemWidth : itemWidth;
+    sliderRef.current.scrollBy({ left: scrollValue, behavior: 'smooth' });
   };
 
   return (
-    <div className="relative my-8 w-full overflow-hidden px-6">
-      {/* Botón Izquierda */}
-      <button
-        onClick={scrollLeft}
-        className="absolute left-0 top-1/2 z-10 -translate-y-1/2 items-center justify-center md:p-3"
-      >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: Colors.stroke }} />
-      </button>
+    <section className="relative mt-[-10%]">
+      {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
 
-      {/* Contenedor scrollable */}
-      <div
-        ref={scrollRef}
-        className="flex gap-12 overflow-x-auto scrollbar-hide"
-      >
-        {children.map((child, index) => (
-          <div
-            key={index}
-            className="flex-shrink-0"
-            style={{ width: `${cardWidth}px` }}
+      {/* Wrapper para flechas y carrusel */}
+      <div className="relative">
+        <div className="absolute left-0 top-1/2 z-10 -translate-y-1/2">
+          <button
+            onClick={() => scroll('left')}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
+            aria-label="Scroll left"
           >
-            {child}
-          </div>
-        ))}
-      </div>
+            <ChevronLeftIcon
+              className="h-6 w-6"
+              style={{ color: Colors.neuter }}
+            />
+          </button>
+        </div>
 
-      {/* Botón Derecha */}
-      <button
-        onClick={scrollRight}
-        className="absolute right-0 top-1/2 z-10 -translate-y-1/2 items-center justify-center md:p-3"
-      >
-        <ChevronRightIcon
-          className="h-6 w-6"
-          style={{ color: Colors.stroke }}
-        />
-      </button>
-    </div>
+        {/* Carrusel sin padding interno */}
+        <div
+          ref={sliderRef}
+          className="hide-scrollbar flex gap-4 overflow-x-auto"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            marginLeft: '56px',
+            marginRight: '56px',
+          }}
+        >
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="flex-shrink-0"
+              style={{
+                width: `calc(100% / ${visibleProducts} - 1rem)`,
+                minWidth: `calc(100% / ${visibleProducts} - 1rem)`,
+                maxWidth: `calc(100% / ${visibleProducts} - 1rem)`,
+              }}
+            >
+              <ProductCard {...product} variant={variant} />
+            </div>
+          ))}
+        </div>
+
+        {/* Flecha Derecha fuera del carrusel */}
+        <div className="absolute right-0 top-1/2 z-10 -translate-y-1/2">
+          <button
+            onClick={() => scroll('right')}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
+            aria-label="Scroll right"
+          >
+            <ChevronRightIcon
+              className="h-6 w-6"
+              style={{ color: Colors.neuter }}
+            />
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }

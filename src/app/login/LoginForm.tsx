@@ -52,6 +52,7 @@ export default function LoginForm() {
         }
 
         toast.success('Inicio de sesión exitoso');
+        router.push('/');
 
         setEmail('');
         setPassword('');
