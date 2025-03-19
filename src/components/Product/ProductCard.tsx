@@ -5,7 +5,7 @@ import { ImageType } from './CardBase';
 import { Colors, FontSizes } from '@/styles/styles';
 import CardButton from '../CardButton';
 
-type ProductCardProps = {
+export type ProductCardProps = {
   imageSrc: ImageType;
   ribbonText?: string;
   label?: string;
@@ -14,7 +14,7 @@ type ProductCardProps = {
   currentPrice: number;
   lastPrice?: number;
   discountPercentage?: number;
-  variant: 'regular' | 'minimal' | 'responsive';
+  variant?: 'regular' | 'minimal' | 'responsive';
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({
