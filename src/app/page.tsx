@@ -10,7 +10,7 @@ import { ImageType } from '@/components/Product/CardBase';
 import Image1 from '@/lib/utils/images/product_2.webp';
 import Image2 from '@/lib/utils/images/product_4.webp';
 import Image3 from '@/lib/utils/images/Rectangle 1 (4).png';
-import Image4 from '@/lib/utils/images/Rectangle 1.png';
+import Image4 from '@/lib/utils/images/product_5 (1).png';
 
 import Banner1 from '@/lib/utils/images/v3.png';
 import Banner2 from '@/lib/utils/images/banner_quality_3__figma_.png';
@@ -79,21 +79,21 @@ export default function Home() {
       productName: 'Ibuprofeno 200mg',
       stock: 50,
       currentPrice: 3.99,
-      imageSrc: Image1,
+      imageSrc: Image4,
     },
     {
       id: 101,
       productName: 'Paracetamol 500mg',
       stock: 100,
       currentPrice: 2.49,
-      imageSrc: Image2,
+      imageSrc: Image4,
     },
     {
       id: 102,
       productName: 'Omeprazol 20mg',
       stock: 75,
       currentPrice: 5.99,
-      imageSrc: Image3,
+      imageSrc: Image1,
     },
   ];
 
