@@ -138,7 +138,7 @@ export default function Home() {
   }, []);
 
   if (loading) {
-    return <p className="p-4 text-lg">Cargando productos...</p>;
+    return <h1 className="p-4 text-lg">Pharmatech...</h1>;
   }
 
   return (
