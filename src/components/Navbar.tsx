@@ -37,7 +37,7 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
   return (
     <>
       {/* Desktop Version */}
-      <nav className="mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 sm:block">
+      <nav className="mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
           <Link href="/">
             <Image

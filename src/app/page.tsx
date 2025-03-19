@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import NavBar, { NavBarProps } from '@/components/Navbar';
 import Carousel from '@/components/Carousel';
 import ProductCarousel from '@/components/Product/ProductCarousel';
@@ -9,9 +9,10 @@ import { ImageType } from '@/components/Product/CardBase';
 
 import Image1 from '@/lib/utils/images/product_2.webp';
 import Image2 from '@/lib/utils/images/product_4.webp';
-import Image3 from '@/lib/utils/images/Rectangle 1 (4).png';
 import Image4 from '@/lib/utils/images/product_5 (1).png';
 
+import Banner1 from '@/lib/utils/images/banner-v2.jpg';
+import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
 
 export type Product = {
@@ -39,6 +40,9 @@ interface ProductApiResponse {
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
   const avatarProps = isLoggedIn
     ? {
         name: 'Juan Pérez',
@@ -60,40 +64,42 @@ export default function Home() {
   };
 
   const slides = [
-    { id: 1, imageUrl: Banner3 },
-    { id: 2, imageUrl: Banner3 },
+    { id: 1, imageUrl: Banner1 },
+    { id: 2, imageUrl: Banner2 },
     { id: 3, imageUrl: Banner3 },
-    { id: 4, imageUrl: Banner3 },
   ];
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const productImages: ImageType[] = [Image1, Image2, Image3, Image4];
-
-  const extraProducts: Product[] = [
-    {
-      id: 100,
-      productName: 'Ibuprofeno 200mg',
-      stock: 50,
-      currentPrice: 3.99,
-      imageSrc: Image4,
-    },
-    {
-      id: 101,
-      productName: 'Paracetamol 500mg',
-      stock: 100,
-      currentPrice: 2.49,
-      imageSrc: Image4,
-    },
-    {
-      id: 102,
-      productName: 'Omeprazol 20mg',
-      stock: 75,
-      currentPrice: 5.99,
-      imageSrc: Image1,
-    },
-  ];
+  // Memoriza las imágenes y productos extra para evitar recreación en cada render
+  const productImages: ImageType[] = useMemo(
+    () => [Image1, Image2, Image4],
+    [],
+  );
+  const extraProducts: Product[] = useMemo(
+    () => [
+      {
+        id: 100,
+        productName: 'Ibuprofeno 200mg',
+        stock: 50,
+        currentPrice: 3.99,
+        imageSrc: Image4,
+      },
+      {
+        id: 101,
+        productName: 'Acetaminofén 50mg',
+        stock: 100,
+        currentPrice: 2.49,
+        imageSrc: Image2,
+      },
+      {
+        id: 102,
+        productName: 'Omeprazol 200mg',
+        stock: 75,
+        currentPrice: 5.99,
+        imageSrc: Image1,
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     const userSession = sessionStorage.getItem('pharmatechToken');
@@ -133,7 +139,7 @@ export default function Home() {
     };
 
     fetchProducts();
-  }, []);
+  }, [productImages, extraProducts]); // Ahora se incluyen como dependencia
 
   if (loading) {
     return <h1 className="p-4 text-lg">Pharmatech...</h1>;
@@ -142,18 +148,20 @@ export default function Home() {
   return (
     <div>
       {/* Navbar fijado */}
-      <div className="fixed left-0 right-0 top-0 z-50 bg-white">
+      <div className="fixed left-0 right-0 top-0 z-50 bg-transparent">
         <NavBar {...navBarProps} />
       </div>
 
-      <main className="p-4 pt-[124px]">
-        <div className="mx-auto w-full max-w-[95vw] p-2 md:max-w-6xl md:p-4">
+      <main className="pt-[124px]">
+        <h1 className="text-2xl font-bold text-white">Pharmatech</h1>
+
+        <div className="md:max-w-8xl mx-auto w-full max-w-[75vw] md:p-2">
           <div className="hidden md:block">
             <Carousel slides={slides} />
           </div>
 
           <div>
-            <h3 className="pt-4 text-[32px] text-[#1C2143]">
+            <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
               Productos en Oferta Exclusiva
             </h3>
           </div>
@@ -162,7 +170,7 @@ export default function Home() {
             <ProductCarousel carouselType="regular" products={products} />
 
             <div>
-              <h3 className="text-[32px] text-[#1C2143]">
+              <h3 className="my-8 text-[32px] text-[#1C2143]">
                 Categoría Medicamentos
               </h3>
             </div>

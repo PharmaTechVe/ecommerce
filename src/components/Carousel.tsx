@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import Image, { type StaticImageData } from 'next/image';
 import { Colors } from '../styles/styles';
@@ -13,12 +13,23 @@ type Slide = {
 type Props = {
   slides: Slide[];
 };
+
 export default function Carousel({ slides }: Props) {
   const [current, setCurrent] = useState(0);
+
   const prevSlide = () =>
     setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
   const nextSlide = () =>
     setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+
+  // Avanza automáticamente cada 5 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
   return (
     <div
       className="relative mx-auto h-[180px] w-full max-w-[95vw] overflow-visible rounded-xl md:h-[316px] md:max-w-6xl"
@@ -27,11 +38,8 @@ export default function Carousel({ slides }: Props) {
       <button
         onClick={prevSlide}
         className="absolute left-[-20px] top-1/2 z-10 flex h-[60px] w-[60px] -translate-y-1/2 items-center justify-center rounded-full border-[6px] border-white md:h-[86px] md:w-[86px] md:border-[10px]"
-        style={{
-          // width: '86px',
-          // height: '86px',
-          backgroundColor: Colors.semanticInfo,
-        }}
+        style={{ backgroundColor: Colors.semanticInfo }}
+        aria-label="Scroll left"
       >
         <ChevronLeftIcon className="h-6 w-6 text-white md:h-14 md:w-7" />
       </button>
@@ -55,11 +63,8 @@ export default function Carousel({ slides }: Props) {
       <button
         onClick={nextSlide}
         className="absolute right-[-20px] top-1/2 z-10 flex h-[60px] w-[60px] -translate-y-1/2 items-center justify-center rounded-full border-[6px] border-white md:right-[-35px] md:h-[86px] md:w-[86px] md:border-[10px]"
-        style={{
-          // width: '86px',
-          // height: '86px',
-          backgroundColor: Colors.semanticInfo,
-        }}
+        style={{ backgroundColor: Colors.semanticInfo }}
+        aria-label="Scroll right"
       >
         <ChevronRightIcon className="h-6 w-6 text-white md:h-14 md:w-7" />
       </button>

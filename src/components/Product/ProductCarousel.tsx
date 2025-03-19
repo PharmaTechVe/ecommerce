@@ -44,9 +44,12 @@ export default function ProductSlider({
       } else if (width < 1111) {
         setVariant('minimal');
         setVisibleProducts(2);
-      } else {
+      } else if (width < 1900) {
         setVariant('regular');
         setVisibleProducts(3);
+      } else {
+        setVariant('regular');
+        setVisibleProducts(4);
       }
     };
 
@@ -63,12 +66,18 @@ export default function ProductSlider({
     sliderRef.current.scrollBy({ left: scrollValue, behavior: 'smooth' });
   };
 
+  // Para mobile se usa un margen y gap menor
+  const marginLR = variant === 'responsive' ? '16px' : '56px';
+  const gapBetween = variant === 'responsive' ? 'gap-2' : 'gap-4';
+  // Define la altura de la card en mobile; ajusta este valor según tu diseño.
+  const cardHeight = variant === 'responsive' ? '400px' : 'auto';
+
   return (
     <section className="relative mt-[-10%]">
       {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
 
-      {/* Wrapper para flechas y carrusel */}
-      <div className="relative">
+      <div className="relative w-full">
+        {/* Flecha izquierda */}
         <div className="absolute left-0 top-1/2 z-10 -translate-y-1/2">
           <button
             onClick={() => scroll('left')}
@@ -82,15 +91,16 @@ export default function ProductSlider({
           </button>
         </div>
 
-        {/* Carrusel sin padding interno */}
+        {/* Carrusel: se fija la altura en mobile al valor de cardHeight */}
         <div
           ref={sliderRef}
-          className="hide-scrollbar flex gap-4 overflow-x-auto"
+          className={`hide-scrollbar mx-auto flex w-[90%] items-center overflow-x-auto overflow-y-hidden ${gapBetween}`}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            marginLeft: '56px',
-            marginRight: '56px',
+            marginLeft: marginLR,
+            marginRight: marginLR,
+            height: cardHeight,
           }}
         >
           {products.map((product) => (
@@ -108,7 +118,7 @@ export default function ProductSlider({
           ))}
         </div>
 
-        {/* Flecha Derecha fuera del carrusel */}
+        {/* Flecha derecha */}
         <div className="absolute right-0 top-1/2 z-10 -translate-y-1/2">
           <button
             onClick={() => scroll('right')}
