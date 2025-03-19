@@ -22,15 +22,16 @@ export type ProductSliderProps = {
   title?: string;
   products: Product[];
   carouselType?: 'regular' | 'large';
+  itemsPerSection?: number;
 };
 
 export default function ProductSlider({
   title,
   products,
-  carouselType = 'large',
+  carouselType = 'regular',
+  itemsPerSection = 1,
 }: ProductSliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [visibleProducts, setVisibleProducts] = useState(3);
   const [variant, setVariant] = useState<'responsive' | 'minimal' | 'regular'>(
     'regular',
   );
@@ -38,18 +39,12 @@ export default function ProductSlider({
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width < 640) {
+      if (width < 800) {
         setVariant('responsive');
-        setVisibleProducts(1);
-      } else if (width < 1111) {
+      } else if (width < 1024) {
         setVariant('minimal');
-        setVisibleProducts(2);
-      } else if (width < 1900) {
-        setVariant('regular');
-        setVisibleProducts(3);
       } else {
         setVariant('regular');
-        setVisibleProducts(4);
       }
     };
 
@@ -58,23 +53,27 @@ export default function ProductSlider({
     return () => window.removeEventListener('resize', handleResize);
   }, [carouselType]);
 
+  const effectiveItemsPerSection =
+    variant === 'responsive' ? 1 : variant === 'minimal' ? 2 : itemsPerSection;
+
+  const cardVariant =
+    itemsPerSection === 4 && variant === 'regular' ? 'minimal' : variant;
+
+  const gapValuePx = variant === 'responsive' ? 8 : 16;
+  const gapBetweenClass = variant === 'responsive' ? 'gap-2' : 'gap-4';
+
   const scroll = (direction: 'left' | 'right') => {
     if (!sliderRef.current) return;
     const containerWidth = sliderRef.current.clientWidth;
-    const itemWidth = containerWidth / visibleProducts;
+    const totalGap = (effectiveItemsPerSection - 1) * gapValuePx;
+    const itemWidth = (containerWidth - totalGap) / effectiveItemsPerSection;
     const scrollValue = direction === 'left' ? -itemWidth : itemWidth;
     sliderRef.current.scrollBy({ left: scrollValue, behavior: 'smooth' });
   };
 
-  // Para mobile se usa un margen y gap menor
-  const marginLR = variant === 'responsive' ? '16px' : '56px';
-  const gapBetween = variant === 'responsive' ? 'gap-2' : 'gap-4';
-  // Define la altura de la card en mobile; ajusta este valor según tu diseño.
-  const cardHeight = variant === 'responsive' ? '400px' : 'auto';
-
   return (
-    <section className="relative mt-[-10%]">
-      {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
+    <section className="relative gap-2">
+      {title && <h2 className="text-xl font-semibold">{title}</h2>}
 
       <div className="relative w-full">
         {/* Flecha izquierda */}
@@ -91,16 +90,15 @@ export default function ProductSlider({
           </button>
         </div>
 
-        {/* Carrusel: se fija la altura en mobile al valor de cardHeight */}
+        {/* Slider */}
         <div
           ref={sliderRef}
-          className={`hide-scrollbar mx-auto flex w-[90%] items-center overflow-x-auto overflow-y-hidden ${gapBetween}`}
+          className={`hide-scrollbar flex items-center overflow-y-hidden ${gapBetweenClass}`}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            marginLeft: marginLR,
-            marginRight: marginLR,
-            height: cardHeight,
+            marginLeft: 'auto',
+            marginRight: 'auto',
           }}
         >
           {products.map((product) => (
@@ -108,12 +106,10 @@ export default function ProductSlider({
               key={product.id}
               className="flex-shrink-0"
               style={{
-                width: `calc(100% / ${visibleProducts} - 1rem)`,
-                minWidth: `calc(100% / ${visibleProducts} - 1rem)`,
-                maxWidth: `calc(100% / ${visibleProducts} - 1rem)`,
+                width: `calc((100% - ${(effectiveItemsPerSection - 1) * gapValuePx}px) / ${effectiveItemsPerSection})`,
               }}
             >
-              <ProductCard {...product} variant={variant} />
+              <ProductCard {...product} variant={cardVariant} />
             </div>
           ))}
         </div>

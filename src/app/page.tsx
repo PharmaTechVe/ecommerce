@@ -1,11 +1,14 @@
 'use client';
+
 import { useEffect, useState, useMemo } from 'react';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import NavBar, { NavBarProps } from '@/components/Navbar';
 import Carousel from '@/components/Carousel';
-import ProductCarousel from '@/components/Product/ProductCarousel';
+import ProductSlider from '@/components/Product/ProductSlider';
 import Footer from '@/components/Footer';
+import { Colors } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
-import { ImageType } from '@/components/Product/CardBase';
+import type { ImageType } from '@/components/Product/CardBase';
 
 import Image1 from '@/lib/utils/images/product_2.webp';
 import Image2 from '@/lib/utils/images/product_4.webp';
@@ -139,7 +142,7 @@ export default function Home() {
     };
 
     fetchProducts();
-  }, [productImages, extraProducts]); // Ahora se incluyen como dependencia
+  }, [productImages, extraProducts]);
 
   if (loading) {
     return <h1 className="p-4 text-lg">Pharmatech...</h1>;
@@ -153,30 +156,48 @@ export default function Home() {
       </div>
 
       <main className="pt-[124px]">
-        <h1 className="text-2xl font-bold text-white">Pharmatech</h1>
-
         <div className="md:max-w-8xl mx-auto w-full max-w-[75vw] md:p-2">
           <div className="hidden md:block">
             <Carousel slides={slides} />
           </div>
 
-          <div>
-            <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
+          {/* Sección: Productos en Oferta Exclusiva */}
+          <div className="fflex mt-8 flex-col pt-4 md:flex-row md:items-center md:justify-between">
+            <h3 className="pt-4 text-[32px] text-[#1C2143]">
               Productos en Oferta Exclusiva
             </h3>
+            <button
+              className={`flex items-center text-sm text-[${Colors.disabled}] hover:underline`}
+            >
+              Ver más productos
+              <ChevronRightIcon className="mr-1 h-5 w-5" />
+            </button>
           </div>
-
           <div className="mt-8">
-            <ProductCarousel carouselType="regular" products={products} />
-
-            <div>
-              <h3 className="my-8 text-[32px] text-[#1C2143]">
-                Categoría Medicamentos
-              </h3>
-            </div>
-
-            <ProductCarousel carouselType="large" products={products} />
+            <ProductSlider
+              carouselType="regular"
+              products={products}
+              itemsPerSection={3}
+            />
           </div>
+
+          {/* Sección: Categoría Medicamentos */}
+          <div className="flex flex-col pb-[10px] md:flex-row md:items-center md:justify-between">
+            <h3 className="text-[32px] text-[#1C2143]">
+              Categoría Medicamentos
+            </h3>
+            <button
+              className={`flex items-center text-sm text-[${Colors.disabled}] hover:underline`}
+            >
+              Ver más productos
+              <ChevronRightIcon className="mr-1 h-5 w-5" />
+            </button>
+          </div>
+          <ProductSlider
+            carouselType="regular"
+            products={products}
+            itemsPerSection={4}
+          />
         </div>
       </main>
 
