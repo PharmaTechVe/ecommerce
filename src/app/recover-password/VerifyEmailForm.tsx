@@ -44,9 +44,7 @@ export default function VerifyEmailForm({ onNext }: VerifyEmailFormProps) {
     } catch (err) {
       console.error('Error en el forgotPassword:', err);
       setGeneralError('Error al enviar el correo');
-      toast.error(
-        'Email no encontrado, verifica que el correo sea de una cuenta existente.',
-      );
+      toast.error('Ingresa una dirección de correo válida.');
     } finally {
       setLoading(false);
     }
