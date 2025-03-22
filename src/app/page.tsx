@@ -6,6 +6,7 @@ import ProductCarousel from '@/components/Product/ProductCarousel';
 import Footer from '@/components/Footer';
 import { api } from '@/lib/sdkConfig';
 import { ImageType } from '@/components/Product/CardBase';
+import CartOverlay from '@/components/Cart/CartOverlay';
 
 import Image1 from '@/lib/utils/images/product_2.webp';
 import Image2 from '@/lib/utils/images/product_4.webp';
@@ -42,6 +43,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
   const avatarProps = isLoggedIn
     ? {
@@ -61,6 +63,7 @@ export default function Home() {
   const navBarProps: NavBarProps = {
     isLoggedIn,
     ...(avatarProps ? { avatarProps } : {}),
+    onCartClick: () => setIsCartOpen(true),
   };
 
   const slides = [
@@ -181,6 +184,12 @@ export default function Home() {
       </main>
 
       <Footer />
+      {isCartOpen && (
+        <CartOverlay
+          isOpen={isCartOpen}
+          closeCart={() => setIsCartOpen(false)}
+        />
+      )}
     </div>
   );
 }

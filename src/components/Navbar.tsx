@@ -8,22 +8,26 @@ import { useRouter } from 'next/navigation';
 import '../styles/globals.css';
 import { Colors } from '../styles/styles';
 import Button from '@/components/Button';
+import { useCart } from '@/contexts/CartContext';
 
 export type NavBarProps = {
   isLoggedIn: boolean;
   avatarProps?: AvatarProps;
+  onCartClick?: () => void;
 };
 
-export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
+export default function NavBar({
+  isLoggedIn,
+  avatarProps,
+  onCartClick,
+}: NavBarProps) {
   const router = useRouter();
   const categories = ['Categorías', 'Tecnología', 'Salud', 'Otros'];
+  const { cartItems } = useCart();
+  const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
-  };
-
-  const handleCartClick = () => {
-    router.push('/cart');
   };
 
   const handleLoginClick = () => {
@@ -61,10 +65,10 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
             inputPlaceholder="Buscar producto"
           />
           <div className="flex items-center gap-8">
-            <div className="relative cursor-pointer" onClick={handleCartClick}>
+            <div className="relative cursor-pointer" onClick={onCartClick}>
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
               <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-                3
+                {totalCount}
               </span>
             </div>
             {isLoggedIn ? (
@@ -120,10 +124,10 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
               priority
             />
           </Link>
-          <div className="relative cursor-pointer" onClick={handleCartClick}>
+          <div className="relative cursor-pointer" onClick={onCartClick}>
             <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
             <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-              3
+              {totalCount}
             </span>
           </div>
         </div>

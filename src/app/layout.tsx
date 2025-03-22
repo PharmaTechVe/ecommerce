@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import theme from '../styles/styles';
+import { CartProvider } from '@/contexts/CartContext';
 
 export const metadata: Metadata = {
   title: 'Pharmatech',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={theme.poppins.variable}>
-      <body>{children}</body>
+      <body>
+        <CartProvider>{children}</CartProvider>
+      </body>
     </html>
   );
 }
