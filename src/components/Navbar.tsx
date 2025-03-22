@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import '../styles/globals.css';
 import { Colors } from '../styles/styles';
 import Button from '@/components/Button';
+import { useAuth } from '@/context/AuthContext';
 
 export type NavBarProps = {
   isLoggedIn: boolean;
@@ -17,7 +18,7 @@ export type NavBarProps = {
 export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
   const router = useRouter();
   const categories = ['Categorías', 'Tecnología', 'Salud', 'Otros'];
-
+  const { token } = useAuth();
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
@@ -67,7 +68,7 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
                 3
               </span>
             </div>
-            {isLoggedIn ? (
+            {token ? (
               avatarProps ? (
                 <Avatar {...avatarProps} />
               ) : (
