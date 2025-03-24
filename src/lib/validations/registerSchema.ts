@@ -50,14 +50,14 @@ export const registerSchema = z
 
           const today = new Date();
           const minAllowedDate = new Date(
-            today.getFullYear() - 13,
+            today.getFullYear() - 14,
             today.getMonth(),
             today.getDate(),
           );
           return fechaDate <= minAllowedDate;
         },
         {
-          message: 'Debes tener al menos 13 años',
+          message: 'Debes tener al menos 14 años',
         },
       ),
 
