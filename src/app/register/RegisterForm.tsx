@@ -88,14 +88,13 @@ export default function RegisterForm() {
         FEMALE = 'f',
       }
 
-      const mappedGender: UserGender =
-        formData.genero === 'hombre'
-          ? UserGender.MALE
-          : formData.genero === 'mujer'
-            ? UserGender.FEMALE
-            : (() => {
-                throw new Error('Invalid gender');
-              })();
+      let mappedGender: UserGender | null = null;
+
+      if (formData.genero === 'hombre') {
+        mappedGender = UserGender.MALE;
+      } else if (formData.genero === 'mujer') {
+        mappedGender = UserGender.FEMALE;
+      }
 
       const payload = {
         firstName: formData.nombre,
@@ -103,11 +102,10 @@ export default function RegisterForm() {
         email: formData.email,
         password: formData.password,
         documentId: formData.cedula,
-        phoneNumber: formData.telefono,
         birthDate: formData.fechaNacimiento,
+        phoneNumber: formData.telefono.trim() !== '' ? formData.telefono : null,
         gender: mappedGender,
       };
-
       try {
         const response = await api.auth.signUp(payload);
         console.log('SignUp response:', response);
