@@ -11,10 +11,10 @@ const Dropdown: React.FC<DropdownProps> = ({ label, items }) => {
   const [selected, setSelected] = useState(label);
 
   return (
-    <div className="relative w-64">
-      <label className="mb-1 block text-sm">Label</label>
+    <div className="relative w-auto">
+      <label className="mb-1 block text-sm">{label}</label>
       <button
-        className="flex w-full items-center justify-between rounded-md border border-gray-400 bg-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        className="focus:blue flex w-full items-center justify-between rounded-md border border-gray-400 bg-white px-4 py-2 focus:outline-none focus:ring-2"
         onClick={() => setIsOpen(!isOpen)}
       >
         {selected}
