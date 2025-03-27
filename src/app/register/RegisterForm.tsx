@@ -1,6 +1,7 @@
 'use client';
-import { api } from '@/lib/sdkConfig';
-import React, { useState, useCallback } from 'react';
+
+import { PharmaTech } from '@pharmatech/sdk';
+import React, { useState, useCallback, useEffect } from 'react';
 import { registerSchema } from '@/lib/validations/registerSchema';
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
@@ -11,8 +12,19 @@ import RadioButton from '@/components/RadioButton';
 import theme from '@/styles/styles';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterForm() {
+  const { token } = useAuth();
+  const router = useRouter();
+
+  // Redirigir al home si ya hay sesión activa
+  useEffect(() => {
+    if (token) {
+      router.push('/');
+    }
+  }, [token, router]);
+
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -40,8 +52,6 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
 
-  const router = useRouter();
-
   const handleInputChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData({ ...formData, [field]: e.target.value });
@@ -54,6 +64,7 @@ export default function RegisterForm() {
       setErrors({ ...errors, genero: '' });
     }
   };
+
   const handleDateSelect = (date: string) => {
     setFormData({ ...formData, fechaNacimiento: date });
     setErrors({ ...errors, fechaNacimiento: '' });
@@ -88,14 +99,13 @@ export default function RegisterForm() {
         FEMALE = 'f',
       }
 
-      const mappedGender: UserGender =
-        formData.genero === 'hombre'
-          ? UserGender.MALE
-          : formData.genero === 'mujer'
-            ? UserGender.FEMALE
-            : (() => {
-                throw new Error('Invalid gender');
-              })();
+      let mappedGender: UserGender | null = null;
+
+      if (formData.genero === 'hombre') {
+        mappedGender = UserGender.MALE;
+      } else if (formData.genero === 'mujer') {
+        mappedGender = UserGender.FEMALE;
+      }
 
       const payload = {
         firstName: formData.nombre,
@@ -103,13 +113,14 @@ export default function RegisterForm() {
         email: formData.email,
         password: formData.password,
         documentId: formData.cedula,
-        phoneNumber: formData.telefono,
         birthDate: formData.fechaNacimiento,
+        phoneNumber: formData.telefono.trim() !== '' ? formData.telefono : null,
         gender: mappedGender,
       };
 
       try {
-        const response = await api.auth.signUp(payload);
+        const pharmaTech = PharmaTech.getInstance(true);
+        const response = await pharmaTech.auth.signUp(payload);
         console.log('SignUp response:', response);
         toast.success('Cuenta creada correctamente');
         setFormData({
@@ -123,10 +134,12 @@ export default function RegisterForm() {
           password: '',
           confirmPassword: '',
         });
-        const loginResponse = await api.auth.login({
+
+        const loginResponse = await pharmaTech.auth.login({
           email: formData.email,
           password: formData.password,
         });
+
         console.log('Access token:', loginResponse.accessToken);
         localStorage.setItem('pharmatechToken', loginResponse.accessToken);
         router.push('/');
@@ -146,17 +159,15 @@ export default function RegisterForm() {
       <form
         onSubmit={(e) => {
           const activeElement = document.activeElement as HTMLElement;
-
-          // Verifica si el elemento activo es un botón dentro del Calendar
           if (
             activeElement.tagName === 'BUTTON' &&
             activeElement.closest('.calendar-container')
           ) {
-            e.preventDefault(); // Evita el envío del formulario
+            e.preventDefault();
             return;
           }
 
-          handleSubmit(e); // Llama al manejador original si no es un botón del Calendar
+          handleSubmit(e);
         }}
         className="w-full space-y-4"
       >
@@ -176,9 +187,7 @@ export default function RegisterForm() {
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.nombre ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.nombre ? 'visible' : 'invisible'}`}
             >
               {errors.nombre}
             </p>
@@ -193,9 +202,7 @@ export default function RegisterForm() {
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.apellido ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.apellido ? 'visible' : 'invisible'}`}
             >
               {errors.apellido}
             </p>
@@ -214,9 +221,7 @@ export default function RegisterForm() {
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.email ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.email ? 'visible' : 'invisible'}`}
             >
               {errors.email}
             </p>
@@ -231,9 +236,7 @@ export default function RegisterForm() {
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.cedula ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.cedula ? 'visible' : 'invisible'}`}
             >
               {errors.cedula}
             </p>
@@ -251,9 +254,7 @@ export default function RegisterForm() {
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.telefono ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.telefono ? 'visible' : 'invisible'}`}
             >
               {errors.telefono}
             </p>
@@ -266,10 +267,8 @@ export default function RegisterForm() {
               className="relative"
               onClick={(e) => {
                 const target = e.target as HTMLElement;
-
-                // Verifica si el clic proviene de un botón dentro del Calendar
                 if (target.tagName === 'BUTTON') {
-                  e.preventDefault(); // Evita que el formulario se envíe
+                  e.preventDefault();
                 }
               }}
             >
@@ -278,9 +277,7 @@ export default function RegisterForm() {
               </div>
             </div>
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.fechaNacimiento ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.fechaNacimiento ? 'visible' : 'invisible'}`}
             >
               {errors.fechaNacimiento}
             </p>
@@ -302,9 +299,7 @@ export default function RegisterForm() {
               />
             </div>
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.genero ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.genero ? 'visible' : 'invisible'}`}
             >
               {errors.genero}
             </p>
@@ -324,9 +319,7 @@ export default function RegisterForm() {
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.password ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.password ? 'visible' : 'invisible'}`}
             >
               {errors.password}
             </p>
@@ -343,9 +336,7 @@ export default function RegisterForm() {
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${
-                errors.confirmPassword ? 'visible' : 'invisible'
-              }`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.confirmPassword ? 'visible' : 'invisible'}`}
             >
               {errors.confirmPassword}
             </p>

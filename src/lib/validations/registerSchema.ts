@@ -28,9 +28,10 @@ export const registerSchema = z
 
     telefono: z
       .string()
-      .nonempty('El número de teléfono es obligatorio')
-      .regex(
-        /^\+\d{8,15}$/,
+      .transform((value) => (value?.trim() === '' ? null : value))
+      .nullable()
+      .refine(
+        (value) => value === null || /^\+\d{8,15}$/.test(value),
         'El teléfono debe iniciar con + y tener entre 8 y 15 dígitos',
       ),
 
@@ -49,20 +50,25 @@ export const registerSchema = z
 
           const today = new Date();
           const minAllowedDate = new Date(
-            today.getFullYear() - 13,
+            today.getFullYear() - 14,
             today.getMonth(),
             today.getDate(),
           );
           return fechaDate <= minAllowedDate;
         },
         {
-          message: 'Debes tener al menos 13 años',
+          message: 'Debes tener al menos 14 años',
         },
       ),
 
-    genero: z.enum(['hombre', 'mujer'], {
-      errorMap: () => ({ message: 'Selecciona un género' }),
-    }),
+    genero: z
+      .string()
+      .transform((value) => (value?.trim() === '' ? null : value))
+      .nullable()
+      .refine(
+        (value) => value === null || value === 'hombre' || value === 'mujer',
+        'Selecciona un género',
+      ),
 
     password: z
       .string()

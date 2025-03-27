@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   token: string | null;
   login: (token: string) => void;
+
   logout: () => void;
 }
 
@@ -24,13 +25,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
+  // Validar el token al inicializar el contexto
   useEffect(() => {
-    const storedToken = sessionStorage.getItem('pharmatechToken');
+    const storedToken =
+      sessionStorage.getItem('pharmatechToken') ||
+      localStorage.getItem('pharmatechToken'); // Verificar ambos lugares
     if (storedToken) {
       setToken(storedToken);
     }
   }, []);
 
+  // Sincronizar el estado del token entre pestañas
   useEffect(() => {
     const syncLogout = () => {
       const storedToken = localStorage.getItem('pharmatechToken');
@@ -42,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (newToken: string) => {
     localStorage.setItem('pharmatechToken', newToken);
+    sessionStorage.setItem('pharmatechToken', newToken); // Guardar en ambos lugares
     setToken(newToken);
     router.push('/');
   };

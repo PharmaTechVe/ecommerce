@@ -1,9 +1,10 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext'; //
-import { Colors } from '@/styles/styles'; //
+import { useAuth } from '@/context/AuthContext';
+import { Colors } from '@/styles/styles';
+
 export type AvatarProps = {
   name: string;
   imageUrl?: string;
@@ -20,11 +21,12 @@ export default function Avatar({
   dropdownOptions = [],
 }: AvatarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { logout } = useAuth(); // acceso al logout
+  const { logout, token } = useAuth();
 
   const handleToggleDropdown = () => {
-    if (withDropdown) {
+    if (withDropdown && token) {
       setDropdownOpen(!dropdownOpen);
     }
   };
@@ -47,10 +49,24 @@ export default function Avatar({
     .map((word) => word[0]?.toUpperCase() || '')
     .join('');
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div
       className="relative inline-block"
       style={{ width: size, height: size }}
+      ref={dropdownRef}
     >
       <div
         className="flex cursor-pointer items-center justify-center overflow-hidden rounded-full"
@@ -72,7 +88,7 @@ export default function Avatar({
         )}
       </div>
 
-      {withDropdown && dropdownOpen && (
+      {withDropdown && dropdownOpen && token && (
         <div className="absolute left-0 right-auto z-10 mt-2 w-40 rounded-md bg-white shadow-lg md:left-auto md:right-0">
           <ul className="py-1">
             {dropdownOptions.map((option) => (

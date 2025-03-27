@@ -15,6 +15,8 @@ import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
 import { AuthProvider } from '@/context/AuthContext';
+//import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 export type Product = {
   id: number;
   productName: string;
@@ -39,6 +41,8 @@ interface ProductApiResponse {
 }
 
 export default function Home() {
+  const { token } = useAuth();
+  //const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -99,9 +103,10 @@ export default function Home() {
   );
 
   useEffect(() => {
-    const userSession = sessionStorage.getItem('pharmatechToken');
-    setIsLoggedIn(!!userSession);
-  }, []);
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, [token]);
 
   useEffect(() => {
     const fetchProducts = async () => {

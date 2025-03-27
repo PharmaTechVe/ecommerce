@@ -28,9 +28,6 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
   };
 
   const handleLoginClick = () => {
-    localStorage.removeItem('pharmatechToken');
-    sessionStorage.removeItem('pharmatechToken');
-
     isLoggedIn = false;
     router.push('/login');
   };
