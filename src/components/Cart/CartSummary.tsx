@@ -19,7 +19,6 @@ const CartSummary: React.FC<Props> = ({
   return (
     <div className=" ">
       <hr className="mb-4 border-t border-[#DFE4EA]" />
-      {/* Subtotal */}
       <div className="mb-2 flex justify-between">
         <span className="text-[18px] font-normal leading-[27px] text-[#393938]">
           Subtotal
@@ -28,7 +27,6 @@ const CartSummary: React.FC<Props> = ({
           ${subtotal.toFixed(2)}
         </span>
       </div>
-      {/* Descuento */}
       <div className="mb-2 flex justify-between">
         <span className="text-[18px] font-normal leading-[27px] text-[#393938]">
           Descuento
@@ -37,7 +35,6 @@ const CartSummary: React.FC<Props> = ({
           - ${discount.toFixed(2)}
         </span>
       </div>
-      {/* Impuestos */}
       <div className="mb-2 flex justify-between">
         <span className="text-[16px] leading-[24px] text-[#666666]">
           IVA (16%)
@@ -46,7 +43,6 @@ const CartSummary: React.FC<Props> = ({
           ${tax.toFixed(2)}
         </span>
       </div>
-      {/* Total */}
       <div className="mb-6 flex justify-between">
         <span className="text-[20px] font-normal leading-[30px] text-[#393938]">
           Total
@@ -55,7 +51,6 @@ const CartSummary: React.FC<Props> = ({
           ${total.toFixed(2)}
         </span>
       </div>
-      {/* Botón de pago */}
       <Button
         onClick={onCheckout}
         variant="submit"

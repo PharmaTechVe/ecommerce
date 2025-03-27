@@ -13,13 +13,11 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
   const router = useRouter();
   const { cartItems, updateItemQuantity, removeItem } = useCart();
 
-  // Subtotal: suma de precios originales de todos los productos (sin aplicar descuento)
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
 
-  // Descuento: descuento total en base a la cantidad de cada producto
   const discount = cartItems.reduce((acc, item) => {
     if (item.discount) {
       return acc + item.price * item.quantity * (item.discount / 100);
@@ -36,7 +34,6 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
 
   return (
     <div className="flex h-full w-full flex-col rounded-lg bg-white p-4 shadow-lg md:w-[551px]">
-      {/* Encabezado */}
       <div className="flex items-center justify-between border-b border-gray-300 px-6 py-3">
         <h4 className="text-2xl font-semibold text-gray-800">
           Carrito de compras
@@ -48,8 +45,6 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
           <XMarkIcon className="h-6 w-6 text-gray-800" />
         </button>
       </div>
-
-      {/* Contenido del carrito */}
       <div className="flex flex-grow flex-col overflow-hidden">
         {cartItems.length === 0 ? (
           <div className="flex flex-grow items-center justify-center">
@@ -59,7 +54,6 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
           </div>
         ) : (
           <>
-            {/* Contenedor scrollable de productos */}
             <div
               className="flex-1 overflow-y-auto px-4 py-2"
               style={{ maxHeight: 'calc(100vh - 300px)' }}
@@ -75,8 +69,6 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
                 />
               ))}
             </div>
-
-            {/* Resumen de compra */}
             <div className="border-t border-gray-200 bg-white px-4 py-6">
               <CartSummary
                 subtotal={subtotal}

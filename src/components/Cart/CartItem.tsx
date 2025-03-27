@@ -35,9 +35,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
 
   return (
     <div className="flex items-center space-x-4 border-b border-gray-200 py-4">
-      {/* Contenedor de imagen con badge */}
       <div className="relative h-20 w-20 flex-shrink-0">
-        {/* Badge de descuento */}
         {discount > 0 && (
           <div className="absolute -left-1 -top-1 z-10">
             <div className="flex items-center justify-center rounded-full bg-[#FFD569] px-3 py-1">

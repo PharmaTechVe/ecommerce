@@ -33,7 +33,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const alertShownRef = useRef(false);
 
-  // Función centralizada para mostrar alertas
   const showStockAlert = () => {
     if (!alertShownRef.current) {
       alertShownRef.current = true;
