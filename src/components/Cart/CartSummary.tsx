@@ -17,7 +17,7 @@ const CartSummary: React.FC<Props> = ({
   onCheckout,
 }) => {
   return (
-    <div className="bg-white px-4 pb-6">
+    <div className=" ">
       <hr className="mb-4 border-t border-[#DFE4EA]" />
       {/* Subtotal */}
       <div className="mb-2 flex justify-between">
@@ -40,7 +40,7 @@ const CartSummary: React.FC<Props> = ({
       {/* Impuestos */}
       <div className="mb-2 flex justify-between">
         <span className="text-[16px] leading-[24px] text-[#666666]">
-          IVA (8%)
+          IVA (16%)
         </span>
         <span className="text-[16px] leading-[24px] text-[#666666]">
           ${tax.toFixed(2)}

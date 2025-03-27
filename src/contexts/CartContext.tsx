@@ -5,9 +5,9 @@ import React, {
   useState,
   useEffect,
   ReactNode,
+  useRef,
 } from 'react';
 
-//! Se añade la propiedad stock a la interfaz CartItem.
 export interface CartItem {
   id: string;
   name: string;
@@ -16,10 +16,9 @@ export interface CartItem {
   discount?: number;
   quantity: number;
   image: string;
-  stock: number; //! Stock disponible del producto
+  stock: number;
 }
 
-// Interfaz del contexto
 interface CartContextProps {
   cartItems: CartItem[];
   addItem: (item: CartItem) => void;
@@ -32,8 +31,19 @@ const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const alertShownRef = useRef(false);
 
-  // Recuperar el carrito del localStorage (opcional)
+  // Función centralizada para mostrar alertas
+  const showStockAlert = () => {
+    if (!alertShownRef.current) {
+      alertShownRef.current = true;
+      alert('No hay suficiente stock para este producto.');
+      setTimeout(() => {
+        alertShownRef.current = false;
+      }, 1000);
+    }
+  };
+
   useEffect(() => {
     const storedCart = localStorage.getItem('cartItems');
     if (storedCart) {
@@ -45,7 +55,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Guardar en localStorage cada vez que cartItems cambie
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
@@ -54,7 +63,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems((prev) => {
       const exists = prev.find((p) => p.id === item.id);
       if (exists) {
-        //! Validación del stock: si la cantidad ya es igual al stock, no se incrementa
         if (exists.quantity < item.stock) {
           return prev.map((p) =>
             p.id === item.id
@@ -68,7 +76,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             '>=',
             item.stock,
           );
-          alert('No hay suficiente stock para este producto.');
+          showStockAlert();
           return prev;
         }
       }
@@ -87,7 +95,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               '>',
               item.stock,
             );
-            alert('No hay suficiente stock para este producto.');
+            showStockAlert();
             return item;
           }
           return { ...item, quantity: Math.max(1, quantity) };

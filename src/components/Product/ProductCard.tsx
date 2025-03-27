@@ -50,7 +50,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
         addItem({
           id: productId,
           name: productName,
-          price: currentPrice,
+          price: lastPrice || currentPrice,
+          discount: discountPercentage || 0,
           quantity: 1,
           image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
           stock,

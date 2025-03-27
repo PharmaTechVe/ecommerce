@@ -34,21 +34,31 @@ const CartItemComponent: React.FC<CartItemProps> = ({
     discount > 0 ? originalTotal * (1 - discount / 100) : originalTotal;
 
   return (
-    <div className="relative flex border-b p-4">
-      <div className="relative h-20 w-20">
+    <div className="flex items-center space-x-4 border-b border-gray-200 py-4">
+      {/* Contenedor de imagen con badge */}
+      <div className="relative h-20 w-20 flex-shrink-0">
+        {/* Badge de descuento */}
+        {discount > 0 && (
+          <div className="absolute -left-1 -top-1 z-10">
+            <div className="flex items-center justify-center rounded-full bg-[#FFD569] px-3 py-1">
+              <span className="text-sm font-medium leading-none text-black">
+                -{discount}%
+              </span>
+            </div>
+          </div>
+        )}
         <Image
           src={item.image}
           alt={item.name}
           layout="fill"
           objectFit="cover"
+          className="rounded-lg"
         />
       </div>
-      <div className="ml-4 flex-grow">
-        <h4 className="font-poppins left-[128px] top-[25px] h-[48px] w-[163px] text-[16px] font-normal leading-[24px] text-[#393938]">
+
+      <div className="flex-grow">
+        <h4 className="text-lg font-medium font-normal text-gray-800">
           {item.name}
-          {discount > 0 && (
-            <span className="ml-2 text-red-500">-{discount}%</span>
-          )}
         </h4>
         <p className="text-gray-600">(${item.price.toFixed(2)} c/u)</p>
 
