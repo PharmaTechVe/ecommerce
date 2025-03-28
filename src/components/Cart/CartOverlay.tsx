@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+'use client';
+import { useEffect, useState } from 'react';
 import Cart from './Cart';
 
 interface CartOverlayProps {
@@ -8,48 +8,39 @@ interface CartOverlayProps {
 }
 
 const CartOverlay: React.FC<CartOverlayProps> = ({ isOpen, closeCart }) => {
-  const [localIsOpen, setLocalIsOpen] = useState(isOpen);
+  const [shouldRender, setShouldRender] = useState(isOpen);
 
+  // Controlar el renderizado para permitir la animación
   useEffect(() => {
-    setLocalIsOpen(isOpen);
+    if (isOpen) {
+      setShouldRender(true);
+    } else {
+      const timer = setTimeout(() => setShouldRender(false), 500); // Ajustado a 500ms
+      return () => clearTimeout(timer);
+    }
   }, [isOpen]);
 
-  const handleClose = () => {
-    setLocalIsOpen(false);
-    setTimeout(() => closeCart(), 400);
-  };
+  if (!shouldRender) return null;
 
   return (
-    <AnimatePresence onExitComplete={() => closeCart()}>
-      {localIsOpen && (
-        <motion.div
-          key="cart-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 bg-black bg-opacity-30" // Eliminado backdrop-blur-sm
-          onClick={handleClose}
-        >
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{
-              type: 'tween',
-              ease: [0.25, 0.1, 0.25, 1],
-              duration: 0.4,
-            }}
-            className="absolute right-0 h-full max-h-screen w-full overflow-hidden md:w-[551px]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="h-full w-full bg-[#FAFAFA] shadow-[0_-8px_32px_rgba(0,0,0,0.1)]">
-              <Cart closeCart={handleClose} />
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="fixed inset-0 z-50">
+      {/* Fondo oscuro con transición más suave */}
+      <div
+        className={`absolute inset-0 bg-black transition-opacity duration-500 ease-in-out ${
+          isOpen ? 'opacity-30' : 'opacity-0'
+        }`}
+        onClick={closeCart}
+      />
+
+      {/* Contenedor del carrito con animación más fluida */}
+      <div
+        className={`absolute right-0 h-full w-full transform transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] md:w-[551px] ${
+          isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-[120%]'
+        } bg-white shadow-xl`}
+      >
+        <Cart closeCart={closeCart} />
+      </div>
+    </div>
   );
 };
 
