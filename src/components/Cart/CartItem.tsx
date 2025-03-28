@@ -34,11 +34,11 @@ const CartItemComponent: React.FC<CartItemProps> = ({
     discount > 0 ? originalTotal * (1 - discount / 100) : originalTotal;
 
   return (
-    <div className="flex items-center space-x-4 border-b border-gray-200 py-4">
+    <div className="flex items-center space-x-4 border-b border-gray-100 py-2">
       <div className="relative h-20 w-20 flex-shrink-0">
         {discount > 0 && (
           <div className="absolute -left-1 -top-1 z-10">
-            <div className="flex items-center justify-center rounded-full bg-[#FFD569] px-3 py-1">
+            <div className="items-center justify-center rounded-full bg-[#FFD569] px-3 py-1">
               <span className="text-sm font-medium leading-none text-black">
                 -{discount}%
               </span>
@@ -55,12 +55,13 @@ const CartItemComponent: React.FC<CartItemProps> = ({
       </div>
 
       <div className="flex-grow">
-        <h4 className="text-lg font-medium font-normal text-gray-800">
-          {item.name}
-        </h4>
-        <p className="text-gray-600">(${item.price.toFixed(2)} c/u)</p>
+        <h4 className="mt-1 text-lg font-normal text-gray-800">{item.name}</h4>
+        <p className="mt-3 text-gray-600">
+          (${Number.isInteger(item.price) ? item.price : item.price.toFixed(2)}{' '}
+          c/u)
+        </p>
 
-        <div className="[&_.FontSizes_h5]:!text-sm [&_h5]:!text-sm [&_span]:!text-sm">
+        <div className="mt-3 [&_.FontSizes_h5]:!text-sm [&_h5]:!text-sm [&_span]:!text-sm">
           <CardButton
             quantity={item.quantity}
             onAdd={handleAdd}
@@ -73,21 +74,42 @@ const CartItemComponent: React.FC<CartItemProps> = ({
       <div className="mr-4 flex flex-col items-end">
         {discount > 0 ? (
           <>
-            <span className="font-semibold">${discountedTotal.toFixed(2)}</span>
+            <span className="font-semibold">
+              $
+              {Number.isInteger(discountedTotal)
+                ? discountedTotal
+                : discountedTotal.toFixed(2)}
+            </span>
             <span className="text-gray-500 line-through">
-              ${originalTotal.toFixed(2)}
+              $
+              {Number.isInteger(originalTotal)
+                ? originalTotal
+                : originalTotal.toFixed(2)}
             </span>
           </>
         ) : (
-          <span className="font-semibold">${originalTotal.toFixed(2)}</span>
+          <span className="font-semibold">
+            $
+            {Number.isInteger(originalTotal)
+              ? originalTotal
+              : originalTotal.toFixed(2)}
+          </span>
         )}
+        <button
+          onClick={() => onRemove(item.id)}
+          className="text-[#FF5959] md:hidden"
+        >
+          <TrashIcon className="h-6 w-6" />
+        </button>
       </div>
 
-      <button onClick={() => onRemove(item.id)} className="text-red-500">
+      <button
+        onClick={() => onRemove(item.id)}
+        className="ml-4 hidden text-[#FF5959] md:block"
+      >
         <TrashIcon className="h-6 w-6" />
       </button>
     </div>
   );
 };
-
 export default CartItemComponent;

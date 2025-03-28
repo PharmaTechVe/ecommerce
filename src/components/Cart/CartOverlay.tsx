@@ -10,12 +10,11 @@ interface CartOverlayProps {
 const CartOverlay: React.FC<CartOverlayProps> = ({ isOpen, closeCart }) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
 
-  // Controlar el renderizado para permitir la animación
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true);
     } else {
-      const timer = setTimeout(() => setShouldRender(false), 500); // Ajustado a 500ms
+      const timer = setTimeout(() => setShouldRender(false), 250);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
@@ -24,15 +23,12 @@ const CartOverlay: React.FC<CartOverlayProps> = ({ isOpen, closeCart }) => {
 
   return (
     <div className="fixed inset-0 z-50">
-      {/* Fondo oscuro con transición más suave */}
       <div
         className={`absolute inset-0 bg-black transition-opacity duration-500 ease-in-out ${
           isOpen ? 'opacity-30' : 'opacity-0'
         }`}
         onClick={closeCart}
       />
-
-      {/* Contenedor del carrito con animación más fluida */}
       <div
         className={`absolute right-0 h-full w-full transform transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] md:w-[551px] ${
           isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-[120%]'

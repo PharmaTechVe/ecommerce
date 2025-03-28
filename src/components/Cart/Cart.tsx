@@ -34,10 +34,8 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
 
   return (
     <div className="flex h-full w-full flex-col rounded-lg bg-white p-4 shadow-lg md:w-[551px]">
-      <div className="flex items-center justify-between border-b border-gray-300 px-6 py-3">
-        <h4 className="text-2xl font-semibold text-gray-800">
-          Carrito de compras
-        </h4>
+      <div className="flex items-center justify-between px-6 py-3">
+        <h4 className="mt-2 text-[28px] text-[#393938]">Carrito de compras</h4>
         <button
           className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-200"
           onClick={closeCart}
@@ -69,7 +67,9 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
                 />
               ))}
             </div>
-            <div className="border-t border-gray-200 bg-white px-4 py-6">
+
+            <hr className="mb-2 border-t border-gray-100" />
+            <div className="bg-white p-8">
               <CartSummary
                 subtotal={subtotal}
                 discount={discount}

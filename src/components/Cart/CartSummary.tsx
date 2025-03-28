@@ -17,38 +17,37 @@ const CartSummary: React.FC<Props> = ({
   onCheckout,
 }) => {
   return (
-    <div className=" ">
-      <hr className="mb-4 border-t border-[#DFE4EA]" />
+    <div className="">
       <div className="mb-2 flex justify-between">
         <span className="text-[18px] font-normal leading-[27px] text-[#393938]">
           Subtotal
         </span>
         <span className="text-[18px] font-normal leading-[27px] text-[#393938]">
-          ${subtotal.toFixed(2)}
+          ${Number.isInteger(subtotal) ? subtotal : subtotal.toFixed(2)}
         </span>
       </div>
       <div className="mb-2 flex justify-between">
-        <span className="text-[18px] font-normal leading-[27px] text-[#393938]">
+        <span className="text-[18px] font-normal leading-[27px] text-[#2ECC71]">
           Descuento
         </span>
         <span className="text-[18px] font-normal leading-[27px] text-[#2ECC71]">
-          - ${discount.toFixed(2)}
+          - ${Number.isInteger(discount) ? discount : discount.toFixed(2)}
         </span>
       </div>
       <div className="mb-2 flex justify-between">
-        <span className="text-[16px] leading-[24px] text-[#666666]">
+        <span className="text-[16px] leading-[24px] text-[#6E6D6C]">
           IVA (16%)
         </span>
-        <span className="text-[16px] leading-[24px] text-[#666666]">
-          ${tax.toFixed(2)}
+        <span className="text-[16px] leading-[24px] text-[#6E6D6C]">
+          ${Number.isInteger(tax) ? tax : tax.toFixed(2)}
         </span>
       </div>
-      <div className="mb-6 flex justify-between">
-        <span className="text-[20px] font-normal leading-[30px] text-[#393938]">
+      <div className="mb-6 mt-6 flex justify-between">
+        <span className="text-[28px] font-normal leading-[30px] text-[#393938]">
           Total
         </span>
         <span className="text-[20px] font-normal leading-[30px] text-[#393938]">
-          ${total.toFixed(2)}
+          ${Number.isInteger(total) ? total : total.toFixed(2)}
         </span>
       </div>
       <Button

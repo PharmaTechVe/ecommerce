@@ -83,7 +83,7 @@ export default function Home() {
         id: 100,
         productName: 'Ibuprofeno 200mg',
         stock: 50,
-        currentPrice: 3.99,
+        currentPrice: 90,
         discountPercentage: 10,
         imageSrc: Image4,
         lastPrice: 100,
