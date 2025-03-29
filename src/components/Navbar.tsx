@@ -28,7 +28,7 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
   };
 
   const handleLoginClick = () => {
-    isLoggedIn = false;
+    console.log(isLoggedIn);
     router.push('/login');
   };
 
@@ -73,6 +73,8 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
                   name="Usuario"
                   size={52}
                   imageUrl="/images/profilePic.jpeg"
+                  withDropdown={true}
+                  dropdownOptions={[{ label: 'Perfil', route: '/profile' }]}
                 />
               )
             ) : (
@@ -93,7 +95,7 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
       {/* Mobile Version */}
       <nav className="mx-auto my-4 max-w-7xl rounded-2xl bg-white px-4 py-3 sm:hidden">
         <div className="flex items-center justify-between">
-          {isLoggedIn ? (
+          {token ? (
             avatarProps ? (
               <Avatar {...avatarProps} />
             ) : (
