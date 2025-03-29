@@ -78,7 +78,7 @@ interface ProductImage {
 export default function ProductDetailPage() {
   const params = useParams();
   const productId =
-    (params.productId as string) || '9592a529-ee7c-472b-878c-20a214ee4939';
+    (params.productId as string) || 'c40116f4-b6cd-4309-89bb-5d8be78d8775';
   const presentationId =
     (params.presentationId as string) || 'ac680d44-85ae-43c2-934b-3ec2b3f4e646';
   const [presentation, setPresentation] =
@@ -127,7 +127,7 @@ export default function ProductDetailPage() {
       }
     }
     fetchGenericData();
-  }, [productId]);
+  }, [presentation, productId]);
   /*
   useEffect(() => {
     async function fetchInventory() {
@@ -213,7 +213,10 @@ export default function ProductDetailPage() {
     },
   };
 
-  const variantOptions = presentationList.map((pres) => pres.presentation.name);
+  const variantOptions = presentationList.map(
+    (pres) =>
+      `${genericProduct.genericName} ${genericProduct.name} ${pres.presentation.name} ${pres.presentation.quantity} ${pres.presentation.measurementUnit}`,
+  );
 
   return (
     <div>
@@ -240,7 +243,7 @@ export default function ProductDetailPage() {
                 color: Colors.textMain,
               }}
             >
-              {presentation.presentation.name}
+              {`${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name} ${presentation.presentation.quantity} ${presentation.presentation.measurementUnit} `}
             </h1>
             <div className="mt-2 flex gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
