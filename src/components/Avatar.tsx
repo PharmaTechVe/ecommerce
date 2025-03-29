@@ -26,7 +26,7 @@ export default function Avatar({
   const { logout, token } = useAuth();
 
   const handleToggleDropdown = () => {
-    if (withDropdown && token) {
+    if (withDropdown) {
       setDropdownOpen(!dropdownOpen);
     }
   };
