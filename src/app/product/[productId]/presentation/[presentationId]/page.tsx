@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import NavBar, { NavBarProps } from '@/components/Navbar';
@@ -76,6 +77,7 @@ interface ProductImage {
 }
 
 export default function ProductDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const productId =
     (params.productId as string) || 'c40116f4-b6cd-4309-89bb-5d8be78d8775';
@@ -213,10 +215,21 @@ export default function ProductDetailPage() {
     },
   };
 
-  const variantOptions = presentationList.map(
-    (pres) =>
-      `${genericProduct.genericName} ${genericProduct.name} ${pres.presentation.name} ${pres.presentation.quantity} ${pres.presentation.measurementUnit}`,
-  );
+  const variantOptionsObjects = presentationList.map((item) => ({
+    id: item.presentation.id,
+    display: `${genericProduct.genericName} ${item.presentation.name} ${item.presentation.quantity} ${item.presentation.measurementUnit}`,
+  }));
+
+  const variantOptions = variantOptionsObjects.map((opt) => opt.display);
+
+  const handlePresentationSelect = (selectedDisplay: string) => {
+    const selectedItem = variantOptionsObjects.find(
+      (opt) => opt.display === selectedDisplay,
+    );
+    if (selectedItem) {
+      router.push(`/product/${productId}/presentation/${selectedItem.id}`);
+    }
+  };
 
   return (
     <div>
@@ -268,6 +281,7 @@ export default function ProductDetailPage() {
             <Dropdown
               label="Selecciona una presentación"
               items={variantOptions}
+              onSelect={handlePresentationSelect}
             />
           </div>
         </div>
