@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   useRef,
 } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 export interface CartItem {
   id: string;
@@ -32,6 +33,8 @@ const CartContext = createContext<CartContextProps | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const alertShownRef = useRef(false);
+  const { token } = useAuth();
+  console.log('Token in Cart Provider:', token);
 
   const showStockAlert = () => {
     if (!alertShownRef.current) {
@@ -57,6 +60,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
+
+  useEffect(() => {
+    if (!token) {
+      setCartItems([]);
+      localStorage.removeItem('cartItems');
+    }
+  }, [token]);
 
   const addItem = (item: CartItem) => {
     setCartItems((prev) => {

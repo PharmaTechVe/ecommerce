@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import { CartItem } from '@/contexts/CartContext';
+import { CartItem } from '@/context/CartContext';
 import CardButton from '../CardButton';
 import { TrashIcon } from '@heroicons/react/24/outline';
 

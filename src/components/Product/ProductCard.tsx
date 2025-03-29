@@ -5,7 +5,7 @@ import CardBase from './CardBase';
 import { ImageType } from './CardBase';
 import { Colors, FontSizes } from '@/styles/styles';
 import CardButton from '../CardButton';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/context/CartContext';
 
 export type ProductCardProps = {
   id?: number;

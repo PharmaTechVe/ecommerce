@@ -8,7 +8,8 @@ import { useRouter } from 'next/navigation';
 import '../styles/globals.css';
 import { Colors } from '../styles/styles';
 import Button from '@/components/Button';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 export type NavBarProps = {
   isLoggedIn: boolean;
@@ -26,15 +27,13 @@ export default function NavBar({
   const { cartItems } = useCart();
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
+  const { token } = useAuth();
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
 
   const handleLoginClick = () => {
-    localStorage.removeItem('pharmatechToken');
-    sessionStorage.removeItem('pharmatechToken');
-
-    isLoggedIn = false;
+    console.log(isLoggedIn);
     router.push('/login');
   };
 
@@ -71,7 +70,7 @@ export default function NavBar({
                 {totalCount}
               </span>
             </div>
-            {isLoggedIn ? (
+            {token ? (
               avatarProps ? (
                 <Avatar {...avatarProps} />
               ) : (
@@ -79,6 +78,8 @@ export default function NavBar({
                   name="Usuario"
                   size={52}
                   imageUrl="/images/profilePic.jpeg"
+                  withDropdown={true}
+                  dropdownOptions={[{ label: 'Perfil', route: '/profile' }]}
                 />
               )
             ) : (
@@ -99,7 +100,7 @@ export default function NavBar({
       {/* Mobile Version */}
       <nav className="mx-auto my-4 max-w-7xl rounded-2xl bg-white px-4 py-3 sm:hidden">
         <div className="flex items-center justify-between">
-          {isLoggedIn ? (
+          {token ? (
             avatarProps ? (
               <Avatar {...avatarProps} />
             ) : (

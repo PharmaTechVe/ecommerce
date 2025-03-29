@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import CartItemComponent from './CartItem';
 import CartSummary from './CartSummary';
-import { useCart, CartItem } from '@/contexts/CartContext';
+import { useCart, CartItem } from '@/context/CartContext';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface CartProps {
