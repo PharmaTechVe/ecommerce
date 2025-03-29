@@ -3,38 +3,59 @@ import React, { useState } from 'react';
 import { Colors, FontSizes } from '@/styles/styles';
 
 type CartButtonProps = {
+  quantity?: number;
   onToggleDetails?: () => void;
-  onClick?: () => void;
+  onAdd?: () => void;
+  onSubtract?: () => void;
+  className?: string;
 };
 
-const CartButton: React.FC<CartButtonProps> = ({}) => {
-  const [quantity, setQuantity] = useState<number>(0);
+const CartButton: React.FC<CartButtonProps> = ({
+  quantity: externalQuantity,
+  onAdd,
+  onSubtract,
+  className,
+}) => {
+  const [internalQuantity, setInternalQuantity] = useState<number>(0);
+  const quantity =
+    externalQuantity !== undefined ? externalQuantity : internalQuantity;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newQuantity = quantity + 1;
-    setQuantity(newQuantity);
+    if (externalQuantity === undefined) {
+      const newQuantity = internalQuantity + 1;
+      setInternalQuantity(newQuantity);
+    }
+    if (onAdd) {
+      onAdd();
+    }
   };
 
   const handleSubtract = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newQuantity = quantity - 1;
-
-    if (newQuantity >= 1) {
-      setQuantity(newQuantity);
-    } else {
-      setQuantity(0);
+    if (externalQuantity === undefined) {
+      const newQuantity = internalQuantity - 1;
+      if (newQuantity >= 1) {
+        setInternalQuantity(newQuantity);
+      } else {
+        setInternalQuantity(0);
+      }
+    }
+    if (onSubtract) {
+      onSubtract();
     }
   };
 
-  const containerStyles =
+  const defaultContainerStyles =
     quantity === 0
       ? 'w-[48px] h-[48px] rounded-full'
       : 'w-[129px] h-[48px] rounded-full px-[25px]';
 
+  const containerStyles = className ? className : defaultContainerStyles;
+
   return (
     <div
-      className={`${containerStyles} flex items-center overflow-hidden bg-[${Colors.primary}]`}
+      className={`${containerStyles} flex items-center overflow-hidden bg-[${Colors.primary}] ${className}`}
     >
       {quantity === 0 ? (
         <div

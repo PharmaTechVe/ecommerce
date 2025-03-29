@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import VerifyEmailForm from './VerifyEmailForm';
 import EnterCodeForm from './EnterCodeForm';
 import ResetPasswordForm from './ResetPasswordForm';
@@ -10,11 +10,18 @@ import Stepper from '@/components/Stepper';
 import { ToastContainer } from 'react-toastify';
 import { ChevronLeftIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function RecoverPasswordPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const router = useRouter();
+  const { token } = useAuth();
 
+  useEffect(() => {
+    if (token) {
+      router.push('/');
+    }
+  }, [token, router]);
   const handleNext = () => setCurrentStep((prev) => prev + 1);
   const handleBack = () => setCurrentStep((prev) => prev - 1);
 

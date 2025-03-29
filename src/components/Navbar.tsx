@@ -8,29 +8,32 @@ import { useRouter } from 'next/navigation';
 import '../styles/globals.css';
 import { Colors } from '../styles/styles';
 import Button from '@/components/Button';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 export type NavBarProps = {
   isLoggedIn: boolean;
   avatarProps?: AvatarProps;
+  onCartClick?: () => void;
 };
 
-export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
+export default function NavBar({
+  isLoggedIn,
+  avatarProps,
+  onCartClick,
+}: NavBarProps) {
   const router = useRouter();
   const categories = ['Categorías', 'Tecnología', 'Salud', 'Otros'];
+  const { cartItems } = useCart();
+  const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
+  const { token } = useAuth();
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
 
-  const handleCartClick = () => {
-    router.push('/cart');
-  };
-
   const handleLoginClick = () => {
-    localStorage.removeItem('pharmatechToken');
-    sessionStorage.removeItem('pharmatechToken');
-
-    isLoggedIn = false;
+    console.log(isLoggedIn);
     router.push('/login');
   };
 
@@ -61,13 +64,13 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
             inputPlaceholder="Buscar producto"
           />
           <div className="flex items-center gap-8">
-            <div className="relative cursor-pointer" onClick={handleCartClick}>
+            <div className="relative cursor-pointer" onClick={onCartClick}>
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
               <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-                3
+                {totalCount}
               </span>
             </div>
-            {isLoggedIn ? (
+            {token ? (
               avatarProps ? (
                 <Avatar {...avatarProps} />
               ) : (
@@ -75,6 +78,8 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
                   name="Usuario"
                   size={52}
                   imageUrl="/images/profilePic.jpeg"
+                  withDropdown={true}
+                  dropdownOptions={[{ label: 'Perfil', route: '/profile' }]}
                 />
               )
             ) : (
@@ -95,7 +100,7 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
       {/* Mobile Version */}
       <nav className="mx-auto my-4 max-w-7xl rounded-2xl bg-white px-4 py-3 sm:hidden">
         <div className="flex items-center justify-between">
-          {isLoggedIn ? (
+          {token ? (
             avatarProps ? (
               <Avatar {...avatarProps} />
             ) : (
@@ -120,10 +125,10 @@ export default function NavBar({ isLoggedIn, avatarProps }: NavBarProps) {
               priority
             />
           </Link>
-          <div className="relative cursor-pointer" onClick={handleCartClick}>
+          <div className="relative cursor-pointer" onClick={onCartClick}>
             <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
             <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-              3
+              {totalCount}
             </span>
           </div>
         </div>
