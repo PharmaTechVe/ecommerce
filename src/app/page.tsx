@@ -6,6 +6,7 @@ import ProductCarousel from '@/components/Product/ProductCarousel';
 import Footer from '@/components/Footer';
 import { api } from '@/lib/sdkConfig';
 import { ImageType } from '@/components/Product/CardBase';
+import CartOverlay from '@/components/Cart/CartOverlay';
 
 import Image1 from '@/lib/utils/images/product_2.webp';
 import Image2 from '@/lib/utils/images/product_4.webp';
@@ -14,8 +15,6 @@ import Image4 from '@/lib/utils/images/product_5 (1).png';
 import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
-import { AuthProvider } from '@/context/AuthContext';
-//import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 export type Product = {
   id: number;
@@ -42,10 +41,10 @@ interface ProductApiResponse {
 
 export default function Home() {
   const { token } = useAuth();
-  //const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
   const avatarProps = isLoggedIn
     ? {
@@ -62,6 +61,7 @@ export default function Home() {
   const navBarProps: NavBarProps = {
     isLoggedIn,
     ...(avatarProps ? { avatarProps } : {}),
+    onCartClick: () => setIsCartOpen(true),
   };
 
   const slides = [
@@ -81,8 +81,10 @@ export default function Home() {
         id: 100,
         productName: 'Ibuprofeno 200mg',
         stock: 50,
-        currentPrice: 3.99,
+        currentPrice: 90,
+        discountPercentage: 10,
         imageSrc: Image4,
+        lastPrice: 100,
       },
       {
         id: 101,
@@ -151,9 +153,7 @@ export default function Home() {
     <div>
       {/* Navbar fijado */}
       <div className="fixed left-0 right-0 top-0 z-50 bg-transparent">
-        <AuthProvider>
-          <NavBar {...navBarProps} />
-        </AuthProvider>
+        <NavBar {...navBarProps} />
       </div>
 
       <main className="pt-[124px]">
@@ -185,6 +185,12 @@ export default function Home() {
       </main>
 
       <Footer />
+      {isCartOpen && (
+        <CartOverlay
+          isOpen={isCartOpen}
+          closeCart={() => setIsCartOpen(false)}
+        />
+      )}
     </div>
   );
 }
