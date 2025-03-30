@@ -25,13 +25,26 @@ interface UserProfile {
   profilePicture?: string;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface CategoryFindAllResponse {
+  results: Category[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
+
 type NavBarProps = {
   onCartClick?: () => void;
 };
 
 export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
-  const categories = ['Categorías', 'Tecnología', 'Salud', 'Otros'];
+  const [categories, setCategories] = React.useState<string[]>([]);
   const { cartItems } = useCart();
   const { token } = useAuth();
 
@@ -39,6 +52,20 @@ export default function NavBar({ onCartClick }: NavBarProps) {
 
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [userData, setUserData] = React.useState<UserProfile | null>(null);
+
+  React.useEffect(() => {
+    api.category
+      .findAll({ page: 1, limit: 20 })
+      .then((resp: CategoryFindAllResponse) => {
+        if (resp && resp.results) {
+          const catNames = resp.results.map((cat: Category) => cat.name);
+          setCategories(catNames);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('Error al cargar categorías:', err);
+      });
+  }, []);
 
   React.useEffect(() => {
     if (!token) {
