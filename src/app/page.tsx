@@ -97,7 +97,7 @@ export default function Home() {
             id: index,
             productId: item.product.id,
             presentationId: item.presentation.id,
-            productName: `${item.product.genericName} ${item.presentation.name}`,
+            productName: `${item.product.genericName} ${item.product.name} ${item.presentation.name}`,
             stock: item.presentation.quantity,
             currentPrice: item.price,
             imageSrc:

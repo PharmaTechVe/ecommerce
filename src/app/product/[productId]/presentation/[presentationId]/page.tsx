@@ -282,9 +282,12 @@ export default function ProductDetailPage() {
               </p>
               <CardButton
                 product={{
-                  productId: productId, // del API
-                  presentationId: presentationId, // del API
-                  name: presentation.presentation.name,
+                  productId: productId,
+                  presentationId: presentationId,
+                  name:
+                    genericProduct.genericName +
+                    genericProduct.name +
+                    presentation.presentation.name,
                   price: presentation.price || presentation.price,
                   // discount: discountPercentage,
                   image:
