@@ -81,11 +81,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
                       : FontSizes.h5.lineHeight
                 }px`,
                 color: Colors.textMain,
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxHeight: '3em',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
               }}
             >
               {productName}
