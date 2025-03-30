@@ -1,11 +1,10 @@
-// Archivo: Home.tsx
-
 'use client';
 import { useEffect, useState, useMemo } from 'react';
 import NavBar, { NavBarProps } from '@/components/Navbar';
 import Carousel from '@/components/Carousel';
 import ProductCarousel from '@/components/Product/ProductCarousel';
 import Footer from '@/components/Footer';
+import CartOverlay from '@/components/Cart/CartOverlay';
 import { api } from '@/lib/sdkConfig';
 import { ImageType } from '@/components/Product/CardBase';
 import Banner1 from '@/lib/utils/images/banner-v2.jpg';
@@ -15,7 +14,6 @@ import Image1 from '@/lib/utils/images/product_2.webp';
 import Image2 from '@/lib/utils/images/product_4.webp';
 import Image4 from '@/lib/utils/images/product_5 (1).png';
 
-import { AuthProvider } from '@/context/AuthContext';
 import { useAuth } from '@/context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import { PharmaTech } from '@pharmatech/sdk';
@@ -53,13 +51,38 @@ interface ProductApiResponse {
 
 export default function Home() {
   const { token } = useAuth();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [jwt, setJwt] = useState('');
   const [userId, setUserId] = useState('');
+
+  const avatarProps = isLoggedIn
+    ? {
+        name: 'Juan Pérez',
+        imageUrl: '/images/profilePic.jpeg',
+        size: 52,
+        showStatus: true,
+        isOnline: true,
+        withDropdown: true,
+        dropdownOptions: [{ label: 'Perfil', route: '/profile' }],
+      }
+    : undefined;
+
+  const navBarProps: NavBarProps = {
+    isLoggedIn,
+    ...(avatarProps ? { avatarProps } : {}),
+    onCartClick: () => setIsCartOpen(true),
+  };
+
+  const slides = [
+    { id: 1, imageUrl: Banner1 },
+    { id: 2, imageUrl: Banner2 },
+    { id: 3, imageUrl: Banner3 },
+  ];
 
   const productImages: ImageType[] = useMemo(
     () => [Image1, Image2, Image4],
@@ -71,8 +94,10 @@ export default function Home() {
         id: 100,
         productName: 'Ibuprofeno 200mg',
         stock: 50,
-        currentPrice: 3.99,
+        currentPrice: 90,
+        discountPercentage: 10,
         imageSrc: Image4,
+        lastPrice: 100,
       },
       {
         id: 101,
@@ -109,7 +134,7 @@ export default function Home() {
       const pharmaTech = PharmaTech.getInstance(true);
       await pharmaTech.auth.resendOtp(storedToken);
 
-      toast.success('OTP enviado exitosamente al correo 📩', {
+      toast.success('OTP enviado exitosamente al correo', {
         autoClose: 3000,
       });
       setShowEmailModal(true);
@@ -143,7 +168,7 @@ export default function Home() {
                 onClick={handleOpenModalAndSendOtp}
                 className="text-blue-300 underline hover:text-blue-500"
               >
-                Haz clic aquí para reenviar
+                Enviar codigo.
               </button>
             </div>,
             {
@@ -197,37 +222,12 @@ export default function Home() {
     fetchProducts();
   }, [productImages, extraProducts]);
 
-  const avatarProps = isLoggedIn
-    ? {
-        name: 'Juan Pérez',
-        imageUrl: '/images/profilePic.jpeg',
-        size: 52,
-        showStatus: true,
-        isOnline: true,
-        withDropdown: true,
-        dropdownOptions: [{ label: 'Perfil', route: '/profile' }],
-      }
-    : undefined;
-
-  const navBarProps: NavBarProps = {
-    isLoggedIn,
-    ...(avatarProps ? { avatarProps } : {}),
-  };
-
-  const slides = [
-    { id: 1, imageUrl: Banner1 },
-    { id: 2, imageUrl: Banner2 },
-    { id: 3, imageUrl: Banner3 },
-  ];
-
   if (loading) return <h1 className="p-4 text-lg">Pharmatech...</h1>;
 
   return (
     <div>
       <div className="fixed left-0 right-0 top-0 z-50 bg-transparent">
-        <AuthProvider>
-          <NavBar {...navBarProps} />
-        </AuthProvider>
+        <NavBar {...navBarProps} />
       </div>
 
       <main className="pt-[124px]">
@@ -260,6 +260,13 @@ export default function Home() {
       />
 
       <ToastContainer />
+
+      {isCartOpen && (
+        <CartOverlay
+          isOpen={isCartOpen}
+          closeCart={() => setIsCartOpen(false)}
+        />
+      )}
     </div>
   );
 }

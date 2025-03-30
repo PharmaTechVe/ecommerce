@@ -10,8 +10,7 @@ import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   token: string | null;
-  login: (token: string) => void;
-
+  login: (token: string, remember: boolean) => void;
   logout: () => void;
 }
 
@@ -45,10 +44,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('storage', syncLogout);
   }, []);
 
-  const login = (newToken: string) => {
-    localStorage.setItem('pharmatechToken', newToken);
-    sessionStorage.setItem('pharmatechToken', newToken); // Guardar en ambos lugares
+  const login = (newToken: string, remember: boolean) => {
+    sessionStorage.setItem('pharmatechToken', newToken);
+    if (remember) {
+      localStorage.setItem('pharmatechToken', newToken);
+    }
     setToken(newToken);
+    console.log(token);
     router.push('/');
   };
 

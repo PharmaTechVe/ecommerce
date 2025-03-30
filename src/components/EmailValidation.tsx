@@ -90,7 +90,7 @@ export default function EnterCodeFormModal({
         const profile = await pharmaTech.user.getProfile(userId, jwt);
 
         if (profile.isValidated) {
-          toast.success('Usuario validado correctamente ✅');
+          toast.success('Usuario validado correctamente');
           onClose();
         } else {
           toast.warning('OTP válido, pero usuario aún no validado');
@@ -116,22 +116,8 @@ export default function EnterCodeFormModal({
     }
 
     try {
-      const response = await fetch(
-        'https://api-dev-8jfx.onrender.com/auth/otp',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Respuesta del servidor:', errorText);
-        throw new Error('No se pudo reenviar el OTP');
-      }
+      const pharmaTech = PharmaTech.getInstance(true);
+      await pharmaTech.auth.resendOtp(jwt);
 
       toast.success('OTP reenviado al correo');
       setLastOtpSentAt(Date.now());

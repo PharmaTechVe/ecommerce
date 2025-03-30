@@ -10,8 +10,10 @@ import CheckButton from '@/components/CheckButton';
 import Image from 'next/image';
 import theme from '@/styles/styles';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginForm() {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -45,17 +47,9 @@ export default function LoginForm() {
         const pharmaTech = PharmaTech.getInstance(true);
 
         const response = await pharmaTech.auth.login({ email, password });
-
-        console.log('Access token:', response.accessToken);
-        sessionStorage.setItem('pharmatechToken', response.accessToken);
-
-        if (remember) {
-          localStorage.setItem('pharmatechToken', response.accessToken);
-        }
-
+        login(response.accessToken, remember);
         toast.success('Inicio de sesión exitoso');
         router.push('/');
-
         setEmail('');
         setPassword('');
       } catch (err) {

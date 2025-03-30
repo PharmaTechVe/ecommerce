@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import theme from '../styles/styles';
+import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 export const metadata: Metadata = {
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="es" className={theme.poppins.variable}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <CartProvider>{children}</CartProvider>
+        </AuthProvider>
         <ToastContainer></ToastContainer>
       </body>
     </html>
