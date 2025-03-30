@@ -5,8 +5,9 @@ import { api } from '@/lib/sdkConfig';
 import { Colors, FontSizes } from '@/styles/styles';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { TruckIcon } from '@heroicons/react/24/outline';
+
 interface BranchAvailabilityProps {
-  presentationId: string;
+  productPresentationId: string;
 }
 
 interface InventoryResult {
@@ -33,80 +34,8 @@ interface InventoryResult {
   };
 }
 
-const DUMMY_INVENTORY: InventoryResult[] = [
-  {
-    id: 'dummy-1',
-    stockQuantity: 5,
-    branch: {
-      id: 'branch-dummy-1',
-      name: 'Farmacia Dummy',
-      address: 'Calle Falsa 123',
-      latitude: 10.061226,
-      longitude: -69.340529,
-      city: {
-        id: 'city-dummy-1',
-        name: 'DummyCity',
-        state: {
-          id: 'state-dummy-1',
-          name: 'DummyState',
-          country: {
-            id: 'country-dummy-1',
-            name: 'DummyLand',
-          },
-        },
-      },
-    },
-  },
-  {
-    id: 'dummy-2',
-    stockQuantity: 10,
-    branch: {
-      id: 'branch-dummy-2',
-      name: 'Farmacia Dummy 2',
-      address: 'Calle Falsa 123',
-      latitude: 10.061226,
-      longitude: -69.340529,
-      city: {
-        id: 'city-dummy-1',
-        name: 'DummyCity',
-        state: {
-          id: 'state-dummy-1',
-          name: 'DummyState',
-          country: {
-            id: 'country-dummy-1',
-            name: 'DummyLand',
-          },
-        },
-      },
-    },
-  },
-  {
-    id: 'dummy-2',
-    stockQuantity: 8,
-    branch: {
-      id: 'branch-dummy-2',
-      name: 'Farmacia Falsa',
-      address: 'Avenida Lorem 456',
-      latitude: 10.061226,
-      longitude: -69.340529,
-      city: {
-        id: 'city-dummy-2',
-        name: 'FalsoCity',
-        state: {
-          id: 'state-dummy-2',
-          name: 'Lara',
-          country: {
-            id: 'country-dummy-2',
-            name: 'Venezuela',
-          },
-        },
-      },
-    },
-  },
-];
-
 const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
-  presentationId,
+  productPresentationId,
 }) => {
   const [inventoryList, setInventoryList] = useState<InventoryResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,16 +43,22 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
   const [selectedState, setSelectedState] = useState<string>('');
 
   useEffect(() => {
-    const fetchBranches = async () => {
+    if (!productPresentationId) {
+      setInventoryList([]);
+      setLoading(false);
+      return;
+    }
+
+    async function fetchBranches() {
       try {
         const data = await api.inventory.findAll({
           page: 1,
           limit: 20,
-          productPresentationId: presentationId,
+          productPresentationId: productPresentationId,
         });
 
         if (!data.results || data.results.length === 0) {
-          setInventoryList(DUMMY_INVENTORY);
+          setInventoryList([]);
         } else {
           setInventoryList(data.results);
         }
@@ -133,12 +68,10 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
         setError('Error al obtener disponibilidad en sucursales');
         setLoading(false);
       }
-    };
-
-    if (presentationId) {
-      fetchBranches();
     }
-  }, [presentationId]);
+
+    fetchBranches();
+  }, [productPresentationId]);
 
   const uniqueStates = Array.from(
     new Set(inventoryList.map((inv) => inv.branch.city.state.name)),
@@ -169,14 +102,14 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
   return (
     <div className="mt-8 flex flex-col md:flex-row">
       {/* Sección de mapa */}
-      <div className="h-[400px] w-full bg-gray-100 md:w-[50%]">
+      <div className="h-[400px] w-full bg-gray-100 md:w-1/2">
         <p>Mapa de sucursales (placeholder)</p>
       </div>
 
       {/* Sección de filtrado + lista */}
-      <div className="mt-4 flex w-full flex-col space-y-4 p-4 md:mt-0 md:w-[50%]">
+      <div className="mt-4 w-full p-4 md:mt-0 md:w-1/2">
         <h2
-          className="text-3xl"
+          className="mb-4 text-3xl"
           style={{
             fontSize: `${FontSizes.h3.size}px`,
             lineHeight: `${FontSizes.h3.lineHeight}px`,
@@ -186,7 +119,7 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
           Disponibilidad en sucursales
         </h2>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <p className="mb-2">Selecciona el estado</p>
           <Dropdown
             label="Selecciona un estado"
@@ -195,16 +128,18 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           {filteredBranches.length === 0 ? (
-            <p>No hay sucursales disponibles en {selectedState}</p>
+            <p>No hay productos disponibles</p>
           ) : (
             filteredBranches.map((inv) => (
-              <div key={inv.id} className="w-full gap-2 p-4 shadow-md">
-                <div className="flex flex-col gap-2 md:flex-row">
+              <div
+                key={inv.id}
+                className="w-full rounded-md border p-4 shadow-md"
+              >
+                <div className="flex flex-col gap-3 md:flex-row md:justify-between">
                   {/* Columna izquierda */}
                   <div className="flex flex-col space-y-2 md:w-1/2">
-                    {/* Nombre del branch */}
                     <h3
                       style={{
                         fontSize: `${FontSizes.h5.size}px`,
@@ -215,8 +150,6 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
                     >
                       {inv.branch.name}
                     </h3>
-
-                    {/* Dirección */}
                     <p
                       style={{
                         fontSize: `${FontSizes.b3.size}px`,
@@ -228,10 +161,8 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
                       {inv.branch.city.state.name}
                     </p>
                   </div>
-
                   {/* Columna derecha */}
-                  <div className="flex flex-col items-end space-y-2 md:w-1/2">
-                    {/* Stock + Check */}
+                  <div className="flex flex-col items-start space-y-2 md:w-1/2 md:items-end">
                     <div className="flex items-center space-x-2">
                       <span
                         style={{
@@ -244,10 +175,8 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
                       </span>
                       <CheckBadgeIcon className="h-5 w-5 text-green-600" />
                     </div>
-
-                    {/* Info de envío */}
-                    <div className="flex items-center space-x-1 text-gray-600">
-                      <TruckIcon className="h-5 w-5" />
+                    <div className="flex items-center space-x-1">
+                      <TruckIcon className="h-5 w-5 text-gray-600" />
                       <span
                         style={{
                           fontSize: `${FontSizes.b3.size}px`,
@@ -268,4 +197,5 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
     </div>
   );
 };
+
 export default BranchAvailability;

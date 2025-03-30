@@ -65,14 +65,7 @@ interface PresentationItem {
     measurementUnit: string;
   };
 }
-/*
-interface InventoryResponse {
-  stockQuantity: number;
-  productPresentation: {
-    price: number;
-  };
-}
-  */
+
 interface ProductImage {
   id: string;
   url: string;
@@ -90,7 +83,6 @@ export default function ProductDetailPage() {
   const [presentationList, setPresentationList] = useState<PresentationItem[]>(
     [],
   );
-  //const [inventoryData, setInventoryData] = useState<InventoryResponse | null>(null);
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
@@ -131,22 +123,7 @@ export default function ProductDetailPage() {
     }
     fetchGenericData();
   }, [presentation, productId]);
-  /*
-  useEffect(() => {
-    async function fetchInventory() {
-      if (presentation) {
-        try {
-          const invResults: InventoryResponse = await api.inventory.getById(presentationId);
-          setInventoryData(invResults);
-        } catch (err) {
-          console.error('Error fetching inventory data:', err);
-          setError('Error fetching inventory data.');
-        }
-      }
-    }
-    fetchInventory();
-  }, [presentation]);
-  */
+
   useEffect(() => {
     async function fetchProductImages() {
       if (genericProduct) {
@@ -189,6 +166,8 @@ export default function ProductDetailPage() {
       <p className="p-4 text-lg">{error || 'Product detail not found.'}</p>
     );
   }
+
+  const productPresentationId = presentation.id;
 
   const breadcrumbItems = [
     { label: 'Inicio', href: '/' },
@@ -272,8 +251,8 @@ export default function ProductDetailPage() {
                   // discount: discountPercentage,
                   image:
                     slides.length > 0
-                      ? slides[0].imageUrl // Usas la primera imagen del arreglo
-                      : '/images/product-detail.jpg', // Fallback si no hay imágenes
+                      ? slides[0].imageUrl
+                      : '/images/product-detail.jpg',
                   stock: presentation.presentation.quantity,
                 }}
               />
@@ -286,7 +265,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
         <div className="my-32">
-          <BranchAvailability presentationId={productId} />
+          <BranchAvailability productPresentationId={productPresentationId} />
         </div>
       </main>
       {isCartOpen && (

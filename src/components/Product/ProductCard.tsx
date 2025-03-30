@@ -7,6 +7,7 @@ import CardButton from '../CardButton';
 import Link from 'next/link';
 
 export type ProductCardProps = {
+  productPresentationId: string;
   productId: string;
   presentationId: string;
   imageSrc: ImageType;
@@ -21,6 +22,7 @@ export type ProductCardProps = {
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({
+  productPresentationId,
   productId,
   presentationId,
   imageSrc,
@@ -62,7 +64,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
               />
             </div>
           )}
-          <Link href={`/product/${productId}/presentation/${presentationId}`}>
+          <Link
+            href={{
+              pathname: `/product/${productId}/presentation/${presentationId}`,
+              query: { productPresentationId },
+            }}
+          >
             <p
               className="w-full text-left"
               style={{
