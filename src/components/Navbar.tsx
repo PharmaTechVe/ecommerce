@@ -174,7 +174,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               size={52}
               imageUrl={userData.profilePicture}
               withDropdown={true}
-              dropdownOptions={[{ label: 'Perfil', route: '/profile' }]}
             />
           ) : (
             <UserCircleIcon
