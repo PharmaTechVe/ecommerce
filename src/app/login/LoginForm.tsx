@@ -1,5 +1,6 @@
 'use client';
-import { api } from '@/lib/sdkConfig';
+
+import { PharmaTech } from '@pharmatech/sdk';
 import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { loginSchema } from '@/lib/validations/loginSchema';
@@ -41,8 +42,9 @@ export default function LoginForm() {
 
       try {
         loginSchema.parse({ email, password });
+        const pharmaTech = PharmaTech.getInstance(true);
 
-        const response = await api.auth.login({ email, password });
+        const response = await pharmaTech.auth.login({ email, password });
 
         console.log('Access token:', response.accessToken);
         sessionStorage.setItem('pharmatechToken', response.accessToken);

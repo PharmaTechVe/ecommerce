@@ -1,9 +1,24 @@
+'use client';
+import { useEffect } from 'react';
 import LoginForm from './LoginForm';
 import theme from '@/styles/styles';
 import Image from 'next/image';
 import Head from 'next/head';
 import { ToastContainer } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+
 export default function LoginPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const localToken = localStorage.getItem('pharmatechToken');
+    const sessionToken = sessionStorage.getItem('pharmatechToken');
+
+    if (localToken || sessionToken) {
+      router.replace('/');
+    }
+  }, [router]);
+
   return (
     <>
       <Head>
@@ -13,7 +28,9 @@ export default function LoginPage() {
           content="Inicia sesión en Pharmatech y accede a la mejor solución para tu salud."
         />
       </Head>
+
       <div className="relative flex h-screen flex-col md:flex-row">
+        {/* Logo */}
         <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 md:left-4 md:top-4 md:w-40 md:-translate-x-0">
           <Image
             src="/images/logo-horizontal.svg"
@@ -98,6 +115,7 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
       <ToastContainer />
     </>
   );
