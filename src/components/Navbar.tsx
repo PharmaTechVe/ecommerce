@@ -22,7 +22,9 @@ interface JwtPayload {
 interface UserProfile {
   firstName: string;
   lastName: string;
-  profilePicture?: string;
+  profile: {
+    profilePicture: string;
+  };
 }
 
 interface Category {
@@ -80,6 +82,8 @@ export default function NavBar({ onCartClick }: NavBarProps) {
       const decoded = jwtDecode<JwtPayload>(token);
       const userId = decoded.sub;
 
+      console.log('UserId:', userId);
+
       if (!userId) {
         console.error('No se encontró userId en el token');
         return;
@@ -89,6 +93,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
         try {
           const profileResponse = await api.user.getProfile(userId, token);
           setUserData(profileResponse);
+          console.log('Perfil obtenido:', profileResponse);
         } catch (error) {
           console.error('Error al obtener perfil:', error);
         }
@@ -147,7 +152,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               <Avatar
                 name={`${userData.firstName} ${userData.lastName}`}
                 size={52}
-                imageUrl={userData.profilePicture}
+                imageUrl={userData.profile.profilePicture}
                 withDropdown={true}
               />
             ) : (
@@ -172,7 +177,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             <Avatar
               name={`${userData.firstName} ${userData.lastName}`}
               size={52}
-              imageUrl={userData.profilePicture}
+              imageUrl={userData.profile.profilePicture}
               withDropdown={true}
             />
           ) : (
