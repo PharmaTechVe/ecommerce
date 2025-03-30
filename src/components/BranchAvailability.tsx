@@ -5,7 +5,7 @@ import { api } from '@/lib/sdkConfig';
 import { Colors, FontSizes } from '@/styles/styles';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { TruckIcon } from '@heroicons/react/24/outline';
-
+import Image from 'next/image';
 interface BranchAvailabilityProps {
   productPresentationId: string;
 }
@@ -102,8 +102,14 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
   return (
     <div className="mt-8 flex flex-col md:flex-row">
       {/* Sección de mapa */}
-      <div className="h-[400px] w-full bg-gray-100 md:w-1/2">
-        <p>Mapa de sucursales (placeholder)</p>
+      <div className="h-[400px] w-full md:w-1/2">
+        <Image
+          src="/images/mapa.jpg"
+          alt="Map"
+          width={500}
+          height={350}
+          layout="responsive"
+        />
       </div>
 
       {/* Sección de filtrado + lista */}
