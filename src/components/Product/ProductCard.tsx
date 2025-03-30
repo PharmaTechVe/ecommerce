@@ -90,35 +90,35 @@ const ProductCard: React.FC<ProductCardProps> = ({
             >
               {productName}
             </p>
-          </Link>
-          <p
-            className={`${
-              variant === 'minimal'
-                ? 'mb-[5px] mt-[20px]'
-                : variant === 'responsive'
-                  ? 'mb-[2px] mt-[10px]'
-                  : 'mb-[20px] mt-[38px]'
-            }`}
-            style={{
-              fontSize: `${
+            <p
+              className={`${
                 variant === 'minimal'
-                  ? FontSizes.b3.size
+                  ? 'mb-[5px] mt-[20px]'
                   : variant === 'responsive'
+                    ? 'mb-[2px] mt-[10px]'
+                    : 'mb-[20px] mt-[38px]'
+              }`}
+              style={{
+                fontSize: `${
+                  variant === 'minimal'
                     ? FontSizes.b3.size
-                    : FontSizes.b1.size
-              }px`,
-              lineHeight: `${
-                variant === 'minimal'
-                  ? FontSizes.b3.lineHeight
-                  : variant === 'responsive'
+                    : variant === 'responsive'
+                      ? FontSizes.b3.size
+                      : FontSizes.b1.size
+                }px`,
+                lineHeight: `${
+                  variant === 'minimal'
                     ? FontSizes.b3.lineHeight
-                    : FontSizes.b1.lineHeight
-              }px`,
-              color: Colors.textMain,
-            }}
-          >
-            Stock: {stock}
-          </p>
+                    : variant === 'responsive'
+                      ? FontSizes.b3.lineHeight
+                      : FontSizes.b1.lineHeight
+                }px`,
+                color: Colors.textMain,
+              }}
+            >
+              Stock: {stock}
+            </p>
+          </Link>
 
           <div
             className={`mt-4 flex w-full items-end justify-between ${
