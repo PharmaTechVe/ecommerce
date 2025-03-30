@@ -12,6 +12,8 @@ import { StarIcon } from '@heroicons/react/24/solid';
 import { Colors, FontSizes } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
 
+import CartOverlay from '@/components/Cart/CartOverlay';
+
 interface PresentationDetailResponse {
   price: number;
   id: string;
@@ -93,6 +95,7 @@ export default function ProductDetailPage() {
   //const [inventoryData, setInventoryData] = useState<InventoryResponse | null>(null);
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -213,6 +216,7 @@ export default function ProductDetailPage() {
         { label: 'Cerrar sesión', route: '/logout' },
       ],
     },
+    onCartClick: () => setIsCartOpen(true),
   };
 
   const variantOptionsObjects = presentationList.map((item) => ({
@@ -276,7 +280,20 @@ export default function ProductDetailPage() {
               >
                 ${presentation.price.toFixed(2)}
               </p>
-              <CardButton />
+              <CardButton
+                product={{
+                  productId: productId, // del API
+                  presentationId: presentationId, // del API
+                  name: presentation.presentation.name,
+                  price: presentation.price || presentation.price,
+                  // discount: discountPercentage,
+                  image:
+                    slides.length > 0
+                      ? slides[0].imageUrl // Usas la primera imagen del arreglo
+                      : '/images/product-detail.jpg', // Fallback si no hay imágenes
+                  stock: presentation.presentation.quantity,
+                }}
+              />
             </div>
             <Dropdown
               label="Selecciona una presentación"
@@ -286,6 +303,12 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </main>
+      {isCartOpen && (
+        <CartOverlay
+          isOpen={isCartOpen}
+          closeCart={() => setIsCartOpen(false)}
+        />
+      )}
     </div>
   );
 }

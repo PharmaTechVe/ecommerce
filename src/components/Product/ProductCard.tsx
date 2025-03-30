@@ -1,15 +1,12 @@
 'use client';
 import React from 'react';
-import { useId } from 'react';
 import CardBase from './CardBase';
 import { ImageType } from './CardBase';
 import { Colors, FontSizes } from '@/styles/styles';
 import CardButton from '../CardButton';
-import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 
 export type ProductCardProps = {
-  id?: number;
   productId: string;
   presentationId: string;
   imageSrc: ImageType;
@@ -24,7 +21,6 @@ export type ProductCardProps = {
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({
-  id,
   productId,
   presentationId,
   imageSrc,
@@ -37,44 +33,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   discountPercentage,
   variant,
 }) => {
-  const generatedId = useId();
-  const cardId = id !== undefined ? id.toString() : generatedId;
-  const { addItem, updateItemQuantity, removeItem, cartItems } = useCart();
-  const existingItem = cartItems.find((item) => item.id === cardId);
-  const quantity = existingItem ? existingItem.quantity : 0;
-
-  const handleAddToCart = () => {
-    if (existingItem) {
-      if (existingItem.quantity < stock) {
-        updateItemQuantity(cardId, existingItem.quantity + 1);
-      } else {
-        alert('No hay stock suficiente para este producto.');
-      }
-    } else {
-      if (stock > 0) {
-        addItem({
-          id: cardId,
-          name: productName,
-          price: lastPrice || currentPrice,
-          discount: discountPercentage || 0,
-          quantity: 1,
-          image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
-          stock,
-        });
-      } else {
-        alert('Este producto no tiene stock.');
-      }
-    }
-  };
-
-  const handleSubtractFromCart = () => {
-    if (existingItem && existingItem.quantity > 1) {
-      updateItemQuantity(cardId, existingItem.quantity - 1);
-    } else if (existingItem) {
-      removeItem(cardId);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center">
       <CardBase
@@ -91,7 +49,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
         >
           {variant === 'responsive' && (
             <div className="mb-[5px] flex justify-end">
-              <CardButton />
+              <CardButton
+                product={{
+                  productId: productId, // del API
+                  presentationId: presentationId, // del API
+                  name: productName,
+                  price: lastPrice || currentPrice,
+                  discount: discountPercentage,
+                  image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
+                  stock: stock,
+                }}
+              />
             </div>
           )}
           <Link href={`/product/${productId}/presentation/${presentationId}`}>
@@ -232,9 +200,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
             {variant !== 'responsive' && (
               <CardButton
-                quantity={quantity}
-                onAdd={handleAddToCart}
-                onSubtract={handleSubtractFromCart}
+                product={{
+                  productId: productId, // del API
+                  presentationId: presentationId, // del API
+                  name: productName,
+                  price: lastPrice || currentPrice,
+                  discount: discountPercentage,
+                  image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
+                  stock: stock,
+                }}
               />
             )}
           </div>
