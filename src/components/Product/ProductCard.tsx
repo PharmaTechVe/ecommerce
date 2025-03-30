@@ -6,9 +6,12 @@ import { ImageType } from './CardBase';
 import { Colors, FontSizes } from '@/styles/styles';
 import CardButton from '../CardButton';
 import { useCart } from '@/context/CartContext';
+import Link from 'next/link';
 
 export type ProductCardProps = {
   id?: number;
+  productId: string;
+  presentationId: string;
   imageSrc: ImageType;
   ribbonText?: string;
   label?: string;
@@ -22,6 +25,8 @@ export type ProductCardProps = {
 
 const ProductCard: React.FC<ProductCardProps> = ({
   id,
+  productId,
+  presentationId,
   imageSrc,
   ribbonText,
   label,
@@ -33,22 +38,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
   variant,
 }) => {
   const generatedId = useId();
-  const productId = id !== undefined ? id.toString() : generatedId;
+  const cardId = id !== undefined ? id.toString() : generatedId;
   const { addItem, updateItemQuantity, removeItem, cartItems } = useCart();
-  const existingItem = cartItems.find((item) => item.id === productId);
+  const existingItem = cartItems.find((item) => item.id === cardId);
   const quantity = existingItem ? existingItem.quantity : 0;
 
   const handleAddToCart = () => {
     if (existingItem) {
       if (existingItem.quantity < stock) {
-        updateItemQuantity(productId, existingItem.quantity + 1);
+        updateItemQuantity(cardId, existingItem.quantity + 1);
       } else {
         alert('No hay stock suficiente para este producto.');
       }
     } else {
       if (stock > 0) {
         addItem({
-          id: productId,
+          id: cardId,
           name: productName,
           price: lastPrice || currentPrice,
           discount: discountPercentage || 0,
@@ -64,9 +69,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const handleSubtractFromCart = () => {
     if (existingItem && existingItem.quantity > 1) {
-      updateItemQuantity(productId, existingItem.quantity - 1);
+      updateItemQuantity(cardId, existingItem.quantity - 1);
     } else if (existingItem) {
-      removeItem(productId);
+      removeItem(cardId);
     }
   };
 
@@ -89,35 +94,35 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <CardButton />
             </div>
           )}
-
-          <p
-            className="w-full text-left"
-            style={{
-              fontSize: `${
-                variant === 'minimal'
-                  ? FontSizes.s1.size
-                  : variant === 'responsive'
-                    ? FontSizes.b1.size
-                    : FontSizes.h5.size
-              }px`,
-              lineHeight: `${
-                variant === 'minimal'
-                  ? FontSizes.s1.lineHeight
-                  : variant === 'responsive'
-                    ? FontSizes.b1.lineHeight
-                    : FontSizes.h5.lineHeight
-              }px`,
-              color: Colors.textMain,
-              wordBreak: 'break-word',
-              whiteSpace: 'normal',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              maxHeight: '3em',
-            }}
-          >
-            {productName}
-          </p>
-
+          <Link href={`/product/${productId}/presentation/${presentationId}`}>
+            <p
+              className="w-full text-left"
+              style={{
+                fontSize: `${
+                  variant === 'minimal'
+                    ? FontSizes.s1.size
+                    : variant === 'responsive'
+                      ? FontSizes.b1.size
+                      : FontSizes.h5.size
+                }px`,
+                lineHeight: `${
+                  variant === 'minimal'
+                    ? FontSizes.s1.lineHeight
+                    : variant === 'responsive'
+                      ? FontSizes.b1.lineHeight
+                      : FontSizes.h5.lineHeight
+                }px`,
+                color: Colors.textMain,
+                wordBreak: 'break-word',
+                whiteSpace: 'normal',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxHeight: '3em',
+              }}
+            >
+              {productName}
+            </p>
+          </Link>
           <p
             className={`${
               variant === 'minimal'

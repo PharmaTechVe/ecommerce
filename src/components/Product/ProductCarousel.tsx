@@ -8,6 +8,8 @@ import { Colors } from '@/styles/styles';
 
 export type Product = {
   id: number;
+  productId: string;
+  presentationId: string;
   productName: string;
   stock: number;
   currentPrice: number;
