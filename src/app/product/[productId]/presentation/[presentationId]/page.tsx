@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import NavBar, { NavBarProps } from '@/components/Navbar';
+import NavBar from '@/components/Navbar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Badge from '@/components/Badge';
 import Carousel, { Slide } from '@/components/Product/Carousel';
@@ -202,21 +202,6 @@ export default function ProductDetailPage() {
     },
   ];
 
-  const navBarProps: NavBarProps = {
-    isLoggedIn: true,
-    avatarProps: {
-      name: 'Juan Pérez',
-      imageUrl: '/images/profilePic.jpeg',
-      size: 52,
-      withDropdown: true,
-      dropdownOptions: [
-        { label: 'Perfil', route: '/profile' },
-        { label: 'Cerrar sesión', route: '/logout' },
-      ],
-    },
-    onCartClick: () => setIsCartOpen(true),
-  };
-
   const variantOptionsObjects = presentationList.map((item) => ({
     id: item.presentation.id,
     display: `${genericProduct.genericName} ${item.presentation.name} ${item.presentation.quantity} ${item.presentation.measurementUnit}`,
@@ -236,7 +221,7 @@ export default function ProductDetailPage() {
   return (
     <div>
       <div className="fixed left-0 right-0 top-0 z-50 bg-white">
-        <NavBar {...navBarProps} />
+        <NavBar onCartClick={() => setIsCartOpen(true)} />
       </div>
       <main className="mx-auto mt-12 max-w-7xl p-4 pt-[100px] md:mt-6">
         <Breadcrumb items={breadcrumbItems} />

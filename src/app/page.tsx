@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import NavBar, { NavBarProps } from '@/components/Navbar';
+import NavBar from '@/components/Navbar';
 import Carousel from '@/components/Carousel';
 import ProductCarousel from '@/components/Product/ProductCarousel';
 import Footer from '@/components/Footer';
@@ -11,7 +11,6 @@ import CartOverlay from '@/components/Cart/CartOverlay';
 import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
-import { useAuth } from '@/context/AuthContext';
 
 export type Product = {
   id: number;
@@ -51,41 +50,15 @@ interface ProductApiResponse {
 }
 
 export default function Home() {
-  const { token } = useAuth();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
-
-  const avatarProps = isLoggedIn
-    ? {
-        name: 'Juan Pérez',
-        imageUrl: '/images/profilePic.jpeg',
-        size: 52,
-        showStatus: true,
-        isOnline: true,
-        withDropdown: true,
-        dropdownOptions: [{ label: 'Perfil', route: '/profile' }],
-      }
-    : undefined;
-
-  const navBarProps: NavBarProps = {
-    isLoggedIn,
-    ...(avatarProps ? { avatarProps } : {}),
-    onCartClick: () => setIsCartOpen(true),
-  };
 
   const slides = [
     { id: 1, imageUrl: Banner1 },
     { id: 2, imageUrl: Banner2 },
     { id: 3, imageUrl: Banner3 },
   ];
-
-  useEffect(() => {
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, [token]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -126,7 +99,7 @@ export default function Home() {
     <div>
       {/* Navbar fijado */}
       <div className="fixed left-0 right-0 top-0 z-50 bg-transparent">
-        <NavBar {...navBarProps} />
+        <NavBar onCartClick={() => setIsCartOpen(true)} />
       </div>
 
       <main className="pt-[124px]">
