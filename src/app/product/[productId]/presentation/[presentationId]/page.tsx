@@ -195,8 +195,8 @@ export default function ProductDetailPage() {
   const breadcrumbItems = [
     { label: 'Inicio', href: '/' },
     {
-      label: genericProduct.genericName,
-      href: `/category/${genericProduct.genericName.toLowerCase()}`,
+      label: genericProduct.categories[0].name,
+      href: `/category/${genericProduct.categories[0]?.name}`,
     },
     {
       label: presentation.presentation.name,
