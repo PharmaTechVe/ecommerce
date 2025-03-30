@@ -11,7 +11,7 @@ import CardButton from '@/components/CardButton';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { Colors, FontSizes } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
-
+import BranchAvailability from '@/components/BranchAvailability';
 import CartOverlay from '@/components/Cart/CartOverlay';
 
 interface PresentationDetailResponse {
@@ -305,6 +305,7 @@ export default function ProductDetailPage() {
             />
           </div>
         </div>
+        <BranchAvailability presentationId={productId} />
       </main>
       {isCartOpen && (
         <CartOverlay
