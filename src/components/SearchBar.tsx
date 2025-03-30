@@ -34,7 +34,7 @@ export default function SearchBar({
   inputPlaceholder = '',
   disableDropdown = false,
 }: SearchBarProps) {
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState('Categorías');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
