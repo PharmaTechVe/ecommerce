@@ -14,6 +14,7 @@ import Banner3 from '@/lib/utils/images/banner_final.jpg';
 
 export type Product = {
   id: number;
+  productPresentationId: string;
   productId: string;
   presentationId: string;
   productName: string;

@@ -8,6 +8,7 @@ import { Colors } from '@/styles/styles';
 
 export type Product = {
   id: number;
+  productPresentationId: string;
   productId: string;
   presentationId: string;
   productName: string;
