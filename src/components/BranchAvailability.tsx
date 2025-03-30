@@ -200,13 +200,11 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
             <p>No hay sucursales disponibles en {selectedState}</p>
           ) : (
             filteredBranches.map((inv) => (
-              <div
-                key={inv.id}
-                className="flex flex-col rounded-md border p-4 shadow-sm"
-              >
-                {/* Encabezado: Nombre a la izquierda, stock + check a la derecha */}
-                <div className="flex items-center justify-between">
-                  <div>
+              <div key={inv.id} className="w-full gap-2 p-4 shadow-md">
+                <div className="flex flex-col gap-2 md:flex-row">
+                  {/* Columna izquierda */}
+                  <div className="flex flex-col space-y-2 md:w-1/2">
+                    {/* Nombre del branch */}
                     <h3
                       style={{
                         fontSize: `${FontSizes.h5.size}px`,
@@ -217,46 +215,50 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
                     >
                       {inv.branch.name}
                     </h3>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span
+
+                    {/* Dirección */}
+                    <p
                       style={{
-                        fontSize: `${FontSizes.b1.size}px`,
-                        lineHeight: `${FontSizes.b1.lineHeight}px`,
-                        color: Colors.textMain,
+                        fontSize: `${FontSizes.b3.size}px`,
+                        lineHeight: `${FontSizes.b3.lineHeight}px`,
+                        color: Colors.textLowContrast,
                       }}
                     >
-                      {inv.stockQuantity} unidades
-                    </span>
-                    <CheckBadgeIcon className="h-5 w-5 text-green-600" />
+                      {inv.branch.address} - {inv.branch.city.name},{' '}
+                      {inv.branch.city.state.name}
+                    </p>
                   </div>
-                </div>
 
-                {/* Dirección debajo */}
-                <p
-                  className="mt-1"
-                  style={{
-                    fontSize: `${FontSizes.b3.size}px`,
-                    lineHeight: `${FontSizes.b3.lineHeight}px`,
-                    color: Colors.textLowContrast,
-                  }}
-                >
-                  {inv.branch.address} - {inv.branch.city.name},{' '}
-                  {inv.branch.city.state.name}
-                </p>
+                  {/* Columna derecha */}
+                  <div className="flex flex-col items-end space-y-2 md:w-1/2">
+                    {/* Stock + Check */}
+                    <div className="flex items-center space-x-2">
+                      <span
+                        style={{
+                          fontSize: `${FontSizes.b1.size}px`,
+                          lineHeight: `${FontSizes.b1.lineHeight}px`,
+                          color: Colors.textMain,
+                        }}
+                      >
+                        {inv.stockQuantity} unidades
+                      </span>
+                      <CheckBadgeIcon className="h-5 w-5 text-green-600" />
+                    </div>
 
-                {/* Info de envío en la parte inferior derecha */}
-                <div className="mt-3 flex items-center space-x-1 text-gray-600">
-                  <TruckIcon className="h-5 w-5" />
-                  <span
-                    style={{
-                      fontSize: `${FontSizes.b3.size}px`,
-                      lineHeight: `${FontSizes.b3.lineHeight}px`,
-                      color: Colors.textLowContrast,
-                    }}
-                  >
-                    Envío en menos de 3h
-                  </span>
+                    {/* Info de envío */}
+                    <div className="flex items-center space-x-1 text-gray-600">
+                      <TruckIcon className="h-5 w-5" />
+                      <span
+                        style={{
+                          fontSize: `${FontSizes.b3.size}px`,
+                          lineHeight: `${FontSizes.b3.lineHeight}px`,
+                          color: Colors.textLowContrast,
+                        }}
+                      >
+                        Envío en menos de 3h
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))
