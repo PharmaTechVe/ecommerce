@@ -267,10 +267,7 @@ export default function ProductDetailPage() {
                 product={{
                   productId: productId,
                   presentationId: presentationId,
-                  name:
-                    genericProduct.genericName +
-                    genericProduct.name +
-                    presentation.presentation.name,
+                  name: ` ${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name} ${presentation.presentation.quantity} ${presentation.presentation.measurementUnit} `,
                   price: presentation.price || presentation.price,
                   // discount: discountPercentage,
                   image:

@@ -40,6 +40,7 @@ interface ProductApiResponse {
     id: string;
     name: string;
     quantity: number;
+    measurementUnit: string;
   };
   product: {
     id: string;
@@ -70,7 +71,7 @@ export default function Home() {
             id: index,
             productId: item.product.id,
             presentationId: item.presentation.id,
-            productName: `${item.product.genericName} ${item.product.name} ${item.presentation.name}`,
+            productName: ` ${item.product.name} ${item.presentation.name} ${item.presentation.quantity} ${item.presentation.measurementUnit} `,
             stock: item.presentation.quantity,
             currentPrice: item.price,
             imageSrc:
