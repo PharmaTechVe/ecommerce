@@ -240,7 +240,7 @@ export default function ProductDetailPage() {
       <div className="fixed left-0 right-0 top-0 z-50 bg-white">
         <NavBar {...navBarProps} />
       </div>
-      <main className="mx-auto mt-6 max-w-7xl p-4 pt-[100px]">
+      <main className="mx-auto mt-12 max-w-7xl p-4 pt-[100px] md:mt-6">
         <Breadcrumb items={breadcrumbItems} />
         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           <Carousel slides={slides} />
@@ -305,7 +305,9 @@ export default function ProductDetailPage() {
             />
           </div>
         </div>
-        <BranchAvailability presentationId={productId} />
+        <div className="my-32">
+          <BranchAvailability presentationId={productId} />
+        </div>
       </main>
       {isCartOpen && (
         <CartOverlay

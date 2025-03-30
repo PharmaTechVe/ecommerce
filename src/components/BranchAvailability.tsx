@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Dropdown from '@/components/Dropdown';
 import { api } from '@/lib/sdkConfig';
 import { Colors, FontSizes } from '@/styles/styles';
-
+import { CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { TruckIcon } from '@heroicons/react/24/outline';
 interface BranchAvailabilityProps {
   presentationId: string;
 }
@@ -39,6 +40,29 @@ const DUMMY_INVENTORY: InventoryResult[] = [
     branch: {
       id: 'branch-dummy-1',
       name: 'Farmacia Dummy',
+      address: 'Calle Falsa 123',
+      latitude: 10.061226,
+      longitude: -69.340529,
+      city: {
+        id: 'city-dummy-1',
+        name: 'DummyCity',
+        state: {
+          id: 'state-dummy-1',
+          name: 'DummyState',
+          country: {
+            id: 'country-dummy-1',
+            name: 'DummyLand',
+          },
+        },
+      },
+    },
+  },
+  {
+    id: 'dummy-2',
+    stockQuantity: 10,
+    branch: {
+      id: 'branch-dummy-2',
+      name: 'Farmacia Dummy 2',
       address: 'Calle Falsa 123',
       latitude: 10.061226,
       longitude: -69.340529,
@@ -180,17 +204,37 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
                 key={inv.id}
                 className="flex flex-col rounded-md border p-4 shadow-sm"
               >
-                <h3
-                  style={{
-                    fontSize: `${FontSizes.h5.size}px`,
-                    lineHeight: `${FontSizes.h5.lineHeight}px`,
-                    color: Colors.textMain,
-                    fontWeight: 500,
-                  }}
-                >
-                  {inv.branch.name}
-                </h3>
+                {/* Encabezado: Nombre a la izquierda, stock + check a la derecha */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3
+                      style={{
+                        fontSize: `${FontSizes.h5.size}px`,
+                        lineHeight: `${FontSizes.h5.lineHeight}px`,
+                        color: Colors.textMain,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {inv.branch.name}
+                    </h3>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span
+                      style={{
+                        fontSize: `${FontSizes.b1.size}px`,
+                        lineHeight: `${FontSizes.b1.lineHeight}px`,
+                        color: Colors.textMain,
+                      }}
+                    >
+                      {inv.stockQuantity} unidades
+                    </span>
+                    <CheckBadgeIcon className="h-5 w-5 text-green-600" />
+                  </div>
+                </div>
+
+                {/* Dirección debajo */}
                 <p
+                  className="mt-1"
                   style={{
                     fontSize: `${FontSizes.b3.size}px`,
                     lineHeight: `${FontSizes.b3.lineHeight}px`,
@@ -200,21 +244,19 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
                   {inv.branch.address} - {inv.branch.city.name},{' '}
                   {inv.branch.city.state.name}
                 </p>
-                <div className="mt-2 flex items-center justify-between">
+
+                {/* Info de envío en la parte inferior derecha */}
+                <div className="mt-3 flex items-center space-x-1 text-gray-600">
+                  <TruckIcon className="h-5 w-5" />
                   <span
                     style={{
-                      fontSize: `${FontSizes.b1.size}px`,
-                      lineHeight: `${FontSizes.b1.lineHeight}px`,
-                      color: Colors.textMain,
+                      fontSize: `${FontSizes.b3.size}px`,
+                      lineHeight: `${FontSizes.b3.lineHeight}px`,
+                      color: Colors.textLowContrast,
                     }}
                   >
-                    <strong>{inv.stockQuantity}</strong> unidades
+                    Envío en menos de 3h
                   </span>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-sm text-green-600">
-                      <span className="mr-1">✅</span> Envío en menos de 3h
-                    </p>
-                  </div>
                 </div>
               </div>
             ))
@@ -224,5 +266,4 @@ const BranchAvailability: React.FC<BranchAvailabilityProps> = ({
     </div>
   );
 };
-
 export default BranchAvailability;
