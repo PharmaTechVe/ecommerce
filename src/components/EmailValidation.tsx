@@ -130,7 +130,7 @@ export default function EnterCodeFormModal({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
       <div
         className="relative bg-white p-6 shadow-lg"
         style={{ width: '442px', height: '489px', borderRadius: '16px' }}
