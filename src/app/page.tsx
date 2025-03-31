@@ -121,29 +121,6 @@ export default function Home() {
     if (token) setIsLoggedIn(true);
   }, [token]);
 
-  const handleOpenModalAndSendOtp = async () => {
-    const storedToken =
-      localStorage.getItem('pharmatechToken') ||
-      sessionStorage.getItem('pharmatechToken');
-    if (!storedToken) {
-      toast.error('Token no encontrado.');
-      return;
-    }
-
-    try {
-      const pharmaTech = PharmaTech.getInstance(true);
-      await pharmaTech.auth.resendOtp(storedToken);
-
-      toast.success('OTP enviado exitosamente al correo', {
-        autoClose: 3000,
-      });
-      setShowEmailModal(true);
-    } catch (err) {
-      console.error('Error al reenviar el OTP:', err);
-      toast.error('No se pudo reenviar el código');
-    }
-  };
-
   useEffect(() => {
     const checkUserValidation = async () => {
       const storedToken =
@@ -165,10 +142,10 @@ export default function Home() {
             <div>
               Verifica tu correo electrónico.{' '}
               <button
-                onClick={handleOpenModalAndSendOtp}
+                onClick={() => setShowEmailModal(true)}
                 className="text-blue-300 underline hover:text-blue-500"
               >
-                Enviar codigo.
+                Verificar código.
               </button>
             </div>,
             {
