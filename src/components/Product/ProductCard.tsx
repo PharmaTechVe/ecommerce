@@ -1,14 +1,15 @@
 'use client';
 import React from 'react';
-import { useId } from 'react';
 import CardBase from './CardBase';
 import { ImageType } from './CardBase';
 import { Colors, FontSizes } from '@/styles/styles';
 import CardButton from '../CardButton';
-import { useCart } from '@/context/CartContext';
+import Link from 'next/link';
 
 export type ProductCardProps = {
-  id?: number;
+  productPresentationId: string;
+  productId: string;
+  presentationId: string;
   imageSrc: ImageType;
   ribbonText?: string;
   label?: string;
@@ -21,7 +22,9 @@ export type ProductCardProps = {
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({
-  id,
+  productPresentationId,
+  productId,
+  presentationId,
   imageSrc,
   ribbonText,
   label,
@@ -32,44 +35,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   discountPercentage,
   variant,
 }) => {
-  const generatedId = useId();
-  const productId = id !== undefined ? id.toString() : generatedId;
-  const { addItem, updateItemQuantity, removeItem, cartItems } = useCart();
-  const existingItem = cartItems.find((item) => item.id === productId);
-  const quantity = existingItem ? existingItem.quantity : 0;
-
-  const handleAddToCart = () => {
-    if (existingItem) {
-      if (existingItem.quantity < stock) {
-        updateItemQuantity(productId, existingItem.quantity + 1);
-      } else {
-        alert('No hay stock suficiente para este producto.');
-      }
-    } else {
-      if (stock > 0) {
-        addItem({
-          id: productId,
-          name: productName,
-          price: lastPrice || currentPrice,
-          discount: discountPercentage || 0,
-          quantity: 1,
-          image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
-          stock,
-        });
-      } else {
-        alert('Este producto no tiene stock.');
-      }
-    }
-  };
-
-  const handleSubtractFromCart = () => {
-    if (existingItem && existingItem.quantity > 1) {
-      updateItemQuantity(productId, existingItem.quantity - 1);
-    } else if (existingItem) {
-      removeItem(productId);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center">
       <CardBase
@@ -86,66 +51,80 @@ const ProductCard: React.FC<ProductCardProps> = ({
         >
           {variant === 'responsive' && (
             <div className="mb-[5px] flex justify-end">
-              <CardButton />
+              <CardButton
+                product={{
+                  productId: productId, // del API
+                  presentationId: presentationId, // del API
+                  name: productName,
+                  price: lastPrice || currentPrice,
+                  discount: discountPercentage,
+                  image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
+                  stock: stock,
+                }}
+              />
             </div>
           )}
-
-          <p
-            className="w-full text-left"
-            style={{
-              fontSize: `${
-                variant === 'minimal'
-                  ? FontSizes.s1.size
-                  : variant === 'responsive'
-                    ? FontSizes.b1.size
-                    : FontSizes.h5.size
-              }px`,
-              lineHeight: `${
-                variant === 'minimal'
-                  ? FontSizes.s1.lineHeight
-                  : variant === 'responsive'
-                    ? FontSizes.b1.lineHeight
-                    : FontSizes.h5.lineHeight
-              }px`,
-              color: Colors.textMain,
-              wordBreak: 'break-word',
-              whiteSpace: 'normal',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              maxHeight: '3em',
+          <Link
+            href={{
+              pathname: `/product/${productId}/presentation/${presentationId}`,
+              query: { productPresentationId },
             }}
           >
-            {productName}
-          </p>
-
-          <p
-            className={`${
-              variant === 'minimal'
-                ? 'mb-[5px] mt-[20px]'
-                : variant === 'responsive'
-                  ? 'mb-[2px] mt-[10px]'
-                  : 'mb-[20px] mt-[38px]'
-            }`}
-            style={{
-              fontSize: `${
+            <p
+              className="w-full text-left"
+              style={{
+                fontSize: `${
+                  variant === 'minimal'
+                    ? FontSizes.s1.size
+                    : variant === 'responsive'
+                      ? FontSizes.b1.size
+                      : FontSizes.h5.size
+                }px`,
+                lineHeight: `${
+                  variant === 'minimal'
+                    ? FontSizes.s1.lineHeight
+                    : variant === 'responsive'
+                      ? FontSizes.b1.lineHeight
+                      : FontSizes.h5.lineHeight
+                }px`,
+                color: Colors.textMain,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {productName}
+            </p>
+            <p
+              className={`${
                 variant === 'minimal'
-                  ? FontSizes.b3.size
+                  ? 'mb-[5px] mt-[20px]'
                   : variant === 'responsive'
+                    ? 'mb-[2px] mt-[10px]'
+                    : 'mb-[20px] mt-[38px]'
+              }`}
+              style={{
+                fontSize: `${
+                  variant === 'minimal'
                     ? FontSizes.b3.size
-                    : FontSizes.b1.size
-              }px`,
-              lineHeight: `${
-                variant === 'minimal'
-                  ? FontSizes.b3.lineHeight
-                  : variant === 'responsive'
+                    : variant === 'responsive'
+                      ? FontSizes.b3.size
+                      : FontSizes.b1.size
+                }px`,
+                lineHeight: `${
+                  variant === 'minimal'
                     ? FontSizes.b3.lineHeight
-                    : FontSizes.b1.lineHeight
-              }px`,
-              color: Colors.textMain,
-            }}
-          >
-            Stock: {stock}
-          </p>
+                    : variant === 'responsive'
+                      ? FontSizes.b3.lineHeight
+                      : FontSizes.b1.lineHeight
+                }px`,
+                color: Colors.textMain,
+              }}
+            >
+              Stock: {stock}
+            </p>
+          </Link>
 
           <div
             className={`mt-4 flex w-full items-end justify-between ${
@@ -227,9 +206,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
             {variant !== 'responsive' && (
               <CardButton
-                quantity={quantity}
-                onAdd={handleAddToCart}
-                onSubtract={handleSubtractFromCart}
+                product={{
+                  productId: productId, // del API
+                  presentationId: presentationId, // del API
+                  name: productName,
+                  price: lastPrice || currentPrice,
+                  discount: discountPercentage,
+                  image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
+                  stock: stock,
+                }}
               />
             )}
           </div>

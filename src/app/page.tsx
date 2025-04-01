@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState, useMemo } from 'react';
-import NavBar, { NavBarProps } from '@/components/Navbar';
+import { useEffect, useRef, useState } from 'react';
+import NavBar from '@/components/Navbar';
 import Carousel from '@/components/Carousel';
 import ProductCarousel from '@/components/Product/ProductCarousel';
 import Footer from '@/components/Footer';
@@ -10,16 +10,10 @@ import { ImageType } from '@/components/Product/CardBase';
 import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
-import Image1 from '@/lib/utils/images/product_2.webp';
-import Image2 from '@/lib/utils/images/product_4.webp';
-import Image4 from '@/lib/utils/images/product_5 (1).png';
-
-import { useAuth } from '@/context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import { PharmaTech } from '@pharmatech/sdk';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import EnterCodeFormModal from '@/components/EmailValidation';
 
 interface JwtPayload {
@@ -28,6 +22,9 @@ interface JwtPayload {
 
 export type Product = {
   id: number;
+  productPresentationId: string;
+  productId: string;
+  presentationId: string;
   productName: string;
   stock: number;
   currentPrice: number;
@@ -38,27 +35,45 @@ export type Product = {
   label?: string;
 };
 
+interface ImageResponse {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  url: string;
+}
+
 interface ProductApiResponse {
+  id: string;
   price: number;
   presentation: {
+    id: string;
     name: string;
     quantity: number;
+    measurementUnit: string;
   };
   product: {
+    id: string;
     name: string;
+    genericName: string;
+    images: ImageResponse[];
   };
 }
 
 export default function Home() {
-  const { token } = useAuth();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
-
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [jwt, setJwt] = useState('');
   const [userId, setUserId] = useState('');
+
+  const toastDisplayed = useRef(false); // ← agregado
+  const toastId = useRef<number | string | null>(null); // ← agregado
+
+  const isLoggedIn =
+    !!localStorage.getItem('pharmatechToken') ||
+    !!sessionStorage.getItem('pharmatechToken');
 
   const avatarProps = isLoggedIn
     ? {
@@ -68,11 +83,14 @@ export default function Home() {
         showStatus: true,
         isOnline: true,
         withDropdown: true,
-        dropdownOptions: [{ label: 'Perfil', route: '/profile' }],
+        dropdownOptions: [
+          { label: 'Perfil', route: '/profile' },
+          { label: 'Cerrar sesión', route: '/logout' },
+        ],
       }
     : undefined;
 
-  const navBarProps: NavBarProps = {
+  const navBarProps = {
     isLoggedIn,
     ...(avatarProps ? { avatarProps } : {}),
     onCartClick: () => setIsCartOpen(true),
@@ -83,43 +101,6 @@ export default function Home() {
     { id: 2, imageUrl: Banner2 },
     { id: 3, imageUrl: Banner3 },
   ];
-
-  const productImages: ImageType[] = useMemo(
-    () => [Image1, Image2, Image4],
-    [],
-  );
-  const extraProducts: Product[] = useMemo(
-    () => [
-      {
-        id: 100,
-        productName: 'Ibuprofeno 200mg',
-        stock: 50,
-        currentPrice: 90,
-        discountPercentage: 10,
-        imageSrc: Image4,
-        lastPrice: 100,
-      },
-      {
-        id: 101,
-        productName: 'Acetaminofén 50mg',
-        stock: 100,
-        currentPrice: 2.49,
-        imageSrc: Image2,
-      },
-      {
-        id: 102,
-        productName: 'Omeprazol 200mg',
-        stock: 75,
-        currentPrice: 5.99,
-        imageSrc: Image1,
-      },
-    ],
-    [],
-  );
-
-  useEffect(() => {
-    if (token) setIsLoggedIn(true);
-  }, [token]);
 
   useEffect(() => {
     const checkUserValidation = async () => {
@@ -137,24 +118,28 @@ export default function Home() {
         const pharmaTech = PharmaTech.getInstance(true);
         const user = await pharmaTech.user.getProfile(decoded.sub, storedToken);
 
-        if (!user.isValidated) {
-          toast.info(
+        if (!user.isValidated && !toastDisplayed.current) {
+          toastId.current = toast.info(
             <div>
               Verifica tu correo electrónico.{' '}
               <button
-                onClick={() => setShowEmailModal(true)}
+                onClick={() => {
+                  toast.dismiss(toastId.current!); // ← cierra el toast
+                  setShowEmailModal(true); // ← abre el modal
+                }}
                 className="text-blue-300 underline hover:text-blue-500"
               >
-                Verificar código.
+                Verificar código
               </button>
             </div>,
             {
               autoClose: false,
-              closeOnClick: true,
+              closeOnClick: false,
               draggable: true,
               position: 'top-right',
             },
           );
+          toastDisplayed.current = true; // ← evita que se vuelva a mostrar
         }
       } catch (err) {
         console.error('Error verificando validación del usuario:', err);
@@ -172,37 +157,35 @@ export default function Home() {
         const backendProducts: Product[] = data.results.map(
           (item: ProductApiResponse, index: number) => ({
             id: index,
-            productName: `${item.product.name} ${item.presentation.name}`,
+            productPresentationId: item.id,
+            productId: item.product.id,
+            presentationId: item.presentation.id,
+            productName: ` ${item.product.name} ${item.presentation.name} ${item.presentation.quantity} ${item.presentation.measurementUnit} `,
             stock: item.presentation.quantity,
             currentPrice: item.price,
-            imageSrc: productImages[index % productImages.length],
+            imageSrc:
+              Array.isArray(item.product.images) &&
+              item.product.images.length > 0
+                ? item.product.images[0].url
+                : '',
           }),
         );
-
-        const allProducts =
-          backendProducts.length >= 6
-            ? backendProducts
-            : [
-                ...backendProducts,
-                ...extraProducts.slice(0, 6 - backendProducts.length),
-              ];
-
-        setProducts(allProducts);
+        setProducts(backendProducts);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
-        setProducts(extraProducts);
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [productImages, extraProducts]);
+  }, []);
 
   if (loading) return <h1 className="p-4 text-lg">Pharmatech...</h1>;
 
   return (
     <div>
+      {/* Navbar */}
       <div className="fixed left-0 right-0 top-0 z-50 bg-transparent">
         <NavBar {...navBarProps} />
       </div>
@@ -217,13 +200,11 @@ export default function Home() {
             Productos en Oferta Exclusiva
           </h3>
 
-          <ProductCarousel carouselType="regular" products={products} />
-
-          <h3 className="my-8 text-[32px] text-[#1C2143]">
-            Categoría Medicamentos
-          </h3>
-
-          <ProductCarousel carouselType="large" products={products} />
+          <div className="mt-8">
+            <div className="cursor-pointer">
+              <ProductCarousel carouselType="regular" products={products} />
+            </div>
+          </div>
         </div>
       </main>
 
