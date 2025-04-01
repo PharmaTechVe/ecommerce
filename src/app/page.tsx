@@ -15,6 +15,7 @@ import { PharmaTech } from '@pharmatech/sdk';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EnterCodeFormModal from '@/components/EmailValidation';
+import { useAuth } from '@/context/AuthContext';
 
 interface JwtPayload {
   sub: string;
@@ -65,8 +66,8 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
-  const [jwt, setJwt] = useState('');
   const [userId, setUserId] = useState('');
+  const { token } = useAuth();
 
   const toastDisplayed = useRef(false);
   const toastId = useRef<number | string | null>(null);
@@ -81,16 +82,8 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const token =
-      typeof window !== 'undefined' &&
-      (localStorage.getItem('pharmatechToken') ||
-        sessionStorage.getItem('pharmatechToken'));
-
     const checkUserValidation = async () => {
-      if (!token) return;
-
-      setJwt(token);
-
+      if (token == null) return;
       try {
         const decoded = jwtDecode<JwtPayload>(token);
         setUserId(decoded.sub);
@@ -190,12 +183,14 @@ export default function Home() {
 
       <Footer />
 
-      <EnterCodeFormModal
-        show={showEmailModal}
-        onClose={() => setShowEmailModal(false)}
-        userId={userId}
-        jwt={jwt}
-      />
+      {token && (
+        <EnterCodeFormModal
+          show={showEmailModal}
+          onClose={() => setShowEmailModal(false)}
+          userId={userId}
+          jwt={token}
+        />
+      )}
 
       <ToastContainer />
 

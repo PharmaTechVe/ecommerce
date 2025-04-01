@@ -70,12 +70,11 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   }, []);
 
   React.useEffect(() => {
-    if (!token) {
+    if (token == null) {
       setIsLoggedIn(false);
       setUserData(null);
       return;
     }
-
     setIsLoggedIn(true);
 
     try {

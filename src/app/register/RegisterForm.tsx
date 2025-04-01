@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterForm() {
-  const { token } = useAuth();
+  const { token, login } = useAuth();
   const router = useRouter();
 
   // Redirigir al home si ya hay sesión activa
@@ -140,8 +140,8 @@ export default function RegisterForm() {
           password: formData.password,
         });
 
-        console.log('Access token:', loginResponse.accessToken);
-        localStorage.setItem('pharmatechToken', loginResponse.accessToken);
+        login(loginResponse.accessToken, false);
+        window.location.reload();
         router.push('/');
       } catch (err) {
         console.error('Error creating account:', err);
