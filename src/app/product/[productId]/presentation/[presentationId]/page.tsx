@@ -12,7 +12,50 @@ import { StarIcon } from '@heroicons/react/24/solid';
 import { Colors, FontSizes } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
 import BranchAvailability from '@/components/BranchAvailability';
+import Footer from '@/components/Footer';
+import { ImageType } from '@/components/Product/CardBase';
 import CartOverlay from '@/components/Cart/CartOverlay';
+import ProductCarousel from '@/components/Product/ProductCarousel';
+
+interface ProductApiResponse {
+  id: string;
+  price: number;
+  presentation: {
+    id: string;
+    name: string;
+    quantity: number;
+    measurementUnit: string;
+  };
+  product: {
+    id: string;
+    name: string;
+    genericName: string;
+    images: ImageResponse[];
+  };
+}
+
+interface ImageResponse {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  url: string;
+}
+
+export type Product = {
+  id: number;
+  productPresentationId: string;
+  productId: string;
+  presentationId: string;
+  productName: string;
+  stock: number;
+  currentPrice: number;
+  lastPrice?: number;
+  discountPercentage?: number;
+  ribbonText?: string;
+  imageSrc: ImageType;
+  label?: string;
+};
 
 interface PresentationDetailResponse {
   price: number;
@@ -86,6 +129,7 @@ export default function ProductDetailPage() {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -152,6 +196,46 @@ export default function ProductDetailPage() {
       }
     }
     fetchProductImages();
+  }, [genericProduct]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const manufacterProductName = genericProduct
+          ? genericProduct.manufacturer.name
+          : '';
+
+        const data = await api.product.getProducts({
+          page: 1,
+          limit: 20,
+          q: manufacterProductName,
+        });
+
+        const backendProducts: Product[] = data.results.map(
+          (item: ProductApiResponse, index: number) => ({
+            id: index,
+            productPresentationId: item.id,
+            productId: item.product.id,
+            presentationId: item.presentation.id,
+            productName: ` ${item.product.name} ${item.presentation.name} ${item.presentation.quantity} ${item.presentation.measurementUnit} `,
+            stock: item.presentation.quantity,
+            currentPrice: item.price,
+            imageSrc:
+              Array.isArray(item.product.images) &&
+              item.product.images.length > 0
+                ? item.product.images[0].url
+                : '',
+          }),
+        );
+        setProducts(backendProducts);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, [genericProduct]);
 
   useEffect(() => {
@@ -267,7 +351,18 @@ export default function ProductDetailPage() {
         <div className="my-32">
           <BranchAvailability productPresentationId={productPresentationId} />
         </div>
+        <div>
+          <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
+            Productos de la marca {genericProduct.manufacturer.name}
+          </h3>
+        </div>
+        <div className="mt-8">
+          <div className="cursor-pointer">
+            <ProductCarousel carouselType="regular" products={products} />
+          </div>
+        </div>
       </main>
+      <Footer />
       {isCartOpen && (
         <CartOverlay
           isOpen={isCartOpen}
