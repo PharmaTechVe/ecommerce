@@ -67,29 +67,10 @@ export default function Home() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [jwt, setJwt] = useState('');
   const [userId, setUserId] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const toastDisplayed = useRef(false);
   const toastId = useRef<number | string | null>(null);
-
-  const avatarProps = isLoggedIn
-    ? {
-        name: 'Juan Pérez',
-        imageUrl: '/images/profilePic.jpeg',
-        size: 52,
-        showStatus: true,
-        isOnline: true,
-        withDropdown: true,
-        dropdownOptions: [
-          { label: 'Perfil', route: '/profile' },
-          { label: 'Cerrar sesión', route: '/logout' },
-        ],
-      }
-    : undefined;
-
   const navBarProps = {
-    isLoggedIn,
-    ...(avatarProps ? { avatarProps } : {}),
     onCartClick: () => setIsCartOpen(true),
   };
 
@@ -104,8 +85,6 @@ export default function Home() {
       typeof window !== 'undefined' &&
       (localStorage.getItem('pharmatechToken') ||
         sessionStorage.getItem('pharmatechToken'));
-
-    setIsLoggedIn(!!token);
 
     const checkUserValidation = async () => {
       if (!token) return;
