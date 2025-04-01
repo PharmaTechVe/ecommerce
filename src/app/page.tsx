@@ -67,13 +67,10 @@ export default function Home() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [jwt, setJwt] = useState('');
   const [userId, setUserId] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const toastDisplayed = useRef(false); // ← agregado
-  const toastId = useRef<number | string | null>(null); // ← agregado
-
-  const isLoggedIn =
-    !!localStorage.getItem('pharmatechToken') ||
-    !!sessionStorage.getItem('pharmatechToken');
+  const toastDisplayed = useRef(false);
+  const toastId = useRef<number | string | null>(null);
 
   const avatarProps = isLoggedIn
     ? {
@@ -103,20 +100,24 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const checkUserValidation = async () => {
-      const storedToken =
-        localStorage.getItem('pharmatechToken') ||
-        sessionStorage.getItem('pharmatechToken');
-      if (!storedToken) return;
+    const token =
+      typeof window !== 'undefined' &&
+      (localStorage.getItem('pharmatechToken') ||
+        sessionStorage.getItem('pharmatechToken'));
 
-      setJwt(storedToken);
+    setIsLoggedIn(!!token);
+
+    const checkUserValidation = async () => {
+      if (!token) return;
+
+      setJwt(token);
 
       try {
-        const decoded = jwtDecode<JwtPayload>(storedToken);
+        const decoded = jwtDecode<JwtPayload>(token);
         setUserId(decoded.sub);
 
         const pharmaTech = PharmaTech.getInstance(true);
-        const user = await pharmaTech.user.getProfile(decoded.sub, storedToken);
+        const user = await pharmaTech.user.getProfile(decoded.sub, token);
 
         if (!user.isValidated && !toastDisplayed.current) {
           toastId.current = toast.info(
@@ -124,8 +125,8 @@ export default function Home() {
               Verifica tu correo electrónico.{' '}
               <button
                 onClick={() => {
-                  toast.dismiss(toastId.current!); // ← cierra el toast
-                  setShowEmailModal(true); // ← abre el modal
+                  toast.dismiss(toastId.current!);
+                  setShowEmailModal(true);
                 }}
                 className="text-blue-300 underline hover:text-blue-500"
               >
@@ -139,7 +140,7 @@ export default function Home() {
               position: 'top-right',
             },
           );
-          toastDisplayed.current = true; // ← evita que se vuelva a mostrar
+          toastDisplayed.current = true;
         }
       } catch (err) {
         console.error('Error verificando validación del usuario:', err);
