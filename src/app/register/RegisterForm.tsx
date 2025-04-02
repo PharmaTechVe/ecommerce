@@ -1,6 +1,5 @@
 'use client';
 
-import { PharmaTech } from '@pharmatech/sdk';
 import React, { useState, useCallback, useEffect } from 'react';
 import { registerSchema } from '@/lib/validations/registerSchema';
 import Button from '@/components/Button';
@@ -13,6 +12,7 @@ import theme from '@/styles/styles';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { api } from '@/lib/sdkConfig';
 
 export default function RegisterForm() {
   const { token, login } = useAuth();
@@ -119,8 +119,7 @@ export default function RegisterForm() {
       };
 
       try {
-        const pharmaTech = PharmaTech.getInstance(true);
-        const response = await pharmaTech.auth.signUp(payload);
+        const response = await api.auth.signUp(payload);
         console.log('SignUp response:', response);
         toast.success('Cuenta creada correctamente');
         setFormData({
@@ -135,7 +134,7 @@ export default function RegisterForm() {
           confirmPassword: '',
         });
 
-        const loginResponse = await pharmaTech.auth.login({
+        const loginResponse = await api.auth.login({
           email: formData.email,
           password: formData.password,
         });
