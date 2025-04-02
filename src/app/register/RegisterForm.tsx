@@ -151,7 +151,7 @@ export default function RegisterForm() {
         setLoading(false);
       }
     },
-    [formData, router],
+    [formData, router, login],
   );
 
   return (
