@@ -1,5 +1,6 @@
 'use client';
-import { api } from '@/lib/sdkConfig';
+
+import { PharmaTech } from '@pharmatech/sdk';
 import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { loginSchema } from '@/lib/validations/loginSchema';
@@ -8,8 +9,11 @@ import Input from '@/components/Input/Input';
 import CheckButton from '@/components/CheckButton';
 import Image from 'next/image';
 import theme from '@/styles/styles';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginForm() {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -17,6 +21,8 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,18 +44,12 @@ export default function LoginForm() {
 
       try {
         loginSchema.parse({ email, password });
+        const pharmaTech = PharmaTech.getInstance(true);
 
-        const response = await api.auth.login({ email, password });
-
-        console.log('Access token:', response.accessToken);
-        sessionStorage.setItem('pharmatechToken', response.accessToken);
-
-        if (remember) {
-          localStorage.setItem('pharmatechToken', response.accessToken);
-        }
-
+        const response = await pharmaTech.auth.login({ email, password });
+        login(response.accessToken, remember);
         toast.success('Inicio de sesión exitoso');
-
+        router.push('/');
         setEmail('');
         setPassword('');
       } catch (err) {
@@ -59,7 +59,7 @@ export default function LoginForm() {
         setLoading(false);
       }
     },
-    [email, password, remember],
+    [email, password, remember, router, login],
   );
 
   return (
@@ -138,6 +138,10 @@ export default function LoginForm() {
             />
             <a
               href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push('/recover-password');
+              }}
               className="hover:underline"
               style={{
                 fontSize: theme.FontSizes.b3.size,
@@ -179,6 +183,10 @@ export default function LoginForm() {
             ¿No tienes cuenta?{' '}
             <a
               href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push('/register');
+              }}
               className="hover:underline"
               style={{
                 fontSize: theme.FontSizes.b3.size,
