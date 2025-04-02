@@ -11,7 +11,6 @@ import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
 import { jwtDecode } from 'jwt-decode';
-import { PharmaTech } from '@pharmatech/sdk';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EnterCodeFormModal from '@/components/EmailValidation';
@@ -88,8 +87,7 @@ export default function Home() {
         const decoded = jwtDecode<JwtPayload>(token);
         setUserId(decoded.sub);
 
-        const pharmaTech = PharmaTech.getInstance(true);
-        const user = await pharmaTech.user.getProfile(decoded.sub, token);
+        const user = await api.user.getProfile(decoded.sub, token);
 
         if (!user.isValidated && !toastDisplayed.current) {
           toastId.current = toast.info(
