@@ -6,8 +6,8 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/Button';
 import theme from '@/styles/styles';
-import { PharmaTech } from '@pharmatech/sdk';
 import { codeSchema } from '@/lib/validations/recoverPasswordSchema';
+import { api } from '@/lib/sdkConfig';
 
 interface EnterCodeFormProps {
   show: boolean;
@@ -85,9 +85,8 @@ export default function EnterCodeFormModal({
       }
 
       try {
-        const pharmaTech = PharmaTech.getInstance(true);
-        await pharmaTech.auth.validateOtp(codeString, jwt);
-        const profile = await pharmaTech.user.getProfile(userId, jwt);
+        await api.auth.validateOtp(codeString, jwt);
+        const profile = await api.user.getProfile(userId, jwt);
 
         if (profile.isValidated) {
           toast.success('Usuario validado correctamente');
@@ -116,8 +115,7 @@ export default function EnterCodeFormModal({
     }
 
     try {
-      const pharmaTech = PharmaTech.getInstance(true);
-      await pharmaTech.auth.resendOtp(jwt);
+      await api.auth.resendOtp(jwt);
 
       toast.success('OTP reenviado al correo');
       setLastOtpSentAt(Date.now());
