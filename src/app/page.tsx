@@ -120,7 +120,7 @@ export default function Home() {
     };
 
     checkUserValidation();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const fetchProducts = async () => {

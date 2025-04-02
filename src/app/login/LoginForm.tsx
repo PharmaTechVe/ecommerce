@@ -1,6 +1,5 @@
 'use client';
 
-import { PharmaTech } from '@pharmatech/sdk';
 import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { loginSchema } from '@/lib/validations/loginSchema';
@@ -11,6 +10,7 @@ import Image from 'next/image';
 import theme from '@/styles/styles';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { api } from '@/lib/sdkConfig';
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -44,9 +44,8 @@ export default function LoginForm() {
 
       try {
         loginSchema.parse({ email, password });
-        const pharmaTech = PharmaTech.getInstance(true);
 
-        const response = await pharmaTech.auth.login({ email, password });
+        const response = await api.auth.login({ email, password });
         login(response.accessToken, remember);
         toast.success('Inicio de sesión exitoso');
         router.push('/');
