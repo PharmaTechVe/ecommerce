@@ -68,6 +68,10 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
   const handleDone = () => {
     setIsCalendarOpen(false);
   };
+  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMonth = Number(event.target.value);
+    setCurrentDate(new Date(year, newMonth, 1));
+  };
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -108,13 +112,23 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
               <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
             </button>
             <div className="flex items-center space-x-4">
-              <span className="text-xl font-medium">{MONTH_NAMES[month]}</span>
+              <select
+                value={month}
+                onChange={handleMonthChange}
+                className="w-16 appearance-none bg-transparent text-center text-lg font-medium md:appearance-none"
+              >
+                {MONTH_NAMES.map((m, index) => (
+                  <option key={index} value={index}>
+                    {m}
+                  </option>
+                ))}
+              </select>
               <input
                 type="number"
                 value={yearInput}
                 onChange={handleYearChange}
                 className="w-16 appearance-auto bg-transparent text-center text-lg font-medium outline-none md:appearance-auto"
-                min="0"
+                min="1900"
                 max="3000"
               />
             </div>
