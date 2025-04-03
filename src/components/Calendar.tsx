@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Button from './Button';
 import Input from './Input/Input';
 import {
@@ -18,6 +18,8 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
@@ -66,8 +68,23 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
   const handleDone = () => {
     setIsCalendarOpen(false);
   };
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsCalendarOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div onClick={() => setIsCalendarOpen(!isCalendarOpen)}>
         <Input
           type="text"

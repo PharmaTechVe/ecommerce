@@ -157,7 +157,7 @@ export default function Home() {
   return (
     <div>
       {/* Navbar */}
-      <div className="fixed left-0 right-0 top-0 z-50 bg-transparent">
+      <div className="fixed left-0 right-0 top-0 z-50 bg-white">
         <NavBar {...navBarProps} />
       </div>
 
