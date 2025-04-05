@@ -112,6 +112,12 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     router.push('/login');
   };
 
+  const handleProfileClick = () => {
+    if (token) {
+      const decoded = jwtDecode<JwtPayload>(token);
+      router.push(`/user/${decoded.sub}`);
+    }
+  };
   return (
     <>
       {/* Versión Desktop */}
@@ -153,6 +159,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 size={52}
                 imageUrl={userData.profile.profilePicture}
                 withDropdown={true}
+                onProfileClick={handleProfileClick}
               />
             ) : (
               <Button

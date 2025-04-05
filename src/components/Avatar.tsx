@@ -11,6 +11,7 @@ export type AvatarProps = {
   size?: number;
   withDropdown?: boolean;
   dropdownOptions?: { label: string; route?: string }[];
+  onProfileClick?: () => void;
 };
 
 export default function Avatar({
@@ -19,6 +20,7 @@ export default function Avatar({
   size = 48,
   withDropdown = false,
   dropdownOptions = [],
+  onProfileClick,
 }: AvatarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,6 +93,15 @@ export default function Avatar({
       {withDropdown && dropdownOpen && token && (
         <div className="absolute left-0 right-auto z-10 mt-2 w-40 rounded-md bg-white shadow-lg md:left-auto md:right-0">
           <ul className="py-1">
+            {onProfileClick && (
+              <li
+                className="cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={onProfileClick}
+              >
+                Ir a mi perfil
+              </li>
+            )}
+
             {dropdownOptions.map((option) => (
               <li
                 key={option.label}
@@ -100,6 +111,7 @@ export default function Avatar({
                 {option.label}
               </li>
             ))}
+
             <li
               className="cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               onClick={handleLogoutClick}
