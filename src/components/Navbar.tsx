@@ -12,20 +12,7 @@ import { Colors } from '../styles/styles';
 import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { jwtDecode } from 'jwt-decode';
 import { api } from '@/lib/sdkConfig';
-
-interface JwtPayload {
-  sub: string;
-}
-
-interface UserProfile {
-  firstName: string;
-  lastName: string;
-  profile: {
-    profilePicture: string;
-  };
-}
 
 interface Category {
   id: string;
@@ -48,13 +35,12 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
   const [categories, setCategories] = React.useState<string[]>([]);
   const { cartItems } = useCart();
-  const { token } = useAuth();
-
+  const { token, userData } = useAuth();
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  const [userData, setUserData] = React.useState<UserProfile | null>(null);
+  const isLoggedIn = Boolean(token && userData);
 
+  // Cargar categorías
   React.useEffect(() => {
     api.category
       .findAll({ page: 1, limit: 20 })
@@ -69,41 +55,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
       });
   }, []);
 
-  React.useEffect(() => {
-    if (token == null) {
-      setIsLoggedIn(false);
-      setUserData(null);
-      return;
-    }
-    setIsLoggedIn(true);
-
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      const userId = decoded.sub;
-
-      console.log('UserId:', userId);
-
-      if (!userId) {
-        console.error('No se encontró userId en el token');
-        return;
-      }
-
-      (async () => {
-        try {
-          const profileResponse = await api.user.getProfile(userId, token);
-          setUserData(profileResponse);
-          console.log('Perfil obtenido:', profileResponse);
-        } catch (error) {
-          console.error('Error al obtener perfil:', error);
-        }
-      })();
-    } catch (err) {
-      console.error('Error decodificando token:', err);
-      setIsLoggedIn(false);
-      setUserData(null);
-    }
-  }, [token]);
-
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
@@ -113,11 +64,12 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   };
 
   const handleProfileClick = () => {
-    if (token) {
-      const decoded = jwtDecode<JwtPayload>(token);
-      router.push(`/user/${decoded.sub}`);
+    if (userData) {
+      // Redirigir al perfil del usuario
+      router.push(`/user/${userData?.id}`);
     }
   };
+
   return (
     <>
       {/* Versión Desktop */}
@@ -185,6 +137,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               size={52}
               imageUrl={userData.profile.profilePicture}
               withDropdown={true}
+              onProfileClick={handleProfileClick}
             />
           ) : (
             <UserCircleIcon

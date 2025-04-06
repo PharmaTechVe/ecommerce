@@ -8,6 +8,7 @@ export const Colors = {
   secondaryWhite: '#FFFFFF',
   disabled: '#D3D3D3',
   primaryTransparent: 'rgb(28, 33, 67, .75)',
+  topBar: 'linear-gradient(80deg, #E5E7EB 100%, #1C2143 37%, #2563EB 70%)',
   neuter: '#6B7280',
   ribbon: '#FFD569',
 
