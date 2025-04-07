@@ -27,6 +27,7 @@ export type SidebarUser = {
 
 interface SidebarProps {
   user: SidebarUser;
+  userId: string; // ✅ nuevo prop
   menuItems?: SidebarMenuItem[];
   onLogout?: () => void;
   className?: string;
@@ -34,37 +35,37 @@ interface SidebarProps {
   children?: React.ReactNode;
 }
 
-// Menu por defecto
-const defaultMenuItems: SidebarMenuItem[] = [
+const getDefaultMenuItems = (userId: string): SidebarMenuItem[] => [
   {
     id: 'profile',
     label: 'Mi Perfil',
-    href: '/profile', // toma la ruta actual pendiente en revision
+    href: `/user/${userId}`,
     icon: <UserIcon className="h-5 w-5" />,
   },
   {
     id: 'addresses',
     label: 'Mis Direcciones',
-    href: '/addresses',
+    href: `/user/${userId}/addresses`,
     icon: <MapIcon className="h-5 w-5" />,
   },
   {
     id: 'security',
     label: 'Seguridad',
-    href: '/security',
+    href: `/user/${userId}/security/updatePassword`,
     icon: <LockClosedIcon className="h-5 w-5" />,
   },
   {
     id: 'orders',
     label: 'Mis Pedidos',
-    href: '/orders',
+    href: `/user/${userId}/orders`,
     icon: <ShoppingCartIcon className="h-5 w-5" />,
   },
 ];
 
 export function Sidebar({
   user,
-  menuItems = defaultMenuItems,
+  userId,
+  menuItems = getDefaultMenuItems(userId),
   onLogout,
   className = '',
   isOpen = false,
@@ -74,12 +75,12 @@ export function Sidebar({
 
   return (
     <div
-      className={` ${isOpen ? 'flex' : 'hidden'} w-72 flex-col rounded-lg bg-transparent p-6 md:flex ${className} `}
+      className={` ${isOpen ? 'flex' : 'hidden'} ml-6 w-72 flex-col rounded-lg bg-[#F1F5FD] p-4 md:flex ${className} `}
     >
-      {/* Botón de cerrar (visible solo en mobile si se pasa en children) */}
+      {/* Botón de cerrar en mobile */}
       {children}
 
-      {/* User Info */}
+      {/* Info del usuario */}
       <div className="mb-6 flex items-center gap-3">
         <Avatar
           name={user.name}
@@ -93,42 +94,41 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Navegación */}
+      {/* Menú de navegación */}
       <nav className="space-y-1">
         {menuItems.map((item) => {
-          let isActive = pathname === item.href;
-
-          if (item.id === 'profile' && pathname.startsWith('/user/')) {
-            isActive = true;
-          }
+          const isActive =
+            pathname === item.href ||
+            (pathname.startsWith(item.href) && item.href !== `/user/${userId}`);
 
           const baseClasses = 'flex items-center gap-3 px-4 py-3 rounded-md';
+
           const activeClasses = `
-            border-l-[3px]
-            border-[#374CBE]
-            text-[#374CBE]
-            bg-white
-          `;
-          const inactiveClasses = 'text-[#6e6d6c] hover:bg-[#f1f6fa]';
+      border-l-[3px]
+      border-[#374CBE]
+      text-[#374CBE]
+      bg-white
+      font-medium
+    `;
+
+          const inactiveClasses = `
+      text-[#6e6d6c]
+      hover:bg-[#f1f6fa]
+      hover:text-[#374CBE]
+    `;
+
+          const finalClasses = `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
 
           return (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`${baseClasses} ${
-                isActive ? activeClasses : inactiveClasses
-              }`}
-            >
+            <Link key={item.id} href={item.href} className={finalClasses}>
               {item.icon}
-              <span className={isActive ? 'font-medium' : ''}>
-                {item.label}
-              </span>
+              <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Logout Button */}
+      {/* Botón de cerrar sesión */}
       {onLogout && (
         <div className="mt-auto pt-32">
           <button

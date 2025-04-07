@@ -19,22 +19,20 @@ export default function Page() {
 
   if (!userData) return <div className="p-6">Cargando...</div>;
 
-  // Data para el Sidebar
   const sidebarUser: SidebarUser = {
     name: `${userData.firstName} ${userData.lastName}`,
     role: userData.role,
     avatar: userData.profile?.profilePicture ?? '',
   };
 
-  // Props para la Navbar
   const navBarProps = {
     onCartClick: () => {},
     onProfileClick: () => router.push(`/user/${userData.id}`),
   };
 
-  function handleGenderClick(genderValue: string) {
+  const handleGenderClick = (genderValue: string) => {
     console.log('Intento de cambiar a:', genderValue);
-  }
+  };
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -53,31 +51,34 @@ export default function Page() {
         </button>
       )}
 
-      <div className="flex flex-col gap-6 pt-20 md:flex-row">
-        {/* SIDEBAR */}
-        <Sidebar
-          user={sidebarUser}
-          isOpen={showSidebar}
-          onLogout={logout}
-          className="fixed top-0 z-40 ml-[60px] h-screen md:static md:h-auto"
-        >
-          {/* Botón cerrar sidebar en mobile */}
-          <button
-            onClick={() => setShowSidebar(false)}
-            className="absolute right-4 top-4 md:hidden"
+      {/* Layout principal con sidebar y contenido */}
+      <div className="flex gap-8 px-4 pt-16 md:px-8 lg:px-16">
+        {/* CONTENEDOR GENERAL */}
+        <div className="mx-auto flex w-full max-w-[1200px] gap-8">
+          {/* SIDEBAR */}
+          <Sidebar
+            user={sidebarUser}
+            userId={userData.id}
+            isOpen={showSidebar}
+            onLogout={logout}
+            className="w-72"
           >
-            <XMarkIcon className="h-6 w-6 text-gray-500" />
-          </button>
-        </Sidebar>
+            <button
+              onClick={() => setShowSidebar(false)}
+              className="absolute right-4 top-4 md:hidden"
+            >
+              <XMarkIcon className="h-6 w-6 text-gray-500" />
+            </button>
+          </Sidebar>
 
-        {/* CONTENIDO PRINCIPAL */}
-        <div className="flex-1">
-          <div className="mx-auto w-[956px] px-4 md:px-0">
+          {/* CONTENIDO */}
+          <div className="flex-1">
             {/* TOP BAR */}
             <div
-              className="mt-4 flex items-center justify-between rounded-[10px] px-6 py-4 shadow"
+              className="flex items-center justify-between rounded-[10px] px-6 py-4 shadow"
               style={{
-                width: '956px',
+                width: '100%',
+                maxWidth: '956px',
                 height: '131px',
                 background: Colors.topBar,
               }}
@@ -106,7 +107,7 @@ export default function Page() {
             </div>
 
             {/* FICHA DE USUARIO */}
-            <div className="mt-6 rounded-lg p-4 md:p-6">
+            <div className="mt-6 max-w-[956px] rounded-lg p-4 md:p-6">
               <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
                 <Input label="Nombre" value={userData.firstName} disabled />
                 <Input label="Apellido" value={userData.lastName} disabled />

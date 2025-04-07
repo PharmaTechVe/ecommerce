@@ -150,6 +150,7 @@ export default function EditUserPage() {
       <div className="flex flex-col gap-6 pt-20 md:flex-row">
         <Sidebar
           user={sidebarUser}
+          userId={userData.id}
           isOpen={showSidebar}
           onLogout={logout}
           className="fixed top-0 z-40 ml-[60px] h-screen md:static md:h-auto"
@@ -180,19 +181,9 @@ export default function EditUserPage() {
                   withDropdown={false}
                 />
                 <h2 className="text-xl font-semibold text-black">
-                  Editar Perfil
+                  {userData.firstName} {userData.lastName}
                 </h2>
               </div>
-
-              <Button
-                variant="submit"
-                width="189px"
-                height="51px"
-                className="font-semibold text-white"
-                onClick={handleSubmit}
-              >
-                Guardar cambios
-              </Button>
             </div>
 
             <div className="mt-6 rounded-lg p-4 md:p-6">
@@ -213,13 +204,13 @@ export default function EditUserPage() {
                   label="Correo Electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  helperText={errors.email}
+                  disabled
                 />
                 <Input
                   label="Cédula"
                   value={documentId}
                   onChange={(e) => setDocumentId(e.target.value)}
-                  helperText={errors.documentId}
+                  disabled
                 />
                 <Input
                   label="Número de teléfono"
@@ -241,7 +232,7 @@ export default function EditUserPage() {
                 )}
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 pb-4">
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                   Género
                 </label>
@@ -261,6 +252,13 @@ export default function EditUserPage() {
                   <p className="mt-1 text-sm text-red-500">{errors.gender}</p>
                 )}
               </div>
+              <Button
+                variant="submit"
+                className="h-[51px] w-[841px] font-semibold text-white"
+                onClick={handleSubmit}
+              >
+                Guardar cambios
+              </Button>
             </div>
           </div>
         </div>

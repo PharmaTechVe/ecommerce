@@ -74,7 +74,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  //Se cambia la data del usuario al iniciar sesión
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!token) {
