@@ -16,7 +16,8 @@ import NavBar from '@/components/Navbar';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
 import Button from '@/components/Button';
 import Link from 'next/link';
-import { Colors, FontSizes } from '@/styles/styles'; // <-- Importa tus estilos
+import { Colors, FontSizes } from '@/styles/styles';
+import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 
 export default function UpdatePasswordPage() {
   const { userData, logout } = useAuth();
@@ -74,7 +75,7 @@ export default function UpdatePasswordPage() {
       setPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      router.push(`/user/${params.id}`);
+      router.push(`/user`);
     } catch (error) {
       console.error('Error al actualizar la contraseña:', error);
       toast.error('Error al actualizar la contraseña');
@@ -92,6 +93,9 @@ export default function UpdatePasswordPage() {
   return (
     <div className="relative min-h-screen bg-white">
       <NavBar onCartClick={() => {}} />
+      <div className="px-4 pt-3 md:px-8 lg:px-16">
+        <UserBreadcrumbs />
+      </div>
 
       {!showSidebar && (
         <button
@@ -105,7 +109,6 @@ export default function UpdatePasswordPage() {
       <div className="flex flex-col gap-6 pt-20 md:flex-row">
         <Sidebar
           user={sidebarUser}
-          userId={userData.id}
           isOpen={showSidebar}
           onLogout={logout}
           className="fixed top-0 z-40 ml-[60px] h-screen md:static md:h-auto"
@@ -260,7 +263,7 @@ export default function UpdatePasswordPage() {
               <p className="text-sm">
                 ¿Olvidaste tu contraseña?{' '}
                 <Link
-                  href={`/user/${userData.id}/security/recoverPassword`}
+                  href={`/user/security/recoverPassword`}
                   style={{ color: Colors.secondaryLight }}
                 >
                   Haz click aquí

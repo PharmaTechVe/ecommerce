@@ -11,6 +11,7 @@ import RadioButton from '@/components/RadioButton';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Avatar from '@/components/Avatar';
 import { Colors } from '@/styles/styles';
+import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 
 export default function Page() {
   const { userData, logout } = useAuth();
@@ -27,7 +28,7 @@ export default function Page() {
 
   const navBarProps = {
     onCartClick: () => {},
-    onProfileClick: () => router.push(`/user/${userData.id}`),
+    onProfileClick: () => router.push(`/user`),
   };
 
   const handleGenderClick = (genderValue: string) => {
@@ -40,7 +41,9 @@ export default function Page() {
       <div className="relative z-50">
         <NavBar {...navBarProps} />
       </div>
-
+      <div className="px-4 pt-3 md:px-8 lg:px-16">
+        <UserBreadcrumbs />
+      </div>
       {/* Botón hamburguesa en mobile */}
       {!showSidebar && (
         <button
@@ -52,13 +55,13 @@ export default function Page() {
       )}
 
       {/* Layout principal con sidebar y contenido */}
+
       <div className="flex gap-8 px-4 pt-16 md:px-8 lg:px-16">
         {/* CONTENEDOR GENERAL */}
         <div className="mx-auto flex w-full max-w-[1200px] gap-8">
           {/* SIDEBAR */}
           <Sidebar
             user={sidebarUser}
-            userId={userData.id}
             isOpen={showSidebar}
             onLogout={logout}
             className="w-72"
@@ -100,7 +103,7 @@ export default function Page() {
                 width="189px"
                 height="51px"
                 className="font-semibold text-white"
-                onClick={() => router.push(`/user/${userData.id}/edit`)}
+                onClick={() => router.push(`/user/edit`)}
               >
                 Editar
               </Button>

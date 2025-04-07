@@ -15,6 +15,7 @@ import { Colors } from '@/styles/styles';
 import { toast, ToastContainer } from 'react-toastify';
 import { api } from '@/lib/sdkConfig';
 import DatePicker1 from '@/components/Calendar';
+import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 
 enum UserGender {
   MALE = 'm',
@@ -114,7 +115,7 @@ export default function EditUserPage() {
 
       await api.user.update(params.id, payload, token);
       toast.success('Perfil actualizado correctamente');
-      router.push(`/user/${params.id}`);
+      router.push(`/user`);
     } catch (error) {
       console.error('Error al actualizar perfil:', error);
       toast.error('Error al actualizar el perfil');
@@ -131,13 +132,15 @@ export default function EditUserPage() {
 
   const navBarProps = {
     onCartClick: () => {},
-    onProfileClick: () => router.push(`/user/${userData.id}`),
+    onProfileClick: () => router.push(`/user`),
   };
 
   return (
     <div className="relative min-h-screen bg-white">
       <NavBar {...navBarProps} />
-
+      <div className="px-4 pt-3 md:px-8 lg:px-16">
+        <UserBreadcrumbs />
+      </div>
       {!showSidebar && (
         <button
           className="absolute left-4 top-4 z-50 md:hidden"
@@ -150,7 +153,6 @@ export default function EditUserPage() {
       <div className="flex flex-col gap-6 pt-20 md:flex-row">
         <Sidebar
           user={sidebarUser}
-          userId={userData.id}
           isOpen={showSidebar}
           onLogout={logout}
           className="fixed top-0 z-40 ml-[60px] h-screen md:static md:h-auto"

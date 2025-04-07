@@ -27,7 +27,6 @@ export type SidebarUser = {
 
 interface SidebarProps {
   user: SidebarUser;
-  userId: string; // ✅ nuevo prop
   menuItems?: SidebarMenuItem[];
   onLogout?: () => void;
   className?: string;
@@ -35,37 +34,36 @@ interface SidebarProps {
   children?: React.ReactNode;
 }
 
-const getDefaultMenuItems = (userId: string): SidebarMenuItem[] => [
+const getDefaultMenuItems = (): SidebarMenuItem[] => [
   {
     id: 'profile',
     label: 'Mi Perfil',
-    href: `/user/${userId}`,
+    href: `/user`,
     icon: <UserIcon className="h-5 w-5" />,
   },
   {
     id: 'addresses',
     label: 'Mis Direcciones',
-    href: `/user/${userId}/addresses`,
+    href: `/user/addresses`,
     icon: <MapIcon className="h-5 w-5" />,
   },
   {
     id: 'security',
     label: 'Seguridad',
-    href: `/user/${userId}/security/updatePassword`,
+    href: `/user/security/updatePassword`,
     icon: <LockClosedIcon className="h-5 w-5" />,
   },
   {
     id: 'orders',
     label: 'Mis Pedidos',
-    href: `/user/${userId}/orders`,
+    href: `/user/orders`,
     icon: <ShoppingCartIcon className="h-5 w-5" />,
   },
 ];
 
 export function Sidebar({
   user,
-  userId,
-  menuItems = getDefaultMenuItems(userId),
+  menuItems = getDefaultMenuItems(),
   onLogout,
   className = '',
   isOpen = false,
@@ -99,7 +97,7 @@ export function Sidebar({
         {menuItems.map((item) => {
           const isActive =
             pathname === item.href ||
-            (pathname.startsWith(item.href) && item.href !== `/user/${userId}`);
+            (pathname.startsWith(item.href) && item.href !== `/user`);
 
           const baseClasses = 'flex items-center gap-3 px-4 py-3 rounded-md';
 

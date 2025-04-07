@@ -13,8 +13,8 @@ import { FontSizes, Colors } from '@/styles/styles';
 import { codeSchema } from '@/lib/validations/recoverPasswordSchema';
 import { api } from '@/lib/sdkConfig';
 import { z } from 'zod';
+import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 
-// Schema para validar email
 const emailSchema = z.string().email('Correo no válido');
 
 export default function RecoverPasswordPage() {
@@ -28,7 +28,6 @@ export default function RecoverPasswordPage() {
   const [generalError, setGeneralError] = useState<string | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Enviar OTP al montar
   useEffect(() => {
     const sendOtp = async () => {
       if (!userData?.email) return;
@@ -117,6 +116,9 @@ export default function RecoverPasswordPage() {
     <div className="relative min-h-screen bg-white">
       <NavBar onCartClick={() => {}} />
 
+      <div className="px-4 pt-3 md:px-8 lg:px-16">
+        <UserBreadcrumbs />
+      </div>
       {!showSidebar && (
         <button
           className="absolute left-4 top-4 z-50 md:hidden"
@@ -129,7 +131,6 @@ export default function RecoverPasswordPage() {
       <div className="flex flex-col gap-6 pt-20 md:flex-row">
         <Sidebar
           user={sidebarUser}
-          userId={userData.id}
           isOpen={showSidebar}
           onLogout={logout}
           className="fixed top-0 z-40 ml-[60px] h-screen md:static md:h-auto"

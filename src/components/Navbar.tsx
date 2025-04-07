@@ -66,7 +66,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const handleProfileClick = () => {
     if (userData) {
       // Redirigir al perfil del usuario
-      router.push(`/user/${userData?.id}`);
+      router.push(`/user`);
     }
   };
 
