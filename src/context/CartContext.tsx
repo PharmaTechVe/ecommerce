@@ -1,3 +1,4 @@
+// CartContext.tsx
 'use client';
 import React, {
   createContext,
@@ -8,6 +9,8 @@ import React, {
   useRef,
 } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { jwtDecode } from 'jwt-decode';
+// import { api } from '@/lib/sdkConfig'; // Importa tu API cuando esté lista
 
 export interface CartItem {
   id: string;
@@ -28,6 +31,12 @@ interface CartContextProps {
   clearCart: () => void;
 }
 
+// Interfaz para el payload del JWT
+interface JwtPayload {
+  sub: string;
+  // Agrega otras propiedades que contenga tu token, si es necesario
+}
+
 const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
@@ -36,6 +45,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { token } = useAuth();
   console.log('Token in Cart Provider:', token);
 
+  // Función para mostrar alerta cuando no hay suficiente stock
   const showStockAlert = () => {
     if (!alertShownRef.current) {
       alertShownRef.current = true;
@@ -46,6 +56,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Cargar el carrito desde localStorage al montar el componente
   useEffect(() => {
     const storedCart = localStorage.getItem('cartItems');
     if (storedCart) {
@@ -57,17 +68,81 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // Guardar el carrito en localStorage cada vez que se actualiza el estado
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Al detectar cambios en el token:
+  // - Si existe, se fusiona el carrito local con el del usuario (si no se ha fusionado ya).
+  // - Si no existe, se mantiene el carrito, permitiendo que el usuario anónimo siga usándolo.
   useEffect(() => {
-    if (!token) {
-      setCartItems([]);
-      localStorage.removeItem('cartItems');
+    if (token) {
+      // Usuario logueado: se fusiona el carrito
+      let userId: string;
+      try {
+        const decoded = jwtDecode<JwtPayload>(token);
+        userId = decoded.sub;
+      } catch (error) {
+        console.error('Error decodificando el token', error);
+        return;
+      }
+
+      // Verificar si ya se fusionó el carrito para este usuario usando un flag en localStorage
+      const mergedUser = localStorage.getItem('mergedUser');
+      if (mergedUser === userId) {
+        // Ya se realizó la fusión para este usuario
+        return;
+      }
+
+      // Aquí se debería obtener el carrito del usuario desde la API.
+      // Descomenta y ajusta el siguiente bloque cuando el endpoint esté listo:
+      /*
+      api.cart.getUserCart(token)
+        .then((serverCart: CartItem[]) => {
+          const localCart: CartItem[] = JSON.parse(localStorage.getItem('cartItems') || '[]');
+          const mergedCart = mergeCarts(serverCart, localCart);
+          setCartItems(mergedCart);
+          localStorage.setItem('cartItems', JSON.stringify(mergedCart));
+          // Guardar el userId para evitar fusiones repetidas
+          localStorage.setItem('mergedUser', userId);
+        })
+        .catch((error) => {
+          console.error('Error al obtener el carrito del usuario:', error);
+        });
+      */
+
+      // Simulación: Se fusiona el carrito local con un carrito de servidor vacío
+      const localCart: CartItem[] = JSON.parse(
+        localStorage.getItem('cartItems') || '[]',
+      );
+      const mergedCart = mergeCarts([], localCart);
+      setCartItems(mergedCart);
+      localStorage.setItem('cartItems', JSON.stringify(mergedCart));
+      localStorage.setItem('mergedUser', userId);
     }
+    // Si no hay token, se mantiene el carrito guardado sin limpiarlo.
   }, [token]);
 
+  // Función para fusionar dos carritos sumando las cantidades en caso de que se repita el mismo ítem
+  const mergeCarts = (
+    serverCart: CartItem[],
+    localCart: CartItem[],
+  ): CartItem[] => {
+    const merged = [...serverCart];
+    localCart.forEach((localItem) => {
+      const index = merged.findIndex((item) => item.id === localItem.id);
+      if (index !== -1) {
+        // Si el ítem ya existe, se suman las cantidades
+        merged[index].quantity += localItem.quantity;
+      } else {
+        merged.push(localItem);
+      }
+    });
+    return merged;
+  };
+
+  // Función para agregar un ítem al carrito
   const addItem = (item: CartItem) => {
     setCartItems((prev) => {
       const exists = prev.find((p) => p.id === item.id);
@@ -93,6 +168,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  // Función para actualizar la cantidad de un ítem del carrito
   const updateItemQuantity = (id: string, quantity: number) => {
     setCartItems((prev) =>
       prev.map((item) => {
@@ -114,12 +190,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  // Función para eliminar un ítem del carrito
   const removeItem = (id: string) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  // Función para vaciar el carrito (por ejemplo, al hacer logout)
   const clearCart = () => {
     setCartItems([]);
+    localStorage.removeItem('cartItems');
+    localStorage.removeItem('mergedUser');
   };
 
   return (
