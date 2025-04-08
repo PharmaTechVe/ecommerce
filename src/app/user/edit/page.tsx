@@ -154,18 +154,18 @@ export default function EditUserPage() {
 
         <div className="flex-1">
           <div className="mx-auto w-full max-w-[956px] px-4 md:px-0">
-            {/* TOPBAR con Avatar + Semicírculo + Badge */}
+            {/* TOPBAR con Avatar y badge*/}
             <div
               className="relative flex flex-col items-center justify-center rounded-[10px] px-6 py-10 shadow md:flex-row md:justify-between md:py-4"
               style={{
                 background: Colors.topBar,
               }}
             >
-              {/* Semicírculo blanco solo en mobile */}
+              {/*solo en mobile */}
               <div className="absolute bottom-0 left-1/2 z-0 h-28 w-24 -translate-x-1/2 translate-y-1/2 rounded-full bg-white md:hidden" />
 
               {/* Avatar + Badge */}
-              <div className="relative z-10 -mb-[100px] md:static md:mb-0 md:flex md:items-center md:gap-4">
+              <div className="relative z-10 -mb-[70px] md:static md:mb-0 md:flex md:items-center md:gap-4">
                 <div className="relative w-fit">
                   {/* Avatar */}
                   <Avatar
