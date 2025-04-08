@@ -11,14 +11,14 @@ import NavBar from '@/components/Navbar';
 import Button from '@/components/Button';
 import { FontSizes, Colors } from '@/styles/styles';
 import { codeSchema } from '@/lib/validations/recoverPasswordSchema';
-import { api } from '@/lib/sdkConfig';
+import { PharmaTech } from '@pharmatech/sdk';
 import { z } from 'zod';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 
 const emailSchema = z.string().email('Correo no válido');
 
 export default function RecoverPasswordPage() {
-  const { userData, logout } = useAuth();
+  const { userData, token, logout } = useAuth();
   const router = useRouter();
   const [showSidebar, setShowSidebar] = useState(false);
 
@@ -27,10 +27,12 @@ export default function RecoverPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const [hasSentOtp, setHasSentOtp] = useState(false);
 
+  const pharmaTech = PharmaTech.getInstance(true);
   useEffect(() => {
     const sendOtp = async () => {
-      if (!userData?.email) return;
+      if (!userData?.email || hasSentOtp) return;
 
       const result = emailSchema.safeParse(userData.email.trim());
 
@@ -40,8 +42,9 @@ export default function RecoverPasswordPage() {
       }
 
       try {
-        await api.auth.forgotPassword(result.data);
+        await pharmaTech.auth.forgotPassword(userData.email);
         toast.success('Código enviado a tu correo.');
+        setHasSentOtp(true);
       } catch (error) {
         console.error('Error enviando OTP:', error);
         toast.error('No se pudo enviar el código. Intenta más tarde.');
@@ -49,7 +52,7 @@ export default function RecoverPasswordPage() {
     };
 
     sendOtp();
-  }, [userData]);
+  }, [userData, pharmaTech.auth, hasSentOtp]);
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) value = value.slice(-1);
@@ -88,11 +91,16 @@ export default function RecoverPasswordPage() {
       }
 
       try {
-        const response = await api.auth.resetPassword(codeString);
-        localStorage.setItem('pharmatechToken', response.accessToken);
+        if (!token) {
+          toast.error('Token inválido');
+          return;
+        }
+
+        await pharmaTech.auth.validateOtp(codeString, token);
+        localStorage.setItem('pharmatechToken', token);
         toast.success('Código verificado correctamente');
-        router.push('/user/security/recoverPassword/resetPassword');
         setCode(Array(6).fill(''));
+        router.push('/user/security/recoverPassword/resetPassword');
       } catch (err) {
         console.error('Error al verificar el código:', err);
         setGeneralError('Error al verificar el código. Intenta de nuevo.');
@@ -101,7 +109,7 @@ export default function RecoverPasswordPage() {
         setLoading(false);
       }
     },
-    [code, router],
+    [code, token, router, pharmaTech.auth],
   );
 
   if (!userData) return <div className="p-6">Cargando...</div>;
@@ -115,10 +123,10 @@ export default function RecoverPasswordPage() {
   return (
     <div className="relative min-h-screen bg-white">
       <NavBar onCartClick={() => {}} />
-
       <div className="px-4 pt-3 md:px-8 lg:px-16">
         <UserBreadcrumbs />
       </div>
+
       {!showSidebar && (
         <button
           className="absolute left-4 top-4 z-50 md:hidden"

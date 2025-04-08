@@ -9,7 +9,7 @@ import { Sidebar, SidebarUser } from '@/components/SideBar';
 import NavBar from '@/components/Navbar';
 import Button from '@/components/Button';
 import { FontSizes, Colors } from '@/styles/styles';
-import { api } from '@/lib/sdkConfig';
+import { PharmaTech } from '@pharmatech/sdk';
 
 type UserAddressAPIResponse = {
   id: string;
@@ -24,6 +24,7 @@ export default function AddressPage() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [addresses, setAddresses] = useState<UserAddressAPIResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const pharmaTech = PharmaTech.getInstance(true);
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -33,7 +34,7 @@ export default function AddressPage() {
           return;
         }
 
-        const response = await api.userAdress.getListAddresses(
+        const response = await pharmaTech.userAdress.getListAddresses(
           userData.id,
           token,
         );
@@ -46,7 +47,7 @@ export default function AddressPage() {
     };
 
     fetchAddresses();
-  }, [userData?.id, token]);
+  }, [userData?.id, token, pharmaTech.userAdress]);
 
   if (!userData) return <div className="p-6">Cargando...</div>;
 
@@ -58,7 +59,7 @@ export default function AddressPage() {
 
   return (
     <div className="relative min-h-screen bg-white">
-      <NavBar onCartClick={() => {}} /> {/* ✅ NavBar agregado */}
+      <NavBar onCartClick={() => {}} />
       {!showSidebar && (
         <button
           className="absolute left-4 top-4 z-50 md:hidden"

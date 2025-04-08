@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { PharmaTech } from '@pharmatech/sdk';
 import { toast, ToastContainer } from 'react-toastify';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 import { updatePasswordSchema } from '@/lib/validations/updatePasswordSchema';
 import { useAuth } from '@/context/AuthContext';
-import { api } from '@/lib/sdkConfig';
 import NavBar from '@/components/Navbar';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
 import Button from '@/components/Button';
@@ -26,6 +26,7 @@ export default function UpdatePasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const pharmaTech = PharmaTech.getInstance(true);
 
   useEffect(() => {
     if (!userData) {
@@ -63,7 +64,7 @@ export default function UpdatePasswordPage() {
       }
 
       setLoading(true);
-      await api.auth.updatePassword(newPassword, token);
+      await pharmaTech.auth.updateCurrentPassword(password, newPassword, token);
 
       toast.success('Contraseña actualizada correctamente');
       setPassword('');
