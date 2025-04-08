@@ -35,7 +35,7 @@ interface EditFormProps {
   onCancel?: () => void;
 }
 
-export default function EditForm({ onCancel }: EditFormProps) {
+export default function EditForm({}: EditFormProps) {
   const { userData, token } = useAuth();
   const router = useRouter();
   const pharmaTech = PharmaTech.getInstance(true);
@@ -217,17 +217,6 @@ export default function EditForm({ onCancel }: EditFormProps) {
       </div>
 
       <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
-        {onCancel && (
-          <Button
-            variant="white"
-            className="w-full md:w-auto"
-            color="red-50"
-            textColor="white"
-            onClick={onCancel}
-          >
-            Cancelar
-          </Button>
-        )}
         <Button
           variant="submit"
           className="h-[51px] w-full font-semibold text-white md:w-auto"
