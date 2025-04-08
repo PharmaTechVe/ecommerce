@@ -53,7 +53,7 @@ const Input: React.FC<InputProps> = ({
   iconColor = 'text-gray-500',
   iconPosition = 'left',
   helperText,
-  helperTextColor = 'text-gray-500',
+  // helperTextColor = 'text-red-500',
   disabled = false,
   type = 'text',
   showPasswordToggle = false,
@@ -153,7 +153,7 @@ const Input: React.FC<InputProps> = ({
       </div>
 
       {helperText && (
-        <p className="mt-1 text-sm" style={{ color: helperTextColor }}>
+        <p className="visible/invisible mt-1 text-sm text-red-500">
           {helperText}
         </p>
       )}

@@ -1,0 +1,241 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'react-toastify';
+import Input from '@/components/Input/Input';
+import Button from '@/components/Button';
+import RadioButton from '@/components/RadioButton';
+import DatePicker1 from '@/components/Calendar';
+import { editProfileSchema } from '@/lib/validations/registerSchema';
+import { PharmaTech } from '@pharmatech/sdk';
+
+enum UserGender {
+  MALE = 'm',
+  FEMALE = 'f',
+}
+
+function formatBirthDate(rawDate: unknown): string {
+  if (typeof rawDate === 'string') {
+    const parts = rawDate.split('/');
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      return `${year}-${month}-${day}`;
+    }
+    return rawDate;
+  }
+  if (rawDate instanceof Date) {
+    return rawDate.toISOString().slice(0, 10);
+  }
+  return '';
+}
+
+interface EditFormProps {
+  onCancel?: () => void;
+}
+
+export default function EditForm({ onCancel }: EditFormProps) {
+  const { userData, token } = useAuth();
+  const router = useRouter();
+  const pharmaTech = PharmaTech.getInstance(true);
+
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [email, setEmail] = useState('');
+  const [cedula, setCedula] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [genero, setGenero] = useState<UserGender>(UserGender.MALE);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (userData) {
+      setNombre(userData.firstName);
+      setApellido(userData.lastName);
+      setEmail(userData.email);
+      setCedula(userData.documentId);
+      setTelefono(userData.phoneNumber ?? '');
+      setFechaNacimiento(formatBirthDate(userData.profile?.birthDate));
+      setGenero(
+        userData.profile?.gender === 'f' ? UserGender.FEMALE : UserGender.MALE,
+      );
+    }
+  }, [userData]);
+
+  const handleSubmit = async () => {
+    console.log('[EDIT USER] Intentando enviar formulario...');
+
+    const generoTexto = genero === UserGender.FEMALE ? 'mujer' : 'hombre';
+
+    const result = editProfileSchema.safeParse({
+      nombre,
+      apellido,
+      telefono,
+      fechaNacimiento,
+      genero: generoTexto,
+    });
+
+    console.log('[VALIDACIÓN]', result);
+
+    if (!result.success) {
+      const { fieldErrors } = result.error.flatten();
+      console.warn('[ERRORES DE VALIDACIÓN]', fieldErrors);
+
+      setErrors({
+        nombre: fieldErrors.nombre?.[0] ?? '',
+        apellido: fieldErrors.apellido?.[0] ?? '',
+        telefono: fieldErrors.telefono?.[0] ?? '',
+        fechaNacimiento: fieldErrors.fechaNacimiento?.[0] ?? '',
+        genero: fieldErrors.genero?.[0] ?? '',
+      });
+      return;
+    }
+
+    if (!token || !userData?.id) {
+      console.error('[ERROR] Token o userData.id está vacío:', {
+        token,
+        userId: userData?.id,
+      });
+      toast.error(
+        'Error de autenticación. Intenta cerrar sesión y volver a entrar.',
+      );
+      return;
+    }
+
+    const payload = {
+      firstName: nombre,
+      lastName: apellido,
+      phoneNumber: telefono?.trim() === '' ? undefined : telefono,
+      birthDate: fechaNacimiento,
+      gender: genero,
+    };
+
+    console.log('[PAYLOAD A ENVIAR]', payload);
+
+    try {
+      await pharmaTech.user.update(userData.id, payload, token);
+      toast.success('Perfil actualizado correctamente');
+
+      setTimeout(() => {
+        router.push('/user');
+      }, 1000);
+    } catch (error: unknown) {
+      console.error('[ERROR AL ACTUALIZAR PERFIL]', error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'No se pudo actualizar el perfil';
+      toast.error(`Error: ${errorMessage}`);
+    }
+  };
+
+  return (
+    <div className="mt-14 rounded-lg p-4 md:p-6">
+      <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
+        <Input
+          label="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          helperText={errors.nombre}
+          borderColor="#f3f4f6"
+          helperTextColor="red-500"
+        />
+        <Input
+          label="Apellido"
+          value={apellido}
+          onChange={(e) => setApellido(e.target.value)}
+          helperText={errors.apellido}
+          borderColor="#f3f4f6"
+          helperTextColor="red-500"
+        />
+        <Input
+          label="Correo Electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled
+          helperText={errors.email}
+          borderColor="#f3f4f6"
+          helperTextColor="red-500"
+        />
+        <Input
+          label="Cédula"
+          value={cedula}
+          onChange={(e) => setCedula(e.target.value)}
+          disabled
+          helperText={errors.cedula}
+          borderColor="#f3f4f6"
+          helperTextColor="red-500"
+        />
+        <Input
+          label="Número de teléfono"
+          value={telefono}
+          onChange={(e) => setTelefono(e.target.value)}
+          helperText={errors.telefono}
+          borderColor="#f3f4f6"
+          helperTextColor="red-500"
+        />
+      </div>
+
+      <div className="mt-4">
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          Fecha de nacimiento
+        </label>
+        <DatePicker1 onDateSelect={(date) => setFechaNacimiento(date)} />
+        <p
+          className={`min-h-[16px] text-xs text-red-500 ${
+            errors.fechaNacimiento ? 'visible' : 'invisible'
+          }`}
+        >
+          {errors.fechaNacimiento}
+        </p>
+      </div>
+
+      <div className="mt-4 pb-4">
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          Género
+        </label>
+        <div className="flex gap-4">
+          <RadioButton
+            text="Hombre"
+            selected={genero === UserGender.MALE}
+            onSelect={() => setGenero(UserGender.MALE)}
+          />
+          <RadioButton
+            text="Mujer"
+            selected={genero === UserGender.FEMALE}
+            onSelect={() => setGenero(UserGender.FEMALE)}
+          />
+        </div>
+        <p
+          className={`min-h-[16px] text-xs text-red-500 ${
+            errors.genero ? 'visible' : 'invisible'
+          }`}
+        >
+          {errors.genero}
+        </p>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
+        {onCancel && (
+          <Button
+            variant="white"
+            className="w-full md:w-auto"
+            color="red-50"
+            textColor="white"
+            onClick={onCancel}
+          >
+            Cancelar
+          </Button>
+        )}
+        <Button
+          variant="submit"
+          className="h-[51px] w-full font-semibold text-white md:w-auto"
+          onClick={handleSubmit}
+        >
+          Guardar cambios
+        </Button>
+      </div>
+    </div>
+  );
+}
