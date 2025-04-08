@@ -88,16 +88,18 @@ const Input: React.FC<InputProps> = ({
       )}
 
       <div
-        className="relative flex items-center rounded-lg border bg-white px-3 py-2 transition-all"
+        className="relative flex items-center rounded-lg border px-3 py-2 transition-all"
         style={{
-          borderWidth: borderSize,
+          backgroundColor: disabled ? '#f3f4f6' : 'white',
+          borderWidth: disabled ? '1px' : borderSize,
           borderColor: disabled
-            ? '#d1d5db'
+            ? '#f3f4f6'
             : isFocused
               ? focusBorderColor
               : isHovered
                 ? hoverBorderColor
                 : borderColor,
+          boxShadow: disabled ? 'inset 0 0 0 1px #f3f4f6' : undefined,
         }}
         onMouseEnter={() => !disabled && setIsHovered(true)}
         onMouseLeave={() => !disabled && setIsHovered(false)}
@@ -120,7 +122,9 @@ const Input: React.FC<InputProps> = ({
           onBlur={() => !disabled && setIsFocused(false)}
           className={`w-full bg-transparent outline-none ${
             disabled ? 'cursor-not-allowed text-gray-400' : 'text-black'
-          } ${Icon && iconPosition === 'left' ? 'pl-10' : ''} ${Icon && iconPosition === 'right' ? 'pr-10' : ''}`}
+          } ${Icon && iconPosition === 'left' ? 'pl-10' : ''} ${
+            Icon && iconPosition === 'right' ? 'pr-10' : ''
+          }`}
         />
 
         {Icon && iconPosition === 'right' && (

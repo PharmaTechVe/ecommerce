@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { editUserSchema } from '@/lib/validations/editSchema';
 import { useAuth } from '@/context/AuthContext';
 import NavBar from '@/components/Navbar';
@@ -31,18 +31,15 @@ function formatBirthDate(rawDate: unknown): string {
     }
     return rawDate;
   }
-
   if (rawDate instanceof Date) {
     return rawDate.toISOString().slice(0, 10);
   }
-
   return '';
 }
 
 export default function EditUserPage() {
-  const { userData, logout } = useAuth();
+  const { userData, logout, token } = useAuth();
   const router = useRouter();
-  const params = useParams();
   const [showSidebar, setShowSidebar] = useState(false);
 
   const [firstName, setFirstName] = useState('');
@@ -52,7 +49,6 @@ export default function EditUserPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState<UserGender>(UserGender.MALE);
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -66,10 +62,6 @@ export default function EditUserPage() {
       setGender(userData.profile?.gender as UserGender);
     }
   }, [userData]);
-
-  const getToken = () =>
-    sessionStorage.getItem('pharmatechToken') ||
-    localStorage.getItem('pharmatechToken');
 
   const handleSubmit = async () => {
     const result = editUserSchema.safeParse({
@@ -97,9 +89,8 @@ export default function EditUserPage() {
     }
 
     try {
-      const token = getToken();
-      if (!token || typeof params.id !== 'string') {
-        toast.error('Token o ID inválido');
+      if (!token || !userData?.id) {
+        console.error('Token o ID de usuario inválido');
         return;
       }
 
@@ -113,7 +104,7 @@ export default function EditUserPage() {
         gender,
       };
 
-      await api.user.update(params.id, payload, token);
+      await api.user.update(userData.id, payload, token);
       toast.success('Perfil actualizado correctamente');
       router.push(`/user`);
     } catch (error) {
@@ -130,17 +121,13 @@ export default function EditUserPage() {
     avatar: userData.profile?.profilePicture ?? '',
   };
 
-  const navBarProps = {
-    onCartClick: () => {},
-    onProfileClick: () => router.push(`/user`),
-  };
-
   return (
     <div className="relative min-h-screen bg-white">
-      <NavBar {...navBarProps} />
+      <NavBar />
       <div className="px-4 pt-3 md:px-8 lg:px-16">
         <UserBreadcrumbs />
       </div>
+
       {!showSidebar && (
         <button
           className="absolute left-4 top-4 z-50 md:hidden"
@@ -166,59 +153,89 @@ export default function EditUserPage() {
         </Sidebar>
 
         <div className="flex-1">
-          <div className="mx-auto w-[956px] px-4 md:px-0">
+          <div className="mx-auto w-full max-w-[956px] px-4 md:px-0">
+            {/* TOPBAR con Avatar + Semicírculo + Badge */}
             <div
-              className="mt-4 flex items-center justify-between rounded-[10px] px-6 py-4 shadow"
+              className="relative flex flex-col items-center justify-center rounded-[10px] px-6 py-10 shadow md:flex-row md:justify-between md:py-4"
               style={{
-                width: '956px',
-                height: '131px',
                 background: Colors.topBar,
               }}
             >
-              <div className="flex items-center gap-4">
-                <Avatar
-                  name={`${userData.firstName} ${userData.lastName}`}
-                  imageUrl={userData.profile?.profilePicture}
-                  size={56}
-                  withDropdown={false}
-                />
-                <h2 className="text-xl font-semibold text-black">
+              {/* Semicírculo blanco solo en mobile */}
+              <div className="absolute bottom-0 left-1/2 z-0 h-28 w-24 -translate-x-1/2 translate-y-1/2 rounded-full bg-white md:hidden" />
+
+              {/* Avatar + Badge */}
+              <div className="relative z-10 -mb-[100px] md:static md:mb-0 md:flex md:items-center md:gap-4">
+                <div className="relative w-fit">
+                  {/* Avatar */}
+                  <Avatar
+                    name={`${userData.firstName} ${userData.lastName}`}
+                    imageUrl={userData.profile?.profilePicture}
+                    size={80}
+                    withDropdown={false}
+                  />
+                  {/* Badge (siempre visible) */}
+                  <div className="absolute bottom-0 right-0 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-[#2D397B]">
+                    <svg
+                      width="15"
+                      height="19"
+                      viewBox="0 0 15 19"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8.40974 16.5121L13.8218 13.529M5.44435 5.18871L11.3094 14.9138M7.88488 3.45702C7.97384 3.60685 7.91605 3.80123 7.75579 3.8912L2.89534 6.6196C2.73508 6.70956 2.53304 6.66103 2.44407 6.5112C0.438238 3.13329 1.74333 1.84064 2.90922 1.18617C4.07511 0.531702 5.87569 0.0734776 7.88488 3.45702ZM8.04596 3.72831L13.739 13.3157C13.8083 13.4324 13.842 13.5661 13.8346 13.7008C13.7407 15.3999 13.5009 16.8887 13.3418 17.7344C13.2662 18.1358 12.8503 18.3715 12.454 18.2369C11.6172 17.9527 10.1627 17.416 8.59372 16.6428C8.46993 16.5818 8.3675 16.4865 8.29812 16.3697L2.60516 6.78248L8.04596 3.72831Z"
+                        stroke="white"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Nombre solo visible en desktop */}
+                <h2 className="hidden text-xl font-semibold text-black md:block">
                   {userData.firstName} {userData.lastName}
                 </h2>
               </div>
             </div>
 
-            <div className="mt-6 rounded-lg p-4 md:p-6">
+            {/* FORMULARIO */}
+            <div className="mt-14 rounded-lg p-4 md:p-6">
               <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
                 <Input
                   label="Nombre"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   helperText={errors.firstName}
+                  borderColor="#f3f4f6"
                 />
                 <Input
                   label="Apellido"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   helperText={errors.lastName}
+                  borderColor="#f3f4f6"
                 />
                 <Input
                   label="Correo Electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled
+                  borderColor="#f3f4f6"
                 />
                 <Input
                   label="Cédula"
                   value={documentId}
                   onChange={(e) => setDocumentId(e.target.value)}
                   disabled
+                  borderColor="#f3f4f6"
                 />
                 <Input
                   label="Número de teléfono"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   helperText={errors.phoneNumber}
+                  borderColor="#f3f4f6"
                 />
               </div>
 
@@ -254,9 +271,10 @@ export default function EditUserPage() {
                   <p className="mt-1 text-sm text-red-500">{errors.gender}</p>
                 )}
               </div>
+
               <Button
                 variant="submit"
-                className="h-[51px] w-[841px] font-semibold text-white"
+                className="h-[51px] w-full font-semibold text-white"
                 onClick={handleSubmit}
               >
                 Guardar cambios

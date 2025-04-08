@@ -4,9 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-
-import { updatePasswordSchema } from '@/lib/validations/updatePasswordSchema';
+import { resetPasswordSchema } from '@/lib/validations/recoverPasswordSchema';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 import NavBar from '@/components/Navbar';
@@ -21,7 +19,6 @@ export default function UpdatePasswordPage() {
   const router = useRouter();
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -30,17 +27,16 @@ export default function UpdatePasswordPage() {
   useEffect(() => {
     if (!userData) {
       toast.error('No se encontró información del usuario');
-      router.push('/login');
+      logout();
     }
-  }, [userData, router]);
+  }, [userData, router, logout]);
 
   const getToken = () =>
     sessionStorage.getItem('pharmatechToken') ||
     localStorage.getItem('pharmatechToken');
 
   const handleSubmit = async () => {
-    const result = updatePasswordSchema.safeParse({
-      password,
+    const result = resetPasswordSchema.safeParse({
       newPassword,
       confirmPassword,
     });
@@ -48,7 +44,6 @@ export default function UpdatePasswordPage() {
     if (!result.success) {
       const { fieldErrors } = result.error.flatten();
       setErrors({
-        password: fieldErrors.password?.[0] ?? '',
         newPassword: fieldErrors.newPassword?.[0] ?? '',
         confirmPassword: fieldErrors.confirmPassword?.[0] ?? '',
       });
@@ -57,19 +52,16 @@ export default function UpdatePasswordPage() {
 
     try {
       const token = getToken();
-      if (!token || !userData?.id) {
+      if (!token) {
         toast.error('Token inválido');
         return;
       }
 
       setLoading(true);
       await api.auth.updatePassword(newPassword, token);
-
       toast.success('Contraseña actualizada correctamente');
-      setPassword('');
       setNewPassword('');
       setConfirmPassword('');
-
       setTimeout(() => {
         router.push('/user');
       }, 600);
@@ -120,7 +112,7 @@ export default function UpdatePasswordPage() {
           </button>
         </Sidebar>
 
-        {/* Contenido */}
+        {/* Contenido centrado */}
         <div className="flex flex-1 justify-center px-4 md:px-0">
           <div className="w-full max-w-[620px] space-y-6 p-4 text-center md:p-6">
             <h1
@@ -133,65 +125,43 @@ export default function UpdatePasswordPage() {
               className="text-base"
               style={{ fontSize: FontSizes.b1.size, color: Colors.textMain }}
             >
-              Cambia tu contraseña para proteger la seguridad de tu cuenta
+              Actualiza tu contraseña para proteger la seguridad de tu cuenta
             </p>
 
             <div className="space-y-6 text-left">
-              {/* Contraseña actual */}
-              <Input
-                label="Contraseña Actual"
-                placeholder="Ingresa tu contraseña actual"
-                type="password"
-                showPasswordToggle
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                borderColor="#393938"
-                borderSize="1px"
-              />
-              {errors.password && (
-                <p className="text-xs text-red-500">{errors.password}</p>
-              )}
-
               {/* Nueva contraseña */}
               <Input
-                label="Nueva Contraseña"
+                label="Nueva contraseña"
                 placeholder="Ingresa tu nueva contraseña"
                 type="password"
-                showPasswordToggle
+                showPasswordToggle={true}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 borderColor="#393938"
                 borderSize="1px"
               />
               {errors.newPassword && (
-                <p className="text-xs text-red-500">{errors.newPassword}</p>
+                <p className="text-xs text-red-500" role="alert">
+                  {errors.newPassword}
+                </p>
               )}
 
               {/* Confirmar contraseña */}
               <Input
-                label="Confirmar Contraseña"
+                label="Confirmar contraseña"
                 placeholder="Confirma tu nueva contraseña"
                 type="password"
-                showPasswordToggle
+                showPasswordToggle={true}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 borderColor="#393938"
                 borderSize="1px"
               />
               {errors.confirmPassword && (
-                <p className="text-xs text-red-500">{errors.confirmPassword}</p>
+                <p className="text-xs text-red-500" role="alert">
+                  {errors.confirmPassword}
+                </p>
               )}
-
-              {/* Enlace recuperación */}
-              <p className="text-sm">
-                ¿Olvidaste tu contraseña?{' '}
-                <Link
-                  href={`/user/security/recoverPassword`}
-                  style={{ color: Colors.secondaryLight }}
-                >
-                  Haz click aquí
-                </Link>
-              </p>
 
               {/* Botón */}
               <Button

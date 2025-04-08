@@ -44,7 +44,7 @@ const getDefaultMenuItems = (): SidebarMenuItem[] => [
   {
     id: 'addresses',
     label: 'Mis Direcciones',
-    href: `/user/addresses`,
+    href: `/user/address`,
     icon: <MapIcon className="h-5 w-5" />,
   },
   {

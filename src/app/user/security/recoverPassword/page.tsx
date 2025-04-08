@@ -89,9 +89,9 @@ export default function RecoverPasswordPage() {
 
       try {
         const response = await api.auth.resetPassword(codeString);
-        sessionStorage.setItem('jwt', response.accessToken);
+        localStorage.setItem('pharmatechToken', response.accessToken);
         toast.success('Código verificado correctamente');
-        router.push('/user/reset-password');
+        router.push('/user/security/recoverPassword/resetPassword');
         setCode(Array(6).fill(''));
       } catch (err) {
         console.error('Error al verificar el código:', err);
