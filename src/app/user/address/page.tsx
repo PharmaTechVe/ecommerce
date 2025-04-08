@@ -118,10 +118,14 @@ export default function AddressPage() {
               </p>
             ) : (
               <div className="space-y-4">
-                {addresses.map((addr) => (
+                {addresses.map((addr, index) => (
                   <div
                     key={addr.id}
-                    className="flex items-center justify-between rounded border border-gray-50 bg-gray-50 px-4 py-3"
+                    className={`flex h-[43px] w-[818px] items-center justify-between rounded border px-4 ${
+                      index % 2 === 0
+                        ? 'border-gray-50 bg-gray-50'
+                        : 'border-white bg-white'
+                    }`}
                   >
                     <p
                       className={`flex-1 pr-4 text-[${FontSizes.b1.size}] text-[${Colors.textMain}]`}
