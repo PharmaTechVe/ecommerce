@@ -139,7 +139,6 @@ export default function RecoverPasswordPage() {
       <div className="flex flex-col gap-6 pt-20 md:flex-row">
         <Sidebar
           user={sidebarUser}
-          isOpen={showSidebar}
           onLogout={logout}
           className="fixed top-0 z-40 ml-[60px] h-screen md:static md:h-auto"
         >
