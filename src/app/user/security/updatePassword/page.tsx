@@ -10,7 +10,7 @@ import NavBar from '@/components/Navbar';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 import { Colors, FontSizes } from '@/styles/styles';
-import UserPasswordForm from './UserPasswordForm';
+import UserPasswordForm from '@/components/User/UserPasswordForm';
 
 export default function UpdatePasswordPage() {
   const { userData, logout } = useAuth();
