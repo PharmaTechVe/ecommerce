@@ -6,7 +6,7 @@ import NavBar from '@/components/Navbar';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
-import EditForm from '@/components/User/editUserAddressForm';
+import EditAddressForm from '@/components/User/UserAddressForm';
 import { ToastContainer } from 'react-toastify';
 
 export default function Page() {
@@ -47,7 +47,7 @@ export default function Page() {
           <Sidebar user={sidebarUser} onLogout={logout} />
           {/* Formulario principal */}
           <div className="flex-1">
-            <EditForm />
+            <EditAddressForm />
           </div>
         </div>
       </div>

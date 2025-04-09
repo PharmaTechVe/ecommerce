@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
 import Input from '@/components/Input/Input';
 import Button from '@/components/Button';
@@ -10,6 +9,7 @@ import RadioButton from '@/components/RadioButton';
 import DatePicker1 from '@/components/Calendar';
 import { editProfileSchema } from '@/lib/validations/registerSchema';
 import { PharmaTech } from '@pharmatech/sdk';
+import { useAuth } from '@/context/AuthContext';
 
 enum UserGender {
   MALE = 'm',
@@ -19,24 +19,17 @@ enum UserGender {
 enum UserRole {
   ADMIN = 'admin',
   CUSTOMER = 'customer',
-  // agrega más roles si el backend los maneja
 }
 
-function formatBirthDate(rawDate: unknown): string {
-  if (typeof rawDate === 'string') {
-    const normalized = rawDate.includes('/')
-      ? rawDate.replace(/\//g, '-')
-      : rawDate;
-    const parts = normalized.split('-');
-    if (parts.length === 3) {
-      const [year, month, day] = parts;
-      return `${year}-${month}-${day}`;
-    }
-    return normalized;
+function formatBirthDate(value: unknown): string {
+  if (typeof value === 'string') {
+    const normalized = value.includes('/') ? value.replace(/\//g, '-') : value;
+    const [year, month, day] = normalized.split('-');
+    return `${year}-${month}-${day}`;
   }
 
-  if (rawDate instanceof Date) {
-    return rawDate.toISOString().slice(0, 10);
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
   }
 
   return '';
@@ -51,92 +44,82 @@ export default function EditForm({}: EditFormProps) {
   const router = useRouter();
   const pharmaTech = PharmaTech.getInstance(true);
 
-  const [nombre, setNombre] = useState('');
-  const [apellido, setApellido] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [fechaNacimiento, setFechaNacimiento] = useState('');
-  const [genero, setGenero] = useState<UserGender>(UserGender.MALE);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [gender, setGender] = useState<UserGender>(UserGender.MALE);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (userData) {
-      setNombre(userData.firstName);
-      setApellido(userData.lastName);
-      setTelefono(userData.phoneNumber ?? '');
-      setFechaNacimiento(formatBirthDate(userData.profile?.birthDate));
-      setGenero(
+      setFirstName(userData.firstName);
+      setLastName(userData.lastName);
+      setPhoneNumber(userData.phoneNumber ?? '');
+      setBirthDate(formatBirthDate(userData.profile?.birthDate));
+      setGender(
         userData.profile?.gender === 'f' ? UserGender.FEMALE : UserGender.MALE,
       );
     }
   }, [userData]);
 
   const handleSubmit = async () => {
-    console.log('[EDIT USER] Intentando enviar formulario...');
-
     if (!userData?.email) {
-      toast.error('El correo del usuario no está disponible.');
+      toast.error('Email is not available.');
       return;
     }
 
-    const generoTexto = genero === UserGender.FEMALE ? 'mujer' : 'hombre';
+    const genderText = gender === UserGender.FEMALE ? 'mujer' : 'hombre';
 
     const result = editProfileSchema.safeParse({
-      nombre,
-      apellido,
-      telefono,
-      fechaNacimiento,
-      genero: generoTexto,
+      nombre: firstName,
+      apellido: lastName,
+      telefono: phoneNumber,
+      fechaNacimiento: birthDate,
+      genero: genderText,
     });
 
     if (!result.success) {
       const { fieldErrors } = result.error.flatten();
-      console.warn('[ERRORES DE VALIDACIÓN]', fieldErrors);
-
       setErrors({
-        nombre: fieldErrors.nombre?.[0] ?? '',
-        apellido: fieldErrors.apellido?.[0] ?? '',
-        telefono: fieldErrors.telefono?.[0] ?? '',
-        fechaNacimiento: fieldErrors.fechaNacimiento?.[0] ?? '',
-        genero: fieldErrors.genero?.[0] ?? '',
+        firstName: fieldErrors.nombre?.[0] ?? '',
+        lastName: fieldErrors.apellido?.[0] ?? '',
+        phoneNumber: fieldErrors.telefono?.[0] ?? '',
+        birthDate: fieldErrors.fechaNacimiento?.[0] ?? '',
+        gender: fieldErrors.genero?.[0] ?? '',
       });
       return;
     }
 
     if (!token || !userData?.id) {
-      console.error('[ERROR] Token o userData.id está vacío:', {
-        token,
-        userId: userData?.id,
-      });
-      toast.error(
-        'Error de autenticación. Intenta cerrar sesión y volver a entrar.',
-      );
+      toast.error('Authentication error. Please log in again.');
       return;
     }
 
     const payload = {
-      firstName: nombre,
-      lastName: apellido,
+      firstName,
+      lastName,
       email: userData.email,
-      phoneNumber: telefono?.trim() === '' ? undefined : telefono,
-      birthDate: fechaNacimiento,
-      gender: genero,
+      phoneNumber: phoneNumber.trim() === '' ? undefined : phoneNumber,
+      birthDate,
+      gender,
       role: UserRole.CUSTOMER,
       profilePicture: userData.profile?.profilePicture ?? undefined,
     };
 
     try {
       await pharmaTech.user.update(userData.id, payload, token);
-      toast.success('Perfil actualizado correctamente');
+      toast.success('Perfil Actualizado exitosamente');
 
       setTimeout(() => {
         router.push('/user');
       }, 1000);
     } catch (error: unknown) {
-      console.error('[ERROR AL ACTUALIZAR PERFIL]', error);
+      console.error('[UPDATE PROFILE ERROR]', error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'No se pudo actualizar el perfil';
+          : 'Error al actualizar. Intente de nuevo.';
       toast.error(`Error: ${errorMessage}`);
     }
   };
@@ -146,85 +129,83 @@ export default function EditForm({}: EditFormProps) {
       <div className="mx-auto w-full max-w-[956px]">
         <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
           <Input
-            label="Nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            helperText={errors.nombre}
+            label="First Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            helperText={errors.firstName}
             borderColor="#f3f4f6"
             helperTextColor="red-500"
           />
           <Input
-            label="Apellido"
-            value={apellido}
-            onChange={(e) => setApellido(e.target.value)}
-            helperText={errors.apellido}
+            label="Last Name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            helperText={errors.lastName}
             borderColor="#f3f4f6"
             helperTextColor="red-500"
           />
           <Input
-            label="Correo Electrónico"
+            label="Email"
             value={userData?.email ?? ''}
             onChange={() => {}}
             disabled
             borderColor="#f3f4f6"
           />
           <Input
-            label="Cédula"
+            label="Document ID"
             value={userData?.documentId ?? ''}
             onChange={() => {}}
             disabled
             borderColor="#f3f4f6"
           />
-
-          {/* Teléfono y Fecha de nacimiento en la misma fila */}
           <Input
-            label="Número de teléfono"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            helperText={errors.telefono}
+            label="Phone Number"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            helperText={errors.phoneNumber}
             borderColor="#f3f4f6"
             helperTextColor="red-500"
           />
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Fecha de nacimiento
+              Birth Date
             </label>
             <DatePicker1
-              value={fechaNacimiento}
-              onDateSelect={(date) => setFechaNacimiento(date)}
+              value={birthDate}
+              onDateSelect={(date) => setBirthDate(date)}
             />
             <p
               className={`min-h-[16px] text-xs text-red-500 ${
-                errors.fechaNacimiento ? 'visible' : 'invisible'
+                errors.birthDate ? 'visible' : 'invisible'
               }`}
             >
-              {errors.fechaNacimiento}
+              {errors.birthDate}
             </p>
           </div>
         </div>
 
         <div className="mt-6 pb-4">
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Género
+            Gender
           </label>
           <div className="flex gap-4">
             <RadioButton
-              text="Hombre"
-              selected={genero === UserGender.MALE}
-              onSelect={() => setGenero(UserGender.MALE)}
+              text="Male"
+              selected={gender === UserGender.MALE}
+              onSelect={() => setGender(UserGender.MALE)}
             />
             <RadioButton
-              text="Mujer"
-              selected={genero === UserGender.FEMALE}
-              onSelect={() => setGenero(UserGender.FEMALE)}
+              text="Female"
+              selected={gender === UserGender.FEMALE}
+              onSelect={() => setGender(UserGender.FEMALE)}
             />
           </div>
           <p
             className={`min-h-[16px] text-xs text-red-500 ${
-              errors.genero ? 'visible' : 'invisible'
+              errors.gender ? 'visible' : 'invisible'
             }`}
           >
-            {errors.genero}
+            {errors.gender}
           </p>
         </div>
 
@@ -234,7 +215,7 @@ export default function EditForm({}: EditFormProps) {
             className="h-[51px] w-full font-semibold text-white md:w-auto"
             onClick={handleSubmit}
           >
-            Guardar cambios
+            Guardar Cambios
           </Button>
         </div>
       </div>

@@ -10,7 +10,7 @@ import RadioButton from '@/components/RadioButton';
 import Avatar from '@/components/Avatar';
 import { Colors } from '@/styles/styles';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
-import EditForm from './edit/editForm';
+import EditForm from '@/components/User/UserProfileForm';
 import { ToastContainer } from 'react-toastify';
 
 function formatFechaFromAny(value: unknown): string {

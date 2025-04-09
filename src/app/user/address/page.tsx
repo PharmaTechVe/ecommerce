@@ -14,7 +14,7 @@ import NavBar from '@/components/Navbar';
 import Button from '@/components/Button';
 import { FontSizes, Colors } from '@/styles/styles';
 import { PharmaTech } from '@pharmatech/sdk';
-import EditForm from '@/components/User/editUserAddressForm';
+import EditForm from '@/components/User/UserAddressForm';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 
 type UserAddressAPIResponse = {
