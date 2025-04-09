@@ -13,10 +13,10 @@ export default function Dropdown({ label, items, onSelect }: DropdownProps) {
   const [selected, setSelected] = useState(label);
 
   return (
-    <div className="relative w-auto">
+    <div className="relative w-full">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="focus:blue flex w-full items-center justify-between rounded-md border border-gray-400 bg-white px-4 py-2 focus:outline-none focus:ring-2"
+        className="focus:blue flex w-full items-center justify-between rounded-md border border-gray-400 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2"
       >
         {selected}
         {isOpen ? (
@@ -25,8 +25,12 @@ export default function Dropdown({ label, items, onSelect }: DropdownProps) {
           <ChevronDownIcon className="h-4 w-4 transition duration-200" />
         )}
       </button>
+
       {isOpen && (
-        <ul className="absolute left-0 mt-1 w-full rounded-md border border-gray-300 bg-white shadow-lg">
+        <ul
+          className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg"
+          style={{ maxHeight: '15rem' }} // ~240px
+        >
           {items.map((item) => (
             <li
               key={item}
@@ -34,9 +38,7 @@ export default function Dropdown({ label, items, onSelect }: DropdownProps) {
               onClick={() => {
                 setSelected(item);
                 setIsOpen(false);
-                if (onSelect) {
-                  onSelect(item);
-                }
+                if (onSelect) onSelect(item);
               }}
             >
               {item}

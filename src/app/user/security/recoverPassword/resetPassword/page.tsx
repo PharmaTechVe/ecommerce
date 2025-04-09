@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon } from '@heroicons/react/24/outline';
 import { resetPasswordSchema } from '@/lib/validations/recoverPasswordSchema';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
@@ -98,19 +98,7 @@ export default function UpdatePasswordPage() {
       )}
 
       <div className="flex flex-col gap-6 pt-20 md:flex-row">
-        <Sidebar
-          user={sidebarUser}
-          isOpen={showSidebar}
-          onLogout={logout}
-          className="fixed top-0 z-40 ml-[60px] h-screen md:static md:h-auto"
-        >
-          <button
-            onClick={() => setShowSidebar(false)}
-            className="absolute right-4 top-4 md:hidden"
-          >
-            <XMarkIcon className="h-6 w-6 text-gray-500" />
-          </button>
-        </Sidebar>
+        <Sidebar user={sidebarUser} onLogout={logout} />
 
         {/* Contenido centrado */}
         <div className="flex flex-1 justify-center px-4 md:px-0">

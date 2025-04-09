@@ -8,17 +8,34 @@ export default function UserBreadcrumbs() {
 
   const breadcrumbLabels: Record<string, string> = {
     user: 'Mi Perfil',
+    address: 'Mis Direcciones',
     edit: 'Editar Perfil',
+    'edit-address': 'Editar Dirección',
+    new: 'Nueva Dirección',
     security: 'Seguridad',
+    updatePassword: 'Actualizar Contraseña',
+    recoverPassword: 'Recuperar Contraseña',
   };
 
-  const nonClickableSegments = ['security'];
+  const nonClickableSegments = ['security', 'edit-address', 'new'];
 
   const segments = pathname.split('/').filter(Boolean);
+
+  const isUUID = (segment: string) => /^[0-9a-fA-F-]{36}$/.test(segment);
+
+  // Usamos flatMap para evitar nulls y mantener tipado string[]
+  const cleanedSegments = segments.flatMap((segment, index, arr) => {
+    if (isUUID(segment) && arr[index + 1] === 'edit-address') {
+      return []; // omitimos el UUID
+    }
+    return [segment];
+  });
+
   const limitedSegments =
-    segments.includes('updatePassword') || segments.includes('recoverPassword')
-      ? segments.slice(0, segments.indexOf('security') + 1)
-      : segments;
+    cleanedSegments.includes('updatePassword') ||
+    cleanedSegments.includes('recoverPassword')
+      ? cleanedSegments.slice(0, cleanedSegments.indexOf('security') + 1)
+      : cleanedSegments;
 
   const items: { label: string; href?: string }[] = [
     { label: 'Home', href: '/' },

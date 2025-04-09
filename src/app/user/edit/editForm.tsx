@@ -76,8 +76,6 @@ export default function EditForm({}: EditFormProps) {
       genero: generoTexto,
     });
 
-    console.log('[VALIDACIÓN]', result);
-
     if (!result.success) {
       const { fieldErrors } = result.error.flatten();
       console.warn('[ERRORES DE VALIDACIÓN]', fieldErrors);
@@ -111,8 +109,6 @@ export default function EditForm({}: EditFormProps) {
       gender: genero,
     };
 
-    console.log('[PAYLOAD A ENVIAR]', payload);
-
     try {
       await pharmaTech.user.update(userData.id, payload, token);
       toast.success('Perfil actualizado correctamente');
@@ -132,98 +128,101 @@ export default function EditForm({}: EditFormProps) {
 
   return (
     <div className="mt-14 rounded-lg p-4 md:p-6">
-      <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
-        <Input
-          label="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          helperText={errors.nombre}
-          borderColor="#f3f4f6"
-          helperTextColor="red-500"
-        />
-        <Input
-          label="Apellido"
-          value={apellido}
-          onChange={(e) => setApellido(e.target.value)}
-          helperText={errors.apellido}
-          borderColor="#f3f4f6"
-          helperTextColor="red-500"
-        />
-        <Input
-          label="Correo Electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled
-          helperText={errors.email}
-          borderColor="#f3f4f6"
-          helperTextColor="red-500"
-        />
-        <Input
-          label="Cédula"
-          value={cedula}
-          onChange={(e) => setCedula(e.target.value)}
-          disabled
-          helperText={errors.cedula}
-          borderColor="#f3f4f6"
-          helperTextColor="red-500"
-        />
-        <Input
-          label="Número de teléfono"
-          value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
-          helperText={errors.telefono}
-          borderColor="#f3f4f6"
-          helperTextColor="red-500"
-        />
-      </div>
-
-      <div className="mt-4">
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Fecha de nacimiento
-        </label>
-        <DatePicker1 onDateSelect={(date) => setFechaNacimiento(date)} />
-        <p
-          className={`min-h-[16px] text-xs text-red-500 ${
-            errors.fechaNacimiento ? 'visible' : 'invisible'
-          }`}
-        >
-          {errors.fechaNacimiento}
-        </p>
-      </div>
-
-      <div className="mt-4 pb-4">
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Género
-        </label>
-        <div className="flex gap-4">
-          <RadioButton
-            text="Hombre"
-            selected={genero === UserGender.MALE}
-            onSelect={() => setGenero(UserGender.MALE)}
+      {/* Contenedor principal con el mismo max-width que el top bar */}
+      <div className="mx-auto w-full max-w-[956px]">
+        <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
+          <Input
+            label="Nombre"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            helperText={errors.nombre}
+            borderColor="#f3f4f6"
+            helperTextColor="red-500"
           />
-          <RadioButton
-            text="Mujer"
-            selected={genero === UserGender.FEMALE}
-            onSelect={() => setGenero(UserGender.FEMALE)}
+          <Input
+            label="Apellido"
+            value={apellido}
+            onChange={(e) => setApellido(e.target.value)}
+            helperText={errors.apellido}
+            borderColor="#f3f4f6"
+            helperTextColor="red-500"
+          />
+          <Input
+            label="Correo Electrónico"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled
+            helperText={errors.email}
+            borderColor="#f3f4f6"
+            helperTextColor="red-500"
+          />
+          <Input
+            label="Cédula"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+            disabled
+            helperText={errors.cedula}
+            borderColor="#f3f4f6"
+            helperTextColor="red-500"
+          />
+          <Input
+            label="Número de teléfono"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            helperText={errors.telefono}
+            borderColor="#f3f4f6"
+            helperTextColor="red-500"
           />
         </div>
-        <p
-          className={`min-h-[16px] text-xs text-red-500 ${
-            errors.genero ? 'visible' : 'invisible'
-          }`}
-        >
-          {errors.genero}
-        </p>
-      </div>
 
-      <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
-        <Button
-          variant="submit"
-          className="h-[51px] w-full font-semibold text-white md:w-auto"
-          onClick={handleSubmit}
-        >
-          Guardar cambios
-        </Button>
+        <div className="mt-4">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Fecha de nacimiento
+          </label>
+          <DatePicker1 onDateSelect={(date) => setFechaNacimiento(date)} />
+          <p
+            className={`min-h-[16px] text-xs text-red-500 ${
+              errors.fechaNacimiento ? 'visible' : 'invisible'
+            }`}
+          >
+            {errors.fechaNacimiento}
+          </p>
+        </div>
+
+        <div className="mt-4 pb-4">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Género
+          </label>
+          <div className="flex gap-4">
+            <RadioButton
+              text="Hombre"
+              selected={genero === UserGender.MALE}
+              onSelect={() => setGenero(UserGender.MALE)}
+            />
+            <RadioButton
+              text="Mujer"
+              selected={genero === UserGender.FEMALE}
+              onSelect={() => setGenero(UserGender.FEMALE)}
+            />
+          </div>
+          <p
+            className={`min-h-[16px] text-xs text-red-500 ${
+              errors.genero ? 'visible' : 'invisible'
+            }`}
+          >
+            {errors.genero}
+          </p>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
+          <Button
+            variant="submit"
+            className="h-[51px] w-full font-semibold text-white md:w-auto"
+            onClick={handleSubmit}
+          >
+            Guardar cambios
+          </Button>
+        </div>
       </div>
     </div>
   );

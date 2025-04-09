@@ -21,6 +21,7 @@ interface InputProps {
   showPasswordToggleIconColor?: string;
   borderSize?: string;
   borderColor?: string;
+  height?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -53,13 +54,13 @@ const Input: React.FC<InputProps> = ({
   iconColor = 'text-gray-500',
   iconPosition = 'left',
   helperText,
-  // helperTextColor = 'text-red-500',
   disabled = false,
   type = 'text',
   showPasswordToggle = false,
   showPasswordToggleIconColor = 'text-gray-500',
   borderSize = '2px',
   borderColor = '#000000',
+  height,
   onChange,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -120,11 +121,12 @@ const Input: React.FC<InputProps> = ({
           onChange={onChange}
           onFocus={() => !disabled && setIsFocused(true)}
           onBlur={() => !disabled && setIsFocused(false)}
-          className={`w-full bg-transparent outline-none ${
+          className={`w-full resize-none bg-transparent outline-none ${
             disabled ? 'cursor-not-allowed text-gray-400' : 'text-black'
           } ${Icon && iconPosition === 'left' ? 'pl-10' : ''} ${
             Icon && iconPosition === 'right' ? 'pr-10' : ''
           }`}
+          style={{ height: height ?? 'auto' }} // 👈 APLICACIÓN DEL TAMAÑO
         />
 
         {Icon && iconPosition === 'right' && (
