@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   PencilIcon,
@@ -154,84 +154,93 @@ export default function AddressPage() {
           </svg>
         </button>
       )}
-      <div className="flex flex-col gap-6 pt-4 md:flex-row">
-        <Sidebar user={sidebarUser} onLogout={logout} className="ml-[104px]" />
-        <div className="flex flex-1 flex-col items-center px-4 md:px-0">
-          <div className="w-full max-w-3xl space-y-6 py-4 md:py-6">
-            <div className="w-full md:flex md:items-center md:justify-between">
-              <div className="relative h-[48px] w-full md:w-[496px]">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar dirección"
-                  className="h-[48px] w-full rounded-md border border-gray-300 py-2 pl-4 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <MagnifyingGlassIcon className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+
+      <Suspense fallback={<div>Loading...</div>}>
+        <div className="flex flex-col gap-6 pt-4 md:flex-row">
+          <Sidebar
+            user={sidebarUser}
+            onLogout={logout}
+            className="ml-[104px]"
+          />
+          <div className="flex flex-1 flex-col items-center px-4 md:px-0">
+            <div className="w-full max-w-3xl space-y-6 py-4 md:py-6">
+              <div className="w-full md:flex md:items-center md:justify-between">
+                <div className="relative h-[48px] w-full md:w-[496px]">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar dirección"
+                    className="h-[48px] w-full rounded-md border border-gray-300 py-2 pl-4 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                </div>
+                <div className="hidden md:block">
+                  <Button
+                    className={`font-regular ml-[24px] h-[48px] w-[220px] bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
+                    onClick={() => router.push('/user/address?new=true')}
+                  >
+                    Agregar nueva dirección
+                  </Button>
+                </div>
               </div>
-              <div className="hidden md:block">
+
+              {loading ? (
+                <p className="text-center text-sm text-gray-500">
+                  Cargando direcciones...
+                </p>
+              ) : (
+                <div className="w-full space-y-4">
+                  {addresses.map((addr, index) => (
+                    <div
+                      key={addr.id}
+                      className={`flex h-[43px] w-full items-center justify-between rounded border px-4 md:w-[818px] ${
+                        index % 2 === 0
+                          ? 'border-gray-100 bg-gray-50'
+                          : 'border-gray-100 bg-white'
+                      }`}
+                    >
+                      <p
+                        className={`flex-1 pr-4 text-[${FontSizes.b1.size}] text-[${Colors.textMain}]`}
+                      >
+                        {addr.adress}, {addr.zipCode}, {addr.nameState}
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          className="text-gray-600 hover:text-primary"
+                          onClick={() =>
+                            router.push(`/user/address/${addr.id}/edit-address`)
+                          }
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          className="text-gray-600 hover:text-red-500"
+                          onClick={() =>
+                            alert(`Eliminar dirección: ${addr.id}`)
+                          }
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Botón en mobile */}
+              <div className="mt-4 block md:hidden">
                 <Button
-                  className={`font-regular ml-[24px] h-[48px] w-[220px] bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
+                  className={`font-regular h-[48px] w-full bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
                   onClick={() => router.push('/user/address?new=true')}
                 >
                   Agregar nueva dirección
                 </Button>
               </div>
             </div>
-
-            {loading ? (
-              <p className="text-center text-sm text-gray-500">
-                Cargando direcciones...
-              </p>
-            ) : (
-              <div className="w-full space-y-4">
-                {addresses.map((addr, index) => (
-                  <div
-                    key={addr.id}
-                    className={`flex h-[43px] w-full items-center justify-between rounded border px-4 md:w-[818px] ${
-                      index % 2 === 0
-                        ? 'border-gray-100 bg-gray-50'
-                        : 'border-gray-100 bg-white'
-                    }`}
-                  >
-                    <p
-                      className={`flex-1 pr-4 text-[${FontSizes.b1.size}] text-[${Colors.textMain}]`}
-                    >
-                      {addr.adress}, {addr.zipCode}, {addr.nameState}
-                    </p>
-                    <div className="flex gap-3">
-                      <button
-                        className="text-gray-600 hover:text-primary"
-                        onClick={() =>
-                          router.push(`/user/address/${addr.id}/edit-address`)
-                        }
-                      >
-                        <PencilIcon className="h-5 w-5" />
-                      </button>
-                      <button
-                        className="text-gray-600 hover:text-red-500"
-                        onClick={() => alert(`Eliminar dirección: ${addr.id}`)}
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Botón en mobile */}
-            <div className="mt-4 block md:hidden">
-              <Button
-                className={`font-regular h-[48px] w-full bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
-                onClick={() => router.push('/user/address?new=true')}
-              >
-                Agregar nueva dirección
-              </Button>
-            </div>
           </div>
         </div>
-      </div>
+      </Suspense>
     </div>
   );
 }
