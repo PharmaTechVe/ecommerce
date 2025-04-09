@@ -32,6 +32,7 @@ interface SidebarProps {
   menuItems?: SidebarMenuItem[];
   onLogout?: () => void;
   className?: string;
+  children?: React.ReactNode;
 }
 
 const getDefaultMenuItems = (): SidebarMenuItem[] => [
