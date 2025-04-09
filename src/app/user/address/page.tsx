@@ -38,11 +38,9 @@ function NewAddressView({
   return (
     <div className="relative min-h-screen bg-white">
       <NavBar onCartClick={() => {}} />
-
       <div className="px-6 pt-6 md:pl-[104px]">
         <UserBreadcrumbs />
       </div>
-
       {!showSidebar && (
         <button
           className="absolute left-4 top-4 z-50 md:hidden"
@@ -63,10 +61,8 @@ function NewAddressView({
           </svg>
         </button>
       )}
-
       <div className="flex flex-col gap-6 pt-4 md:flex-row">
         <Sidebar user={sidebarUser} onLogout={logout} />
-
         <div className="flex flex-1 flex-col items-center px-4 md:px-0">
           <div className="w-full max-w-3xl space-y-6 py-4 md:py-6">
             <h2
@@ -98,7 +94,6 @@ export default function AddressPage() {
     const fetchAddresses = async () => {
       try {
         if (!token || !userData?.id) return;
-
         const response = await pharmaTech.userAdress.getListAddresses(
           userData.id,
           token,
@@ -113,26 +108,6 @@ export default function AddressPage() {
 
     if (!isNewAddress) fetchAddresses();
   }, [userData?.id, token, isNewAddress]);
-
-  {
-    /* const handleSearch = async (searchTerm: string) => {
-    try {
-      if (!token || !userData?.id) return;
-
-      // Se comenta la lógica para la petición de búsqueda
-      // const response = await pharmaTech.userAdress.getAddress(
-      //   userData.id,
-      //   token,
-      //   searchTerm
-      // );
-      // setAddresses(response); 
-
-      // Aquí iría la lógica para filtrar las direcciones, por ahora solo se usa el estado `searchTerm`.
-    } catch (error) {
-      console.error('Error al buscar direcciones:', error);
-    }
-  };*/
-  }
 
   if (!userData) return <div className="p-6">Cargando...</div>;
 
@@ -156,11 +131,9 @@ export default function AddressPage() {
   return (
     <div className="relative min-h-screen bg-white">
       <NavBar onCartClick={() => {}} />
-
       <div className="px-6 pt-6 md:pl-[104px]">
         <UserBreadcrumbs />
       </div>
-
       {!showSidebar && (
         <button
           className="absolute left-4 top-4 z-50 md:hidden"
@@ -181,35 +154,29 @@ export default function AddressPage() {
           </svg>
         </button>
       )}
-
       <div className="flex flex-col gap-6 pt-4 md:flex-row">
         <Sidebar user={sidebarUser} onLogout={logout} className="ml-[104px]" />
-
         <div className="flex flex-1 flex-col items-center px-4 md:px-0">
           <div className="w-full max-w-3xl space-y-6 py-4 md:py-6">
-            <div className="flex w-full flex-col items-center justify-between gap-6 md:flex-row md:gap-0">
-              {/* Input de búsqueda */}
-              <div className="relative mb-4 h-[48px] w-full md:w-[496px]">
+            <div className="w-full md:flex md:items-center md:justify-between">
+              <div className="relative h-[48px] w-full md:w-[496px]">
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    //handleSearch(e.target.value); // Ejecutar la búsqueda por ahora en revision
-                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Buscar dirección"
-                  className="h-[48px] w-[496px] rounded-md border border-gray-300 py-2 pl-4 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-[48px] w-full rounded-md border border-gray-300 py-2 pl-4 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <MagnifyingGlassIcon className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
               </div>
-
-              {/* Botón de "Agregar nueva dirección" */}
-              <Button
-                className="font-regular text-[${FontSizes.b1.size}] ml-[24px] h-[48px] w-[180px] bg-primary px-4 py-2 text-white md:w-auto"
-                onClick={() => router.push('/user/address?new=true')}
-              >
-                Agregar nueva dirección
-              </Button>
+              <div className="hidden md:block">
+                <Button
+                  className={`font-regular ml-[24px] h-[48px] w-[220px] bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
+                  onClick={() => router.push('/user/address?new=true')}
+                >
+                  Agregar nueva dirección
+                </Button>
+              </div>
             </div>
 
             {loading ? (
@@ -223,8 +190,8 @@ export default function AddressPage() {
                     key={addr.id}
                     className={`flex h-[43px] w-full items-center justify-between rounded border px-4 md:w-[818px] ${
                       index % 2 === 0
-                        ? 'border-gray-50 bg-gray-50'
-                        : 'border-white bg-white'
+                        ? 'border-gray-100 bg-gray-50'
+                        : 'border-gray-100 bg-white'
                     }`}
                   >
                     <p
@@ -252,6 +219,16 @@ export default function AddressPage() {
                 ))}
               </div>
             )}
+
+            {/* Botón en mobile */}
+            <div className="mt-4 block md:hidden">
+              <Button
+                className={`font-regular h-[48px] w-full bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
+                onClick={() => router.push('/user/address?new=true')}
+              >
+                Agregar nueva dirección
+              </Button>
+            </div>
           </div>
         </div>
       </div>
