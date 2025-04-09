@@ -33,7 +33,7 @@ interface User {
   phoneNumber: string;
   lastOrderDate: Date;
   profile: {
-    profilePicture: string;
+    profilePicture?: string;
     birthDate: Date;
     gender: string;
   };

@@ -13,6 +13,20 @@ import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 import EditForm from './edit/editForm';
 import { ToastContainer } from 'react-toastify';
 
+function formatFechaFromAny(value: unknown): string {
+  const raw =
+    typeof value === 'string'
+      ? value
+      : value instanceof Date
+        ? value.toISOString().split('T')[0]
+        : '';
+
+  if (!raw) return '';
+
+  const [year, month, day] = raw.split('-');
+  return `${day}-${month}-${year}`;
+}
+
 export default function Page() {
   const { userData, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -27,23 +41,17 @@ export default function Page() {
 
   return (
     <div className="relative min-h-screen bg-white">
-      {/* Navbar */}
       <div className="relative z-50">
         <NavBar onCartClick={() => {}} />
       </div>
 
-      {/* Breadcrumbs */}
       <div className="px-4 pt-6 md:px-8 lg:px-16">
         <UserBreadcrumbs />
       </div>
 
       <div className="flex gap-8 px-4 pt-8 md:px-8 lg:px-16">
-        {/* Sidebar */}
         <Sidebar user={sidebarUser} onLogout={logout} />
-
-        {/* Panel de edición o vista */}
         <div className="flex-1">
-          {/* TOP BAR */}
           <div
             className="relative mx-auto flex w-full flex-col items-center justify-center rounded-[10px] px-6 pb-20 pt-10 shadow md:flex-row md:justify-between md:py-4"
             style={{ maxWidth: '956px', background: Colors.topBar }}
@@ -58,7 +66,6 @@ export default function Page() {
                   size={80}
                   withDropdown={false}
                 />
-
                 {isEditing && (
                   <div className="absolute bottom-0 right-0 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-[#2D397B]">
                     <svg
@@ -98,7 +105,6 @@ export default function Page() {
             )}
           </div>
 
-          {/* Formulario o vista de perfil */}
           {isEditing ? (
             <EditForm onCancel={() => setIsEditing(false)} />
           ) : (
@@ -114,9 +120,7 @@ export default function Page() {
                 <Input label="Cédula" value={userData.documentId} disabled />
                 <Input
                   label="Fecha de nacimiento"
-                  value={new Date(
-                    userData.profile.birthDate,
-                  ).toLocaleDateString()}
+                  value={formatFechaFromAny(userData.profile.birthDate)}
                   disabled
                   type="text"
                 />

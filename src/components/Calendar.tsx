@@ -13,15 +13,17 @@ import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/DateUtils';
 
 type DatePicker1Props = {
   onDateSelect?: (date: string) => void;
+  value?: string;
 };
 
-export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
+export default function DatePicker1({ onDateSelect, value }: DatePicker1Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [yearInput, setYearInput] = useState(
     currentDate.getFullYear().toString(),
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
@@ -39,6 +41,14 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
   useEffect(() => {
     setYearInput(currentDate.getFullYear().toString());
   }, [currentDate]);
+
+  useEffect(() => {
+    if (value) {
+      setSelectedDate(value);
+      const [year, month, day] = value.split('-').map(Number);
+      setCurrentDate(new Date(year, month - 1, day));
+    }
+  }, [value]);
 
   const handleYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newYearStr = event.target.value;
@@ -83,7 +93,7 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
       </div>
 
       {isCalendarOpen && (
-        <div className="absolute z-50 mt-2 w-full max-w-md rounded-md bg-white p-4 shadow-lg sm:h-[532px] sm:h-auto sm:w-[509px]">
+        <div className="absolute z-50 mt-2 w-full max-w-md rounded-md bg-white p-4 shadow-lg sm:h-auto sm:w-[509px]">
           <div className="mb-4 flex items-center justify-between px-4">
             <button
               onClick={handlePrevMonth}

@@ -16,18 +16,29 @@ enum UserGender {
   FEMALE = 'f',
 }
 
+enum UserRole {
+  ADMIN = 'admin',
+  CUSTOMER = 'customer',
+  // agrega más roles si el backend los maneja
+}
+
 function formatBirthDate(rawDate: unknown): string {
   if (typeof rawDate === 'string') {
-    const parts = rawDate.split('/');
+    const normalized = rawDate.includes('/')
+      ? rawDate.replace(/\//g, '-')
+      : rawDate;
+    const parts = normalized.split('-');
     if (parts.length === 3) {
-      const [day, month, year] = parts;
+      const [year, month, day] = parts;
       return `${year}-${month}-${day}`;
     }
-    return rawDate;
+    return normalized;
   }
+
   if (rawDate instanceof Date) {
     return rawDate.toISOString().slice(0, 10);
   }
+
   return '';
 }
 
@@ -42,8 +53,6 @@ export default function EditForm({}: EditFormProps) {
 
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
-  const [email, setEmail] = useState('');
-  const [cedula, setCedula] = useState('');
   const [telefono, setTelefono] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [genero, setGenero] = useState<UserGender>(UserGender.MALE);
@@ -53,8 +62,6 @@ export default function EditForm({}: EditFormProps) {
     if (userData) {
       setNombre(userData.firstName);
       setApellido(userData.lastName);
-      setEmail(userData.email);
-      setCedula(userData.documentId);
       setTelefono(userData.phoneNumber ?? '');
       setFechaNacimiento(formatBirthDate(userData.profile?.birthDate));
       setGenero(
@@ -65,6 +72,11 @@ export default function EditForm({}: EditFormProps) {
 
   const handleSubmit = async () => {
     console.log('[EDIT USER] Intentando enviar formulario...');
+
+    if (!userData?.email) {
+      toast.error('El correo del usuario no está disponible.');
+      return;
+    }
 
     const generoTexto = genero === UserGender.FEMALE ? 'mujer' : 'hombre';
 
@@ -104,9 +116,12 @@ export default function EditForm({}: EditFormProps) {
     const payload = {
       firstName: nombre,
       lastName: apellido,
+      email: userData.email,
       phoneNumber: telefono?.trim() === '' ? undefined : telefono,
       birthDate: fechaNacimiento,
       gender: genero,
+      role: UserRole.CUSTOMER,
+      profilePicture: userData.profile?.profilePicture ?? undefined,
     };
 
     try {
@@ -148,22 +163,20 @@ export default function EditForm({}: EditFormProps) {
           />
           <Input
             label="Correo Electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={userData?.email ?? ''}
+            onChange={() => {}}
             disabled
-            helperText={errors.email}
             borderColor="#f3f4f6"
-            helperTextColor="red-500"
           />
           <Input
             label="Cédula"
-            value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
+            value={userData?.documentId ?? ''}
+            onChange={() => {}}
             disabled
-            helperText={errors.cedula}
             borderColor="#f3f4f6"
-            helperTextColor="red-500"
           />
+
+          {/* Teléfono y Fecha de nacimiento en la misma fila */}
           <Input
             label="Número de teléfono"
             value={telefono}
@@ -172,23 +185,25 @@ export default function EditForm({}: EditFormProps) {
             borderColor="#f3f4f6"
             helperTextColor="red-500"
           />
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Fecha de nacimiento
+            </label>
+            <DatePicker1
+              value={fechaNacimiento}
+              onDateSelect={(date) => setFechaNacimiento(date)}
+            />
+            <p
+              className={`min-h-[16px] text-xs text-red-500 ${
+                errors.fechaNacimiento ? 'visible' : 'invisible'
+              }`}
+            >
+              {errors.fechaNacimiento}
+            </p>
+          </div>
         </div>
 
-        <div className="mt-4">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Fecha de nacimiento
-          </label>
-          <DatePicker1 onDateSelect={(date) => setFechaNacimiento(date)} />
-          <p
-            className={`min-h-[16px] text-xs text-red-500 ${
-              errors.fechaNacimiento ? 'visible' : 'invisible'
-            }`}
-          >
-            {errors.fechaNacimiento}
-          </p>
-        </div>
-
-        <div className="mt-4 pb-4">
+        <div className="mt-6 pb-4">
           <label className="mb-2 block text-sm font-medium text-gray-700">
             Género
           </label>
