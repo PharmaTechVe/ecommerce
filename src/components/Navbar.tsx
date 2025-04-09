@@ -14,6 +14,14 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 
+interface UserProfile {
+  firstName: string;
+  lastName: string;
+  profile: {
+    profilePicture: string;
+  };
+}
+
 interface Category {
   id: string;
   name: string;
@@ -35,12 +43,13 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
   const [categories, setCategories] = React.useState<string[]>([]);
   const { cartItems } = useCart();
-  const { token, userData } = useAuth();
+  const { token, user } = useAuth();
+
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const [userData, setUserData] = React.useState<UserProfile | null>(null);
 
-  const isLoggedIn = Boolean(token && userData);
-
-  // Cargar categorías
+  // Obtener categorías
   React.useEffect(() => {
     api.category
       .findAll({ page: 1, limit: 20 })
@@ -55,19 +64,34 @@ export default function NavBar({ onCartClick }: NavBarProps) {
       });
   }, []);
 
+  // Obtener perfil si está logueado
+  React.useEffect(() => {
+    if (!token || !user?.sub) {
+      setIsLoggedIn(false);
+      setUserData(null);
+      return;
+    }
+
+    setIsLoggedIn(true);
+
+    (async () => {
+      try {
+        const profileResponse = await api.user.getProfile(user.sub, token);
+        setUserData(profileResponse);
+        console.log('Perfil obtenido:', profileResponse);
+      } catch (error) {
+        console.error('Error al obtener perfil:', error);
+        setUserData(null);
+      }
+    })();
+  }, [token, user]);
+
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
 
   const handleLoginClick = () => {
     router.push('/login');
-  };
-
-  const handleProfileClick = () => {
-    if (userData) {
-      // Redirigir al perfil del usuario
-      router.push(`/user`);
-    }
   };
 
   return (
@@ -104,6 +128,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 {totalCount}
               </span>
             </div>
+
             {/* Usuario */}
             {isLoggedIn && userData ? (
               <Avatar
@@ -111,7 +136,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 size={52}
                 imageUrl={userData.profile.profilePicture}
                 withDropdown={true}
-                onProfileClick={handleProfileClick}
               />
             ) : (
               <Button
@@ -137,7 +161,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               size={52}
               imageUrl={userData.profile.profilePicture}
               withDropdown={true}
-              onProfileClick={handleProfileClick}
             />
           ) : (
             <UserCircleIcon
