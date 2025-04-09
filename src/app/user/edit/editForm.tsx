@@ -128,7 +128,6 @@ export default function EditForm({}: EditFormProps) {
 
   return (
     <div className="mt-14 rounded-lg p-4 md:p-6">
-      {/* Contenedor principal con el mismo max-width que el top bar */}
       <div className="mx-auto w-full max-w-[956px]">
         <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
           <Input
