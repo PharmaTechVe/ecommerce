@@ -107,7 +107,7 @@ export default function AddressPage() {
     };
 
     if (!isNewAddress) fetchAddresses();
-  }, [userData?.id, token, isNewAddress]);
+  }, [userData?.id, token, isNewAddress, pharmaTech.userAdress]);
 
   if (!userData) return <div className="p-6">Cargando...</div>;
 

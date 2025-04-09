@@ -114,6 +114,8 @@ export function Sidebar({
         <button
           onClick={() => setIsOpen(true)}
           className="fixed left-4 top-4 z-50 flex items-center gap-2 rounded-md bg-white p-2 shadow md:hidden"
+          aria-expanded={isOpen ? 'true' : 'false'}
+          aria-controls="sidebar"
         >
           <Bars3Icon className="h-5 w-5 text-gray-700" />
         </button>
@@ -122,6 +124,7 @@ export function Sidebar({
       {/* Sidebar responsive */}
       {(isOpen || !isMobile) && (
         <div
+          id="sidebar"
           className={`${
             isMobile
               ? 'fixed left-0 top-0 z-50 h-full w-72 bg-white shadow-lg'
@@ -134,6 +137,7 @@ export function Sidebar({
               <button
                 onClick={() => setIsOpen(false)}
                 className="mb-2 p-1 text-gray-600 hover:text-red-500"
+                aria-label="Cerrar menú"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>

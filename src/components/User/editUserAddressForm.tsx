@@ -80,7 +80,7 @@ export default function EditForm({
     };
 
     loadCountryAndStates();
-  }, []);
+  }, [pharmaTech.country, pharmaTech.state]);
 
   useEffect(() => {
     const loadCities = async () => {
@@ -101,7 +101,7 @@ export default function EditForm({
     };
 
     if (estado) loadCities();
-  }, [estado, estados]);
+  }, [estado, estados, pharmaTech.city]);
 
   useEffect(() => {
     if (initialData) {
