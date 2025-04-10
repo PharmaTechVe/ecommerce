@@ -136,6 +136,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 size={52}
                 imageUrl={userData.profile.profilePicture}
                 withDropdown={true}
+                onProfileClick={() => router.push('/user')}
               />
             ) : (
               <Button
@@ -161,6 +162,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               size={52}
               imageUrl={userData.profile.profilePicture}
               withDropdown={true}
+              onProfileClick={() => router.push('/user')}
             />
           ) : (
             <UserCircleIcon

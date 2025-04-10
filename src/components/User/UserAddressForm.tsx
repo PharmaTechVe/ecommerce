@@ -1,19 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import Input from '@/components/Input/Input';
 import Dropdown from '@/components/Dropdown';
 import Button from '@/components/Button';
 import { Colors } from '@/styles/styles';
 import { addressSchema } from '@/lib/validations/userAddressSchema';
-import {
-  PharmaTech,
-  CountryResponse,
-  StateResponse,
-  CityResponse,
-} from '@pharmatech/sdk';
+import { CountryResponse, StateResponse, CityResponse } from '@pharmatech/sdk';
+import { api } from '@/lib/sdkConfig';
+import LocationPopup from '@/components/User/UserAddressPopup';
+import { MapPinIcon } from '@heroicons/react/24/outline';
 
 interface EditFormProps {
   initialData?: {
@@ -28,19 +25,27 @@ interface EditFormProps {
   };
   onCancel?: () => void;
   mode?: 'edit' | 'create';
+  onSubmit?: (data: {
+    address: string;
+    zipCode: string;
+    additionalInfo: string;
+    referencePoint: string;
+    state: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  }) => void;
+  onAdd?: () => void;
 }
 
 export default function EditAddressForm({
   initialData,
   onCancel,
   mode = 'edit',
+  onSubmit,
 }: EditFormProps) {
-  const router = useRouter();
-  const pharmaTech = PharmaTech.getInstance(true);
-
   const [states, setStates] = useState<StateResponse[]>([]);
   const [cities, setCities] = useState<CityResponse[]>([]);
-
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [address, setAddress] = useState('');
@@ -50,10 +55,14 @@ export default function EditAddressForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isEditing, setIsEditing] = useState(mode === 'create' || !initialData);
 
+  const [showLocationPopup, setShowLocationPopup] = useState(false);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
   useEffect(() => {
     const loadCountryAndStates = async () => {
       try {
-        const countries = await pharmaTech.country.findAll({
+        const countries = await api.country.findAll({
           page: 1,
           limit: 100,
         });
@@ -66,7 +75,7 @@ export default function EditAddressForm({
           return;
         }
 
-        const statesRes = await pharmaTech.state.findAll({
+        const statesRes = await api.state.findAll({
           page: 1,
           limit: 100,
           countryId: venezuela.id,
@@ -80,7 +89,7 @@ export default function EditAddressForm({
     };
 
     loadCountryAndStates();
-  }, [pharmaTech]);
+  }, []);
 
   useEffect(() => {
     const loadCities = async () => {
@@ -88,7 +97,7 @@ export default function EditAddressForm({
         const foundState = states.find((s) => s.name === selectedState);
         if (!foundState) return;
 
-        const cityRes = await pharmaTech.city.findAll({
+        const cityRes = await api.city.findAll({
           page: 1,
           limit: 100,
           stateId: foundState.id,
@@ -101,7 +110,7 @@ export default function EditAddressForm({
     };
 
     if (selectedState) loadCities();
-  }, [selectedState, states, pharmaTech]);
+  }, [selectedState, states]);
 
   useEffect(() => {
     if (initialData) {
@@ -114,7 +123,16 @@ export default function EditAddressForm({
     }
   }, [initialData]);
 
-  const handleSubmit = async () => {
+  const handleLocationAdded = (
+    location: { lat: number; lng: number },
+    address: string,
+  ) => {
+    setLatitude(location.lat);
+    setLongitude(location.lng);
+    setAddress(address);
+  };
+
+  const handleNextClick = async () => {
     const result = addressSchema.safeParse({
       state: selectedState,
       city: selectedCity,
@@ -137,8 +155,30 @@ export default function EditAddressForm({
       return;
     }
 
-    toast.success('Address saved successfully');
-    router.push('/user/address');
+    if (latitude === null || longitude === null) {
+      toast.error('Debes seleccionar una ubicación en el mapa');
+      return;
+    }
+
+    const latitudeNumber = latitude as number;
+    const longitudeNumber = longitude as number;
+
+    if (onSubmit) {
+      const data = {
+        address,
+        zipCode,
+        additionalInfo,
+        referencePoint,
+        state: selectedState,
+        city: selectedCity,
+        latitude: latitudeNumber,
+        longitude: longitudeNumber,
+      };
+
+      onSubmit(data);
+    }
+
+    setShowLocationPopup(true);
   };
 
   return (
@@ -150,7 +190,7 @@ export default function EditAddressForm({
             variant="submit"
             onClick={() => setIsEditing(true)}
           >
-            Edit address
+            Editar dirección
           </Button>
         </div>
       )}
@@ -161,10 +201,10 @@ export default function EditAddressForm({
             className="mb-1 font-medium"
             style={{ color: Colors.textMain }}
           >
-            State:
+            Estado:
           </label>
           <Dropdown
-            label="State"
+            label="Estado"
             items={states.map((s) => s.name)}
             onSelect={setSelectedState}
           />
@@ -174,19 +214,19 @@ export default function EditAddressForm({
             className="mb-1 font-medium"
             style={{ color: Colors.textMain }}
           >
-            City:
+            Ciudad:
           </label>
           <Dropdown
-            label="City"
+            label="Ciudad"
             items={cities.map((c) => c.name)}
             onSelect={setSelectedCity}
           />
         </div>
       </div>
 
-      <div className="mt-[33px]">
+      <div className="relative mt-[33px]">
         <Input
-          label="Address (Current location)"
+          label="Dirección: (Ubicación actual)"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           helperText={errors.address}
@@ -195,34 +235,40 @@ export default function EditAddressForm({
           helperTextColor="red-500"
           placeholder="E.g. Av. Libertador, El Recreo Mall, Local 123"
         />
+        <MapPinIcon
+          className="absolute right-4 top-1/2 mb-4 -translate-y-1/2 transform cursor-pointer text-gray-600"
+          width={24}
+          height={24}
+          onClick={() => setShowLocationPopup(true)}
+        />
       </div>
 
       <div className="mt-[33px] grid grid-cols-1 gap-y-[33px] md:grid-cols-2 md:gap-x-[48px]">
         <Input
-          label="Zip Code"
+          label="Código postal"
           value={zipCode}
           onChange={(e) => setZipCode(e.target.value)}
           helperText={errors.zipCode}
           disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
-          placeholder="E.g. 1010"
+          placeholder="E.j. 1010"
         />
         <Input
-          label="Additional Info"
+          label="Información adicional"
           value={additionalInfo}
           onChange={(e) => setAdditionalInfo(e.target.value)}
           helperText={errors.additionalInfo}
           disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
-          placeholder="E.g. House, Apartment, Office, etc."
+          placeholder="E.g. casa, oficina, etc."
         />
       </div>
 
       <div className="mt-[33px]">
         <Input
-          label="Reference Point"
+          label="Punto de referencia"
           value={referencePoint}
           onChange={(e) => setReferencePoint(e.target.value)}
           helperText={errors.referencePoint}
@@ -238,9 +284,9 @@ export default function EditAddressForm({
           <Button
             variant="submit"
             className="h-[51px] w-full font-semibold text-white md:w-auto"
-            onClick={handleSubmit}
+            onClick={handleNextClick}
           >
-            {mode === 'create' ? 'Next' : 'Save address'}
+            {mode === 'create' ? 'Siguiente' : 'Guardar Cambios'}
           </Button>
           {onCancel && (
             <Button
@@ -248,10 +294,18 @@ export default function EditAddressForm({
               className="h-[51px] w-full border border-gray-300 font-semibold text-gray-600 md:w-auto"
               onClick={onCancel}
             >
-              Cancel
+              Cancelar
             </Button>
           )}
         </div>
+      )}
+
+      {showLocationPopup && (
+        <LocationPopup
+          onAdd={handleLocationAdded}
+          onBack={() => setShowLocationPopup(false)}
+          guideText="Mueve el pin hata tu ubicacion exacta"
+        />
       )}
     </div>
   );

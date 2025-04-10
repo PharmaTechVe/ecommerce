@@ -1,25 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import NavBar from '@/components/Navbar';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
-import { Bars3Icon } from '@heroicons/react/24/outline';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 import EditAddressForm from '@/components/User/UserAddressForm';
 import { ToastContainer } from 'react-toastify';
+import { api } from '@/lib/sdkConfig';
 
 export default function Page() {
-  const { userData, logout } = useAuth();
-  const [showSidebar, setShowSidebar] = useState(false);
+  const { user, logout, token } = useAuth();
 
-  if (!userData) return <div className="p-6">Cargando...</div>;
+  const [userData, setUserData] = useState<SidebarUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const sidebarUser: SidebarUser = {
-    name: `${userData.firstName} ${userData.lastName}`,
-    role: userData.role,
-    avatar: userData.profile?.profilePicture ?? '',
-  };
+  useEffect(() => {
+    if (!token || !user?.sub) {
+      setUserData(null);
+      return;
+    }
+
+    (async () => {
+      try {
+        const profileResponse = await api.user.getProfile(user.sub, token);
+        const fetchedUserData: SidebarUser = {
+          name: `${profileResponse.firstName} ${profileResponse.lastName}`,
+          role: profileResponse.role || 'Usuario',
+          avatar: profileResponse.profile?.profilePicture || '',
+        };
+        setUserData(fetchedUserData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setUserData(null);
+        setLoading(false);
+      }
+    })();
+  }, [user?.sub, token]);
+
+  if (loading || !userData) return <div className="p-6">Cargando...</div>;
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -32,19 +52,10 @@ export default function Page() {
         <UserBreadcrumbs />
       </div>
 
-      {!showSidebar && (
-        <button
-          className="absolute left-4 top-4 z-50 md:hidden"
-          onClick={() => setShowSidebar(true)}
-        >
-          <Bars3Icon className="h-6 w-6 text-gray-700" />
-        </button>
-      )}
-
       <div className="flex gap-8 px-4 pt-16 md:px-8 lg:px-16">
         <div className="mx-auto flex w-full max-w-[1200px] gap-8">
           {/* Sidebar lateral */}
-          <Sidebar user={sidebarUser} onLogout={logout} />
+          <Sidebar user={userData} onLogout={logout} />
           {/* Formulario principal */}
           <div className="flex-1">
             <EditAddressForm />

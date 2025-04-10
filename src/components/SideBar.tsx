@@ -154,7 +154,7 @@ export function Sidebar({
             />
             <div>
               <h3 className="font-medium text-[#393938]">{user.name}</h3>
-              <p className="text-sm text-[#6e6d6c]">{user.role}</p>
+              <p className="text-sm text-[#6e6d6c]">Cuenta Personal</p>
             </div>
           </div>
 

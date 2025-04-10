@@ -1,31 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { PharmaTech } from '@pharmatech/sdk';
-import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/Input/Input';
 import Button from '@/components/Button';
 import { Colors } from '@/styles/styles';
 import { updatePasswordSchema } from '@/lib/validations/updatePasswordSchema';
 import Link from 'next/link';
 
-export default function UserPasswordForm() {
-  const { userData } = useAuth();
-  const router = useRouter();
+interface UserPasswordFormProps {
+  onSubmit: (
+    password: string,
+    newPassword: string,
+    confirmPassword: string,
+  ) => void;
+}
+
+export default function UserPasswordForm({ onSubmit }: UserPasswordFormProps) {
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const pharmaTech = PharmaTech.getInstance(true);
 
-  const getToken = () =>
-    sessionStorage.getItem('pharmatechToken') ||
-    localStorage.getItem('pharmatechToken');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSubmit = async () => {
     const result = updatePasswordSchema.safeParse({
       password,
       newPassword,
@@ -43,23 +43,8 @@ export default function UserPasswordForm() {
     }
 
     try {
-      const token = getToken();
-      if (!token || !userData?.id) {
-        toast.error('Token inválido');
-        return;
-      }
-
       setLoading(true);
-      await pharmaTech.auth.updateCurrentPassword(password, newPassword, token);
-
-      toast.success('Contraseña actualizada correctamente');
-      setPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-
-      setTimeout(() => {
-        router.push('/user');
-      }, 600);
+      onSubmit(password, newPassword, confirmPassword); // Pasamos confirmPassword también
     } catch (error) {
       console.error('Error al actualizar la contraseña:', error);
       toast.error('Error al actualizar la contraseña');
@@ -69,7 +54,7 @@ export default function UserPasswordForm() {
   };
 
   return (
-    <div className="space-y-6 text-left">
+    <form onSubmit={handleSubmit} className="space-y-6 text-left">
       <Input
         label="Contraseña Actual"
         placeholder="Ingresa tu contraseña actual"
@@ -125,11 +110,10 @@ export default function UserPasswordForm() {
       <Button
         variant="submit"
         className="mt-2 h-[46px] w-full font-semibold text-white"
-        onClick={handleSubmit}
         disabled={loading}
       >
         {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
       </Button>
-    </div>
+    </form>
   );
 }

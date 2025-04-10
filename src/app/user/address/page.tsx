@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   PencilIcon,
@@ -9,13 +9,24 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { useAuth } from '@/context/AuthContext';
-import { Sidebar, SidebarUser } from '@/components/SideBar';
+import { Sidebar, type SidebarUser } from '@/components/SideBar';
 import NavBar from '@/components/Navbar';
 import Button from '@/components/Button';
 import { FontSizes, Colors } from '@/styles/styles';
-import { PharmaTech } from '@pharmatech/sdk';
-import EditForm from '@/components/User/UserAddressForm';
+import { api } from '@/lib/sdkConfig';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
+
+type UserProfile = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  documentId: string;
+  phoneNumber: string;
+  role?: string;
+  profile: {
+    profilePicture?: string;
+  };
+};
 
 type UserAddressAPIResponse = {
   id: string;
@@ -24,80 +35,54 @@ type UserAddressAPIResponse = {
   nameState: string;
 };
 
-function NewAddressView({
-  logout,
-  showSidebar,
-  setShowSidebar,
-  sidebarUser,
-}: {
-  logout: () => void;
-  showSidebar: boolean;
-  setShowSidebar: (show: boolean) => void;
-  sidebarUser: SidebarUser;
-}) {
-  return (
-    <div className="relative min-h-screen bg-white">
-      <NavBar onCartClick={() => {}} />
-      <div className="px-6 pt-6 md:pl-[104px]">
-        <UserBreadcrumbs />
-      </div>
-      {!showSidebar && (
-        <button
-          className="absolute left-4 top-4 z-50 md:hidden"
-          onClick={() => setShowSidebar(true)}
-        >
-          <svg
-            className="h-6 w-6 text-gray-700"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      )}
-      <div className="flex flex-col gap-6 pt-4 md:flex-row">
-        <Sidebar user={sidebarUser} onLogout={logout} />
-        <div className="flex flex-1 flex-col items-center px-4 md:px-0">
-          <div className="w-full max-w-3xl space-y-6 py-4 md:py-6">
-            <h2
-              className={`font-regular text-[${FontSizes.b1.size}] text-[${Colors.textMain}]`}
-            >
-              Crear nueva dirección
-            </h2>
-            <EditForm mode="create" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function AddressPage() {
-  const { userData, logout, token } = useAuth();
+  const { user, logout, token } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showSidebar, setShowSidebar] = useState(false);
   const [addresses, setAddresses] = useState<UserAddressAPIResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const pharmaTech = PharmaTech.getInstance(true);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    if (!token || !user?.sub) {
+      setUserData(null);
+      router.push('/login');
+      return;
+    }
+    (async () => {
+      try {
+        const profileResponse = await api.user.getProfile(user.sub, token);
+
+        const userData: UserProfile = {
+          firstName: profileResponse.firstName,
+          lastName: profileResponse.lastName,
+          email: profileResponse.email || '',
+          documentId: profileResponse.documentId || '',
+          phoneNumber: profileResponse.phoneNumber || '',
+          role: profileResponse.role,
+          profile: {
+            profilePicture: profileResponse.profile?.profilePicture || '',
+          },
+        };
+
+        setUserData(userData);
+        console.log('Perfil obtenido:', userData);
+      } catch (error) {
+        console.error('Error al obtener perfil:', error);
+        setUserData(null);
+      }
+    })();
+  }, [user?.sub, token, router]);
 
   const isNewAddress = searchParams.get('new') === 'true';
 
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        if (!token || !userData?.id) return;
-        const response = await pharmaTech.userAdress.getListAddresses(
-          userData.id,
-          token,
-        );
+        if (!token || !user?.sub) return;
+        const response = await api.userAdress.getListAddresses(user.sub, token);
         setAddresses(response);
       } catch (error) {
         console.error('Error al cargar direcciones:', error);
@@ -107,26 +92,21 @@ export default function AddressPage() {
     };
 
     if (!isNewAddress) fetchAddresses();
-  }, [userData?.id, token, isNewAddress, pharmaTech.userAdress]);
+  }, [user?.sub, token, isNewAddress]);
 
-  if (!userData) return <div className="p-6">Cargando...</div>;
+  if (!user || loading) return <div className="p-6">Cargando...</div>;
 
-  const sidebarUser: SidebarUser = {
-    name: `${userData.firstName} ${userData.lastName}`,
-    role: userData.role,
-    avatar: userData.profile?.profilePicture ?? '',
-  };
-
-  if (isNewAddress) {
-    return (
-      <NewAddressView
-        logout={logout}
-        showSidebar={showSidebar}
-        setShowSidebar={setShowSidebar}
-        sidebarUser={sidebarUser}
-      />
-    );
-  }
+  const sidebarUser: SidebarUser = userData
+    ? {
+        name: `${userData.firstName} ${userData.lastName}`,
+        role: userData.role || '',
+        avatar: userData.profile?.profilePicture ?? '',
+      }
+    : {
+        name: 'Usuario',
+        role: '',
+        avatar: '',
+      };
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -178,7 +158,7 @@ export default function AddressPage() {
                 <div className="hidden md:block">
                   <Button
                     className={`font-regular ml-[24px] h-[48px] w-[220px] bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
-                    onClick={() => router.push('/user/address?new=true')}
+                    onClick={() => router.push('/user/address/new')}
                   >
                     Agregar nueva dirección
                   </Button>
@@ -216,9 +196,19 @@ export default function AddressPage() {
                         </button>
                         <button
                           className="text-gray-600 hover:text-red-500"
-                          onClick={() =>
-                            alert(`Eliminar dirección: ${addr.id}`)
-                          }
+                          onClick={() => {
+                            if (token) {
+                              api.userAdress.deleteAddress(
+                                user.sub,
+                                addr.id,
+                                token,
+                              );
+                            } else {
+                              console.error(
+                                'Token is null, no se puede borrar la dirección',
+                              );
+                            }
+                          }}
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
@@ -232,7 +222,7 @@ export default function AddressPage() {
               <div className="mt-4 block md:hidden">
                 <Button
                   className={`font-regular h-[48px] w-full bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
-                  onClick={() => router.push('/user/address?new=true')}
+                  onClick={() => router.push('/user/address/new')}
                 >
                   Agregar nueva dirección
                 </Button>

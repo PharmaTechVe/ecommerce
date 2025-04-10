@@ -8,7 +8,7 @@ import Button from '@/components/Button';
 import RadioButton from '@/components/RadioButton';
 import DatePicker1 from '@/components/Calendar';
 import { editProfileSchema } from '@/lib/validations/registerSchema';
-import { PharmaTech } from '@pharmatech/sdk';
+import { api } from '@/lib/sdkConfig';
 import { useAuth } from '@/context/AuthContext';
 
 enum UserGender {
@@ -17,32 +17,32 @@ enum UserGender {
 }
 
 enum UserRole {
-  ADMIN = 'admin',
   CUSTOMER = 'customer',
+  ADMIN = 'admin',
 }
 
-function formatBirthDate(value: unknown): string {
-  if (typeof value === 'string') {
-    const normalized = value.includes('/') ? value.replace(/\//g, '-') : value;
-    const [year, month, day] = normalized.split('-');
-    return `${year}-${month}-${day}`;
-  }
-
-  if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
-  }
-
-  return '';
-}
+type UserProfile = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  documentId: string;
+  phoneNumber: string;
+  role?: string;
+  profile: {
+    birthDate: string | Date;
+    gender: UserGender;
+    profilePicture?: string;
+  };
+};
 
 interface EditFormProps {
   onCancel?: () => void;
+  userData: UserProfile;
 }
 
-export default function EditForm({}: EditFormProps) {
-  const { userData, token } = useAuth();
+export default function EditForm({ userData }: EditFormProps) {
+  const { user, token } = useAuth();
   const router = useRouter();
-  const pharmaTech = PharmaTech.getInstance(true);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -55,16 +55,18 @@ export default function EditForm({}: EditFormProps) {
     if (userData) {
       setFirstName(userData.firstName);
       setLastName(userData.lastName);
-      setPhoneNumber(userData.phoneNumber ?? '');
-      setBirthDate(formatBirthDate(userData.profile?.birthDate));
-      setGender(
-        userData.profile?.gender === 'f' ? UserGender.FEMALE : UserGender.MALE,
+      setPhoneNumber(userData.phoneNumber);
+      setBirthDate(
+        typeof userData.profile.birthDate === 'string'
+          ? userData.profile.birthDate
+          : userData.profile.birthDate.toISOString().slice(0, 10),
       );
+      setGender(userData.profile.gender);
     }
   }, [userData]);
 
   const handleSubmit = async () => {
-    if (!userData?.email) {
+    if (!user?.email) {
       toast.error('Email is not available.');
       return;
     }
@@ -91,7 +93,7 @@ export default function EditForm({}: EditFormProps) {
       return;
     }
 
-    if (!token || !userData?.id) {
+    if (!token || !user?.sub) {
       toast.error('Authentication error. Please log in again.');
       return;
     }
@@ -99,16 +101,16 @@ export default function EditForm({}: EditFormProps) {
     const payload = {
       firstName,
       lastName,
-      email: userData.email,
+      email: user.email,
       phoneNumber: phoneNumber.trim() === '' ? undefined : phoneNumber,
       birthDate,
       gender,
-      role: UserRole.CUSTOMER,
+      role: userData.role as UserRole,
       profilePicture: userData.profile?.profilePicture ?? undefined,
     };
 
     try {
-      await pharmaTech.user.update(userData.id, payload, token);
+      await api.user.update(user.sub, payload, token);
       toast.success('Perfil Actualizado exitosamente');
 
       setTimeout(() => {
@@ -129,7 +131,7 @@ export default function EditForm({}: EditFormProps) {
       <div className="mx-auto w-full max-w-[956px]">
         <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
           <Input
-            label="First Name"
+            label="Nombre"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             helperText={errors.firstName}
@@ -137,7 +139,7 @@ export default function EditForm({}: EditFormProps) {
             helperTextColor="red-500"
           />
           <Input
-            label="Last Name"
+            label="Apellido"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             helperText={errors.lastName}
@@ -145,21 +147,21 @@ export default function EditForm({}: EditFormProps) {
             helperTextColor="red-500"
           />
           <Input
-            label="Email"
-            value={userData?.email ?? ''}
+            label="Correo"
+            value={user?.email ?? ''}
             onChange={() => {}}
             disabled
             borderColor="#f3f4f6"
           />
           <Input
-            label="Document ID"
-            value={userData?.documentId ?? ''}
+            label="Cédula"
+            value={userData.documentId}
             onChange={() => {}}
             disabled
             borderColor="#f3f4f6"
           />
           <Input
-            label="Phone Number"
+            label="telefono"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             helperText={errors.phoneNumber}
@@ -186,16 +188,16 @@ export default function EditForm({}: EditFormProps) {
 
         <div className="mt-6 pb-4">
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Gender
+            Genero
           </label>
           <div className="flex gap-4">
             <RadioButton
-              text="Male"
+              text="Hombre"
               selected={gender === UserGender.MALE}
               onSelect={() => setGender(UserGender.MALE)}
             />
             <RadioButton
-              text="Female"
+              text="género"
               selected={gender === UserGender.FEMALE}
               onSelect={() => setGender(UserGender.FEMALE)}
             />

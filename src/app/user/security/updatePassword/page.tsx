@@ -1,57 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import { toast, ToastContainer } from 'react-toastify';
-import { Bars3Icon } from '@heroicons/react/24/outline';
 
-import { useAuth } from '@/context/AuthContext';
-import NavBar from '@/components/Navbar';
-import { Sidebar, SidebarUser } from '@/components/SideBar';
-import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
-import { Colors, FontSizes } from '@/styles/styles';
+import UserProfileLayout from '@/components/User/ProfileLayout';
 import UserPasswordForm from '@/components/User/UserPasswordForm';
+import { Colors, FontSizes } from '@/styles/styles';
+import { api } from '@/lib/sdkConfig';
 
 export default function UpdatePasswordPage() {
-  const { userData, logout } = useAuth();
   const router = useRouter();
-  const [showSidebar, setShowSidebar] = useState(false);
-
-  useEffect(() => {
-    if (!userData) {
-      toast.error('No se encontró información del usuario');
-      router.push('/login');
-    }
-  }, [userData, router]);
-
-  if (!userData) return <div className="p-6">Cargando...</div>;
-
-  const sidebarUser: SidebarUser = {
-    name: `${userData.firstName} ${userData.lastName}`,
-    role: userData.role,
-    avatar: userData.profile?.profilePicture ?? '',
-  };
 
   return (
-    <div className="relative min-h-screen bg-white">
-      <NavBar onCartClick={() => {}} />
-      <div className="px-4 pt-3 md:px-8 lg:px-16">
-        <UserBreadcrumbs />
-      </div>
-
-      {!showSidebar && (
-        <button
-          className="absolute left-4 top-4 z-50 md:hidden"
-          onClick={() => setShowSidebar(true)}
-        >
-          <Bars3Icon className="h-6 w-6 text-gray-700" />
-        </button>
-      )}
-
-      <div className="flex flex-col gap-6 pt-20 md:flex-row">
-        <Sidebar user={sidebarUser} onLogout={logout} />
-
-        <div className="flex flex-1 justify-center px-4 md:px-0">
+    <UserProfileLayout>
+      {() => (
+        <div className="flex w-full justify-center px-4 md:px-0">
           <div className="w-full max-w-[620px] space-y-6 p-4 text-center md:p-6">
             <h1
               className="font-semibold"
@@ -66,12 +29,32 @@ export default function UpdatePasswordPage() {
               Cambia tu contraseña para proteger la seguridad de tu cuenta
             </p>
 
-            <UserPasswordForm />
+            <UserPasswordForm
+              onSubmit={async (password: string, newPassword: string) => {
+                try {
+                  const token = sessionStorage.getItem('jwt');
+                  if (!token) {
+                    throw new Error('Token no encontrado');
+                  }
+
+                  await api.auth.updateCurrentPassword(
+                    password,
+                    newPassword,
+                    token,
+                  );
+                  toast.success('Contraseña actualizada con éxito');
+                  router.push('/user');
+                } catch (error) {
+                  console.error('Error al actualizar la contraseña:', error);
+                  toast.error(
+                    'Hubo un problema al actualizar tu contraseña. Intenta nuevamente.',
+                  );
+                }
+              }}
+            />
           </div>
         </div>
-      </div>
-
-      <ToastContainer />
-    </div>
+      )}
+    </UserProfileLayout>
   );
 }

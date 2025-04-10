@@ -3,7 +3,11 @@
 import { usePathname } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 
-export default function UserBreadcrumbs() {
+interface UserBreadcrumbsProps {
+  isEditing?: boolean;
+}
+
+export default function UserBreadcrumbs({ isEditing }: UserBreadcrumbsProps) {
   const pathname = usePathname();
 
   const breadcrumbLabels: Record<string, string> = {
@@ -23,10 +27,9 @@ export default function UserBreadcrumbs() {
 
   const isUUID = (segment: string) => /^[0-9a-fA-F-]{36}$/.test(segment);
 
-  // Usamos flatMap para evitar nulls y mantener tipado string[]
   const cleanedSegments = segments.flatMap((segment, index, arr) => {
     if (isUUID(segment) && arr[index + 1] === 'edit-address') {
-      return []; // omitimos el UUID
+      return [];
     }
     return [segment];
   });
@@ -53,6 +56,10 @@ export default function UserBreadcrumbs() {
       items.push({ label, href: currentPath });
     }
   });
+
+  if (isEditing) {
+    items.push({ label: 'Editar Perfil' });
+  }
 
   return <Breadcrumb items={items} />;
 }
