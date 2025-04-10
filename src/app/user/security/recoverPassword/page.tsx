@@ -1,42 +1,45 @@
 'use client';
 
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { useAuth } from '@/context/AuthContext';
-import Button from '@/components/Button';
-import { FontSizes, Colors } from '@/styles/styles';
-import { codeSchema } from '@/lib/validations/recoverPasswordSchema';
 import { api } from '@/lib/sdkConfig';
 import { z } from 'zod';
+import { resetPasswordSchema } from '@/lib/validations/recoverPasswordSchema';
+import { FontSizes, Colors } from '@/styles/styles';
+
 import UserProfileLayout from '@/components/User/ProfileLayout';
+import EnterCodeForm from '@/components/User/EnterCodeForm';
+import Input from '@/components/Input/Input';
+import Button from '@/components/Button';
 
 const emailSchema = z.string().email('Correo no válido');
 
 export default function RecoverPasswordPage() {
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
   const router = useRouter();
 
-  const [code, setCode] = useState<string[]>(Array(6).fill(''));
-  const [codeError, setCodeError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [generalError, setGeneralError] = useState<string | null>(null);
-  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const [step, setStep] = useState<'enterCode' | 'resetPassword'>('enterCode');
   const [hasSentOtp, setHasSentOtp] = useState(false);
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const sendOtp = async () => {
       if (!user?.email || hasSentOtp) return;
 
       const result = emailSchema.safeParse(user.email.trim());
-
       if (!result.success) {
         toast.error('Correo inválido. No se pudo enviar el código.');
         return;
       }
 
       try {
-        await api.auth.forgotPassword(user.email);
+        await api.auth.resetPassword(user.email);
         toast.success('Código enviado a tu correo.');
         setHasSentOtp(true);
       } catch (error) {
@@ -48,63 +51,62 @@ export default function RecoverPasswordPage() {
     sendOtp();
   }, [user, hasSentOtp]);
 
-  const handleInputChange = (index: number, value: string) => {
-    if (value.length > 1) value = value.slice(-1);
-    const newCode = [...code];
-    newCode[index] = value;
-    setCode(newCode);
-    setCodeError('');
-    if (value && index < inputsRef.current.length - 1) {
-      inputsRef.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (
-    index: number,
-    event: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    if (event.key === 'Backspace' && !code[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
-    }
-  };
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setLoading(true);
-      setGeneralError(null);
-      setCodeError('');
-
-      const codeString = code.join('');
-      const result = codeSchema.safeParse(codeString);
-
-      if (!result.success) {
-        setCodeError(result.error.errors[0].message);
-        setLoading(false);
+  const handleCodeVerified = async (code: string) => {
+    try {
+      if (!token) {
+        toast.error('Token inválido');
         return;
       }
 
-      try {
-        if (!token) {
-          toast.error('Token inválido');
-          return;
-        }
+      await api.auth.validateOtp(code, token);
+      sessionStorage.setItem('pharmatechToken', token);
+      toast.success('Código verificado correctamente');
+      setStep('resetPassword');
+    } catch (err) {
+      console.error('Error al verificar el código:', err);
+      toast.error('Código incorrecto. Intenta de nuevo.');
+    }
+  };
 
-        await api.auth.validateOtp(codeString, token);
-        localStorage.setItem('pharmatechToken', token);
-        toast.success('Código verificado correctamente');
-        setCode(Array(6).fill(''));
-        router.push('/user/security/recoverPassword/resetPassword');
-      } catch (err) {
-        console.error('Error al verificar el código:', err);
-        setGeneralError('Error al verificar el código. Intenta de nuevo.');
-        toast.error('Error al verificar el código. Intenta de nuevo.');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [code, token, router],
-  );
+  const handleSubmitNewPassword = async () => {
+    const result = resetPasswordSchema.safeParse({
+      newPassword,
+      confirmPassword,
+    });
+
+    if (!result.success) {
+      const { fieldErrors } = result.error.flatten();
+      setErrors({
+        newPassword: fieldErrors.newPassword?.[0] ?? '',
+        confirmPassword: fieldErrors.confirmPassword?.[0] ?? '',
+      });
+      return;
+    }
+
+    const finalToken =
+      sessionStorage.getItem('pharmatechToken') ||
+      localStorage.getItem('pharmatechToken');
+
+    if (!finalToken) {
+      toast.error('Token inválido. Vuelve a iniciar el proceso.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.auth.updatePassword(newPassword, finalToken);
+      toast.success('Contraseña actualizada correctamente');
+      setTimeout(() => {
+        logout();
+        router.push('/login');
+      }, 800);
+    } catch (error) {
+      console.error('Error actualizando contraseña:', error);
+      toast.error('Error al actualizar la contraseña');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!user) return <div className="p-6">Cargando...</div>;
 
@@ -112,67 +114,91 @@ export default function RecoverPasswordPage() {
     <UserProfileLayout>
       {() => (
         <div className="relative min-h-screen bg-white">
-          <div className="flex flex-1 flex-col items-center justify-start px-4 md:px-0">
+          <div className="flex flex-1 justify-center px-4 md:px-0">
             <div className="w-full max-w-[620px] space-y-6 p-4 text-center md:p-6">
-              <h3
-                className="font-semibold"
-                style={{ fontSize: FontSizes.h3.size, color: Colors.textMain }}
-              >
-                Recuperación de Contraseña
-              </h3>
-              <p
-                className="text-base"
-                style={{ fontSize: FontSizes.b1.size, color: Colors.textMain }}
-              >
-                Hemos enviado un código de verificación a tu correo para
-                restablecer tu contraseña. Ingrésalo aquí
-              </p>
-
-              <form onSubmit={handleSubmit} noValidate>
-                <div className="mt-6 space-y-4">
-                  <div className="flex justify-center space-x-2">
-                    {code.map((char, index) => (
-                      <input
-                        key={index}
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="-"
-                        maxLength={1}
-                        value={char}
-                        onChange={(e) =>
-                          handleInputChange(index, e.target.value)
-                        }
-                        onKeyDown={(e) => handleKeyDown(index, e)}
-                        ref={(el) => {
-                          inputsRef.current[index] = el;
-                        }}
-                        className="h-10 w-10 rounded border border-gray-400 text-center"
-                      />
-                    ))}
-                  </div>
-                  {codeError && (
-                    <p className="text-xs text-red-500" role="alert">
-                      {codeError}
-                    </p>
-                  )}
-                  {generalError && (
-                    <p className="text-xs text-red-500" role="alert">
-                      {generalError}
-                    </p>
-                  )}
-                  <Button
-                    variant="submit"
-                    className="mt-8 h-[50px] w-[350px] font-semibold text-white"
-                    disabled={loading}
-                    aria-busy={loading}
+              {step === 'enterCode' && (
+                <>
+                  <h3
+                    className="font-semibold"
+                    style={{
+                      fontSize: FontSizes.h3.size,
+                      color: Colors.textMain,
+                    }}
                   >
-                    {loading ? 'Cargando...' : 'Verificar'}
-                  </Button>
-                </div>
-              </form>
+                    Recuperación de Contraseña
+                  </h3>
+                  <p
+                    className="text-base"
+                    style={{
+                      fontSize: FontSizes.b1.size,
+                      color: Colors.textMain,
+                    }}
+                  >
+                    Hemos enviado un código a tu correo. Ingrésalo para
+                    continuar.
+                  </p>
+
+                  <EnterCodeForm onNext={handleCodeVerified} />
+                </>
+              )}
+
+              {step === 'resetPassword' && (
+                <>
+                  <h3
+                    className="font-semibold"
+                    style={{
+                      fontSize: FontSizes.h3.size,
+                      color: Colors.textMain,
+                    }}
+                  >
+                    Crear Nueva Contraseña
+                  </h3>
+                  <p
+                    className="text-base"
+                    style={{
+                      fontSize: FontSizes.b1.size,
+                      color: Colors.textMain,
+                    }}
+                  >
+                    Ingresa y confirma tu nueva contraseña para finalizar el
+                    proceso.
+                  </p>
+
+                  <div className="mt-6 space-y-6 text-left">
+                    <Input
+                      label="Nueva contraseña"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      borderColor="#393938"
+                      showPasswordToggle
+                      helperText={errors.newPassword}
+                      helperTextColor="red-500"
+                    />
+                    <Input
+                      label="Confirmar contraseña"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      borderColor="#393938"
+                      showPasswordToggle
+                      helperText={errors.confirmPassword}
+                      helperTextColor="red-500"
+                    />
+
+                    <Button
+                      variant="submit"
+                      className="w-full font-semibold text-white"
+                      onClick={handleSubmitNewPassword}
+                      disabled={loading}
+                    >
+                      {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-
           <ToastContainer />
         </div>
       )}

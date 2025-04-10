@@ -15,6 +15,8 @@ import Button from '@/components/Button';
 import { FontSizes, Colors } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
+import ModalConfirm from '@/components/ModalConfirm';
+import { toast } from 'react-toastify';
 
 type UserProfile = {
   firstName: string;
@@ -45,6 +47,10 @@ export default function AddressPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [userData, setUserData] = useState<UserProfile | null>(null);
 
+  // Modal confirmación
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
+
   useEffect(() => {
     if (!token || !user?.sub) {
       setUserData(null);
@@ -54,7 +60,6 @@ export default function AddressPage() {
     (async () => {
       try {
         const profileResponse = await api.user.getProfile(user.sub, token);
-
         const userData: UserProfile = {
           firstName: profileResponse.firstName,
           lastName: profileResponse.lastName,
@@ -66,9 +71,7 @@ export default function AddressPage() {
             profilePicture: profileResponse.profile?.profilePicture || '',
           },
         };
-
         setUserData(userData);
-        console.log('Perfil obtenido:', userData);
       } catch (error) {
         console.error('Error al obtener perfil:', error);
         setUserData(null);
@@ -78,21 +81,39 @@ export default function AddressPage() {
 
   const isNewAddress = searchParams.get('new') === 'true';
 
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      try {
-        if (!token || !user?.sub) return;
-        const response = await api.userAdress.getListAddresses(user.sub, token);
-        setAddresses(response);
-      } catch (error) {
-        console.error('Error al cargar direcciones:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchAddresses = async () => {
+    try {
+      if (!token || !user?.sub) return;
+      const response = await api.userAdress.getListAddresses(user.sub, token);
+      setAddresses(response);
+    } catch (error) {
+      console.error('Error al cargar direcciones:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (!isNewAddress) fetchAddresses();
   }, [user?.sub, token, isNewAddress]);
+
+  const handleConfirmDelete = async () => {
+    if (!token || !user?.sub || !addressToDelete) return;
+
+    try {
+      await api.userAdress.deleteAddress(user.sub, addressToDelete, token);
+      toast.success('Dirección eliminada');
+      setShowConfirmModal(false);
+      setAddressToDelete(null);
+
+      setTimeout(() => {
+        fetchAddresses();
+      }, 500);
+    } catch (err) {
+      console.error('Error al eliminar dirección:', err);
+      toast.error('No se pudo eliminar la dirección.');
+    }
+  };
 
   if (!user || loading) return <div className="p-6">Cargando...</div>;
 
@@ -197,17 +218,8 @@ export default function AddressPage() {
                         <button
                           className="text-gray-600 hover:text-red-500"
                           onClick={() => {
-                            if (token) {
-                              api.userAdress.deleteAddress(
-                                user.sub,
-                                addr.id,
-                                token,
-                              );
-                            } else {
-                              console.error(
-                                'Token is null, no se puede borrar la dirección',
-                              );
-                            }
+                            setAddressToDelete(addr.id);
+                            setShowConfirmModal(true);
                           }}
                         >
                           <TrashIcon className="h-5 w-5" />
@@ -218,7 +230,6 @@ export default function AddressPage() {
                 </div>
               )}
 
-              {/* Botón en mobile */}
               <div className="mt-4 block md:hidden">
                 <Button
                   className={`font-regular h-[48px] w-full bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}
@@ -231,6 +242,19 @@ export default function AddressPage() {
           </div>
         </div>
       </Suspense>
+
+      {/* Modal confirmación */}
+      {showConfirmModal && (
+        <ModalConfirm
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirmDelete}
+          title="¿Estás seguro de eliminar esta dirección?"
+          description="Esta acción no se puede deshacer."
+          cancelText="Cancelar"
+          confirmText="Eliminar"
+        />
+      )}
     </div>
   );
 }
