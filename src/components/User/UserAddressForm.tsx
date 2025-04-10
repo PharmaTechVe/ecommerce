@@ -62,10 +62,7 @@ export default function EditAddressForm({
   useEffect(() => {
     const loadCountryAndStates = async () => {
       try {
-        const countries = await api.country.findAll({
-          page: 1,
-          limit: 100,
-        });
+        const countries = await api.country.findAll({ page: 1, limit: 100 });
         const venezuela = countries.results.find(
           (c: CountryResponse) => c.name.toLowerCase() === 'venezuela',
         );
@@ -125,11 +122,13 @@ export default function EditAddressForm({
 
   const handleLocationAdded = (
     location: { lat: number; lng: number },
-    address: string,
+    selectedAddress: string,
   ) => {
     setLatitude(location.lat);
     setLongitude(location.lng);
-    setAddress(address);
+    setAddress(selectedAddress); // ✅ actualiza el input de dirección
+    setShowLocationPopup(false); // ✅ cierra el popup
+    // ❌ no se llama onSubmit aquí
   };
 
   const handleNextClick = async () => {
@@ -160,25 +159,18 @@ export default function EditAddressForm({
       return;
     }
 
-    const latitudeNumber = latitude as number;
-    const longitudeNumber = longitude as number;
-
     if (onSubmit) {
-      const data = {
+      onSubmit({
         address,
         zipCode,
         additionalInfo,
         referencePoint,
         state: selectedState,
         city: selectedCity,
-        latitude: latitudeNumber,
-        longitude: longitudeNumber,
-      };
-
-      onSubmit(data);
+        latitude,
+        longitude,
+      });
     }
-
-    setShowLocationPopup(true);
   };
 
   return (
@@ -304,7 +296,7 @@ export default function EditAddressForm({
         <LocationPopup
           onAdd={handleLocationAdded}
           onBack={() => setShowLocationPopup(false)}
-          guideText="Mueve el pin hata tu ubicacion exacta"
+          guideText="Mueve el pin hasta tu ubicación exacta"
         />
       )}
     </div>
