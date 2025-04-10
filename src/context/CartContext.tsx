@@ -1,4 +1,3 @@
-// CartContext.tsx
 'use client';
 import React, {
   createContext,
@@ -9,8 +8,6 @@ import React, {
   useRef,
 } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { jwtDecode } from 'jwt-decode';
-// import { api } from '@/lib/sdkConfig'; // Importa tu API cuando esté lista
 
 export interface CartItem {
   id: string;
@@ -31,21 +28,15 @@ interface CartContextProps {
   clearCart: () => void;
 }
 
-// Interfaz para el payload del JWT
-interface JwtPayload {
-  sub: string;
-  // Agrega otras propiedades que contenga tu token, si es necesario
-}
-
 const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const alertShownRef = useRef(false);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   console.log('Token in Cart Provider:', token);
+  console.log('User in Cart Provider:', user);
 
-  // Función para mostrar alerta cuando no hay suficiente stock
   const showStockAlert = () => {
     if (!alertShownRef.current) {
       alertShownRef.current = true;
@@ -56,7 +47,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Cargar el carrito desde localStorage al montar el componente
   useEffect(() => {
     const storedCart = localStorage.getItem('cartItems');
     if (storedCart) {
@@ -68,26 +58,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Guardar el carrito en localStorage cada vez que se actualiza el estado
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
 
   // Al detectar cambios en el token:
-  // - Si existe, se fusiona el carrito local con el del usuario (si no se ha fusionado ya).
-  // - Si no existe, se mantiene el carrito, permitiendo que el usuario anónimo siga usándolo.
+  // - Si existe y además tenemos el usuario decodificado, se fusiona el carrito local con el del usuario (si no se ha fusionado ya).
+  // - Si no hay token, se mantiene el carrito del usuario anónimo.
   useEffect(() => {
-    if (token) {
-      // Usuario logueado: se fusiona el carrito
-      let userId: string;
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        userId = decoded.sub;
-      } catch (error) {
-        console.error('Error decodificando el token', error);
-        return;
-      }
-
+    if (token && user) {
+      const userId = user.sub;
       // Verificar si ya se fusionó el carrito para este usuario usando un flag en localStorage
       const mergedUser = localStorage.getItem('mergedUser');
       if (mergedUser === userId) {
@@ -122,7 +102,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('mergedUser', userId);
     }
     // Si no hay token, se mantiene el carrito guardado sin limpiarlo.
-  }, [token]);
+  }, [token, user]);
 
   // Función para fusionar dos carritos sumando las cantidades en caso de que se repita el mismo ítem
   const mergeCarts = (
