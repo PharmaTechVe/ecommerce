@@ -35,6 +35,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   discountPercentage,
   variant,
 }) => {
+  // Definimos el objeto de la ruta para el detalle del producto
+  const detailLink = {
+    pathname: `/product/${productId}/presentation/${presentationId}`,
+    query: { productPresentationId },
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <CardBase
@@ -43,6 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         ribbonText={ribbonText}
         imageSrc={imageSrc}
         label={label}
+        imageLink={detailLink} // PASAMOS LA RUTA: la imagen ahora es clickeable
       >
         <div
           className={`flex flex-col px-[24px] ${
@@ -64,12 +71,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               />
             </div>
           )}
-          <Link
-            href={{
-              pathname: `/product/${productId}/presentation/${presentationId}`,
-              query: { productPresentationId },
-            }}
-          >
+          <Link href={detailLink}>
             <p
               className="w-full text-left"
               style={{
