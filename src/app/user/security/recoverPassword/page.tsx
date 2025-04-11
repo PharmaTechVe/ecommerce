@@ -5,65 +5,57 @@ import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
-import { z } from 'zod';
 import { resetPasswordSchema } from '@/lib/validations/recoverPasswordSchema';
 import { FontSizes, Colors } from '@/styles/styles';
 
 import UserProfileLayout from '@/components/User/ProfileLayout';
-import EnterCodeForm from '@/components/User/EnterCodeForm';
 import Input from '@/components/Input/Input';
 import Button from '@/components/Button';
-
-const emailSchema = z.string().email('Correo no válido');
+import EnterCodeForm from '@/components/User/EnterCodeForm';
 
 export default function RecoverPasswordPage() {
   const { user, token, logout } = useAuth();
   const router = useRouter();
 
   const [step, setStep] = useState<'enterCode' | 'resetPassword'>('enterCode');
-  const [hasSentOtp, setHasSentOtp] = useState(false);
-
+  const [resendTimer, setResendTimer] = useState(30);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const sendOtp = async () => {
-      if (!user?.email || hasSentOtp) return;
+    let interval: NodeJS.Timeout;
+    if (step === 'enterCode' && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer, step]);
 
-      const result = emailSchema.safeParse(user.email.trim());
-      if (!result.success) {
-        toast.error('Correo inválido. No se pudo enviar el código.');
-        return;
-      }
+  useEffect(() => {
+    if (!user?.email) return;
 
-      try {
-        await api.auth.resetPassword(user.email);
+    api.auth
+      .forgotPassword(user.email)
+      .then(() => {
         toast.success('Código enviado a tu correo.');
-        setHasSentOtp(true);
-      } catch (error) {
+        setResendTimer(30);
+      })
+      .catch((error) => {
         console.error('Error enviando OTP:', error);
         toast.error('No se pudo enviar el código. Intenta más tarde.');
-      }
-    };
+      });
+  }, [user?.email]);
 
-    sendOtp();
-  }, [user, hasSentOtp]);
-
-  const handleCodeVerified = async (code: string) => {
+  const handleCodeSubmit = async (code: string) => {
     try {
-      if (!token) {
-        toast.error('Token inválido');
-        return;
-      }
-
-      await api.auth.validateOtp(code, token);
-      sessionStorage.setItem('pharmatechToken', token);
+      await api.auth.resetPassword(code);
       toast.success('Código verificado correctamente');
       setStep('resetPassword');
-    } catch (err) {
-      console.error('Error al verificar el código:', err);
+    } catch (error) {
+      console.error('Error al verificar el código:', error);
       toast.error('Código incorrecto. Intenta de nuevo.');
     }
   };
@@ -85,7 +77,8 @@ export default function RecoverPasswordPage() {
 
     const finalToken =
       sessionStorage.getItem('pharmatechToken') ||
-      localStorage.getItem('pharmatechToken');
+      localStorage.getItem('pharmatechToken') ||
+      token;
 
     if (!finalToken) {
       toast.error('Token inválido. Vuelve a iniciar el proceso.');
@@ -116,17 +109,16 @@ export default function RecoverPasswordPage() {
         <div className="relative min-h-screen bg-white">
           <div className="flex flex-1 justify-center px-4 md:px-0">
             <div className="w-full max-w-[620px] space-y-6 p-4 text-center md:p-6">
+              <h3
+                className="font-semibold"
+                style={{ fontSize: FontSizes.h3.size, color: Colors.textMain }}
+              >
+                Recuperación de Contraseña
+              </h3>
+
+              {/* Paso 1: Ingreso de código */}
               {step === 'enterCode' && (
                 <>
-                  <h3
-                    className="font-semibold"
-                    style={{
-                      fontSize: FontSizes.h3.size,
-                      color: Colors.textMain,
-                    }}
-                  >
-                    Recuperación de Contraseña
-                  </h3>
                   <p
                     className="text-base"
                     style={{
@@ -134,25 +126,47 @@ export default function RecoverPasswordPage() {
                       color: Colors.textMain,
                     }}
                   >
-                    Hemos enviado un código a tu correo. Ingrésalo para
+                    Ingrese el código que enviamos a tu correo electrónico para
                     continuar.
                   </p>
 
-                  <EnterCodeForm onNext={handleCodeVerified} />
+                  <EnterCodeForm onNext={handleCodeSubmit} />
+
+                  {/* Reenviar código */}
+                  <p
+                    className="mt-4"
+                    style={{
+                      color: resendTimer > 0 ? '#999' : Colors.secondaryLight,
+                      cursor: resendTimer > 0 ? 'default' : 'pointer',
+                      fontSize: FontSizes.b1.size,
+                    }}
+                    onClick={() => {
+                      if (!user?.email || resendTimer > 0) return;
+
+                      api.auth
+                        .forgotPassword(user.email)
+                        .then(() => {
+                          toast.success('Código reenviado a tu correo.');
+                          setResendTimer(30);
+                        })
+                        .catch((error) => {
+                          console.error('Error reenviando código:', error);
+                          toast.error(
+                            'No se pudo reenviar el código. Intenta más tarde.',
+                          );
+                        });
+                    }}
+                  >
+                    {resendTimer > 0
+                      ? `¿No recibiste el código? Reenviar en ${resendTimer}s`
+                      : '¿No recibiste el código? Reenviar'}
+                  </p>
                 </>
               )}
 
+              {/* Paso 2: Nueva contraseña */}
               {step === 'resetPassword' && (
                 <>
-                  <h3
-                    className="font-semibold"
-                    style={{
-                      fontSize: FontSizes.h3.size,
-                      color: Colors.textMain,
-                    }}
-                  >
-                    Crear Nueva Contraseña
-                  </h3>
                   <p
                     className="text-base"
                     style={{
@@ -160,10 +174,8 @@ export default function RecoverPasswordPage() {
                       color: Colors.textMain,
                     }}
                   >
-                    Ingresa y confirma tu nueva contraseña para finalizar el
-                    proceso.
+                    Código verificado. Ahora puedes crear una nueva contraseña.
                   </p>
-
                   <div className="mt-6 space-y-6 text-left">
                     <Input
                       label="Nueva contraseña"

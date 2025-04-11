@@ -44,7 +44,7 @@ export default function UserPasswordForm({ onSubmit }: UserPasswordFormProps) {
 
     try {
       setLoading(true);
-      onSubmit(password, newPassword, confirmPassword); // Pasamos confirmPassword también
+      onSubmit(password, newPassword, confirmPassword);
     } catch (error) {
       console.error('Error al actualizar la contraseña:', error);
       toast.error('Error al actualizar la contraseña');
