@@ -72,7 +72,6 @@ export function Sidebar({
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Detectar tamaño de pantalla
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -109,7 +108,6 @@ export function Sidebar({
 
   return (
     <>
-      {/* Botón abrir en móvil */}
       {isMobile && !isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -121,7 +119,6 @@ export function Sidebar({
         </button>
       )}
 
-      {/* Sidebar responsive */}
       {(isOpen || !isMobile) && (
         <div
           id="sidebar"
@@ -129,9 +126,8 @@ export function Sidebar({
             isMobile
               ? 'fixed left-0 top-0 z-50 h-full w-72 bg-white shadow-lg'
               : 'min-h-[582px] w-[269px]'
-          } flex flex-col rounded-lg bg-[#F1F5FD] p-4 ${className}`}
+          } flex flex-col rounded-lg bg-[#F1F5FD] p-4 pb-8 ${className}`} // 👈 Agregado `pb-8`
         >
-          {/* Cerrar móvil */}
           {isMobile && (
             <div className="flex justify-end">
               <button
@@ -144,7 +140,6 @@ export function Sidebar({
             </div>
           )}
 
-          {/* Info de usuario */}
           <div className="mb-6 flex items-center gap-3">
             <Avatar
               name={user.name}
@@ -158,15 +153,13 @@ export function Sidebar({
             </div>
           </div>
 
-          {/* Menú */}
           <nav className="space-y-1">{renderMenuItems()}</nav>
 
-          {/* Cerrar sesión */}
           {onLogout && (
-            <div className="mt-auto pt-6">
+            <div className="mt-auto pt-10">
               <button
                 onClick={onLogout}
-                className="flex items-center gap-2 font-medium text-[#d31510]"
+                className="flex items-center gap-2 font-medium text-[#d31510] transition-all duration-200 ease-in-out hover:scale-105 hover:text-red-600"
               >
                 <ArrowRightEndOnRectangleIcon className="h-5 w-5" />
                 <span>Cerrar Sesión</span>

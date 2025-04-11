@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { api } from '@/lib/sdkConfig';
 
 const LocationPopup = dynamic(
-  () => import('@/components/User/UserAddressPopup'),
+  () => import('@/components/GoogleMap/UserAddressPopup'),
   {
     ssr: false,
     loading: () => <div className="p-6">Cargando mapa...</div>,
