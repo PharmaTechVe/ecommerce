@@ -9,7 +9,7 @@ import { Colors } from '@/styles/styles';
 import { addressSchema } from '@/lib/validations/userAddressSchema';
 import { CountryResponse, StateResponse, CityResponse } from '@pharmatech/sdk';
 import { api } from '@/lib/sdkConfig';
-import LocationPopup from '@/components/User/UserAddressPopup';
+import LocationPopup from '@/components/GoogleMap/UserAddressPopup';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 
 interface EditFormProps {
@@ -34,6 +34,7 @@ interface EditFormProps {
     city: string;
     latitude: number;
     longitude: number;
+    cityId: string;
   }) => void;
   onAdd?: () => void;
 }
@@ -48,6 +49,7 @@ export default function EditAddressForm({
   const [cities, setCities] = useState<CityResponse[]>([]);
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+  const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
   const [address, setAddress] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [additionalInfo, setAdditionalInfo] = useState('');
@@ -66,25 +68,21 @@ export default function EditAddressForm({
         const venezuela = countries.results.find(
           (c: CountryResponse) => c.name.toLowerCase() === 'venezuela',
         );
-
         if (!venezuela) {
-          toast.error('Country Venezuela not found');
+          toast.error('País Venezuela no encontrado');
           return;
         }
-
         const statesRes = await api.state.findAll({
           page: 1,
           limit: 100,
           countryId: venezuela.id,
         });
-
         setStates(statesRes.results);
       } catch (err) {
-        console.error('Error loading states:', err);
-        toast.error('Failed to load states');
+        console.error('Error cargando estados:', err);
+        toast.error('No se pudieron cargar los estados');
       }
     };
-
     loadCountryAndStates();
   }, []);
 
@@ -100,14 +98,20 @@ export default function EditAddressForm({
           stateId: foundState.id,
         });
 
-        setCities(cityRes.results);
+        const cityList = cityRes.results;
+        setCities(cityList);
+
+        if (selectedCity) {
+          const foundCity = cityList.find((c) => c.name === selectedCity);
+          if (foundCity) setSelectedCityId(foundCity.id);
+        }
       } catch (err) {
-        console.error('Error loading cities:', err);
+        console.error('Error cargando ciudades:', err);
       }
     };
 
     if (selectedState) loadCities();
-  }, [selectedState, states]);
+  }, [selectedState, states, selectedCity]);
 
   useEffect(() => {
     if (initialData) {
@@ -117,6 +121,7 @@ export default function EditAddressForm({
       setReferencePoint(initialData.referencePoint ?? '');
       setSelectedCity(initialData.nameCity);
       setSelectedState(initialData.nameState);
+      setSelectedCityId(initialData.cityId);
     }
   }, [initialData]);
 
@@ -126,9 +131,8 @@ export default function EditAddressForm({
   ) => {
     setLatitude(location.lat);
     setLongitude(location.lng);
-    setAddress(selectedAddress); // ✅ actualiza el input de dirección
-    setShowLocationPopup(false); // ✅ cierra el popup
-    // ❌ no se llama onSubmit aquí
+    setAddress(selectedAddress);
+    setShowLocationPopup(false);
   };
 
   const handleNextClick = async () => {
@@ -154,8 +158,8 @@ export default function EditAddressForm({
       return;
     }
 
-    if (latitude === null || longitude === null) {
-      toast.error('Debes seleccionar una ubicación en el mapa');
+    if (latitude === null || longitude === null || !selectedCityId) {
+      toast.error('Debes seleccionar una ciudad y ubicación en el mapa');
       return;
     }
 
@@ -169,6 +173,7 @@ export default function EditAddressForm({
         city: selectedCity,
         latitude,
         longitude,
+        cityId: selectedCityId,
       });
     }
   };
@@ -211,7 +216,12 @@ export default function EditAddressForm({
           <Dropdown
             label="Ciudad"
             items={cities.map((c) => c.name)}
-            onSelect={setSelectedCity}
+            onSelect={(cityName) => {
+              setSelectedCity(cityName);
+              const foundCity = cities.find((c) => c.name === cityName);
+              if (foundCity) setSelectedCityId(foundCity.id);
+              else setSelectedCityId(null);
+            }}
           />
         </div>
       </div>
@@ -225,7 +235,7 @@ export default function EditAddressForm({
           disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
-          placeholder="E.g. Av. Libertador, El Recreo Mall, Local 123"
+          placeholder="Ej. Av. Libertador, El Recreo Mall, Local 123"
         />
         <MapPinIcon
           className="absolute right-4 top-1/2 mb-4 -translate-y-1/2 transform cursor-pointer text-gray-600"
@@ -244,7 +254,7 @@ export default function EditAddressForm({
           disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
-          placeholder="E.j. 1010"
+          placeholder="Ej. 1010"
         />
         <Input
           label="Información adicional"
@@ -254,7 +264,7 @@ export default function EditAddressForm({
           disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
-          placeholder="E.g. casa, oficina, etc."
+          placeholder="Ej. casa, oficina, etc."
         />
       </div>
 

@@ -7,7 +7,9 @@ import {
   Marker,
   StandaloneSearchBox,
   Circle,
+  Libraries,
 } from '@react-google-maps/api';
+import { parsePlaceFromSearchBox } from '@/lib/utils/helpers/parsePlaceFromSearchBox';
 
 interface GoogleMapsProps {
   radius: number;
@@ -20,22 +22,25 @@ interface GoogleMapsProps {
   style?: string;
 }
 
+// ✅ Constante para evitar recarga innecesaria del script
+const GOOGLE_MAP_LIBRARIES: Libraries = ['places'];
+
 const GoogleMaps = ({
   radius,
   setLatitude,
-  style,
-  address,
-  setAddress,
   setLongitude,
   latitude,
   longitude,
+  address,
+  setAddress,
+  style,
 }: GoogleMapsProps) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const inputRef = useRef<google.maps.places.SearchBox | null>(null);
 
-  // Cargar la API de Google Maps
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries: ['places'],
+    libraries: GOOGLE_MAP_LIBRARIES,
   });
 
   const center = useMemo(
@@ -44,8 +49,8 @@ const GoogleMaps = ({
   );
 
   const getAddressFromCoordinates = (lat: number, lng: number) => {
-    if (!window.google || !window.google.maps || !window.google.maps.Geocoder) {
-      console.error('Google Maps API is not fully loaded');
+    if (!window.google?.maps?.Geocoder) {
+      console.error('Google Maps API no está completamente cargado');
       return;
     }
 
@@ -53,10 +58,10 @@ const GoogleMaps = ({
     const latLng = new window.google.maps.LatLng(lat, lng);
 
     geocoder.geocode({ location: latLng }, (results, status) => {
-      if (status === window.google.maps.GeocoderStatus.OK && results) {
+      if (status === window.google.maps.GeocoderStatus.OK && results?.length) {
         setAddress(results[0]?.formatted_address || 'Dirección no encontrada');
       } else {
-        console.error('No se pudo obtener la dirección:', status);
+        console.error('Error obteniendo dirección:', status);
         setAddress('Dirección no encontrada');
       }
     });
@@ -74,58 +79,32 @@ const GoogleMaps = ({
   };
 
   useEffect(() => {
-    if (
-      map &&
-      window.google &&
-      window.google.maps &&
-      window.google.maps.Geocoder
-    ) {
+    if (map && window.google?.maps?.Geocoder) {
       map.panTo({ lat: latitude, lng: longitude });
       getAddressFromCoordinates(latitude, longitude);
     }
   }, [latitude, longitude, map]);
 
-  const inputRef = useRef<google.maps.places.SearchBox | null>(null);
-
   const handlePlaceChanged = () => {
-    if (inputRef.current) {
-      const places = inputRef.current.getPlaces();
-
-      if (places && places.length > 0) {
-        const place = places[0];
-
-        // Verificación `geometry` y `geometry.location` cuadrante
-        if (place.geometry && place.geometry.location) {
-          const lat = place.geometry.location.lat();
-          const lng = place.geometry.location.lng();
-
-          setAddress(place.formatted_address || '');
-          setLatitude(lat);
-          setLongitude(lng);
-        } else {
-          console.error('Sin cuadrante o ubicación en el lugar seleccionado');
-        }
-      }
-    }
+    parsePlaceFromSearchBox({
+      ref: inputRef.current,
+      setLatitude,
+      setLongitude,
+      setAddress,
+    });
   };
 
-  if (!isLoaded) {
-    return <div>Cargando mapa...</div>;
-  }
+  if (!isLoaded) return <div>Cargando mapa...</div>;
 
   return (
     <div className="w-full" style={{ height: '500px' }}>
       <GoogleMap
-        mapContainerStyle={{
-          width: '100%',
-          height: '60%',
-        }}
+        mapContainerStyle={{ width: '100%', height: '60%' }}
         center={center}
         zoom={10}
         onLoad={(map) => setMap(map)}
         onClick={changeCoordinate}
       >
-        {/* Buscador de ubicación */}
         <StandaloneSearchBox
           onLoad={(ref) => (inputRef.current = ref)}
           onPlacesChanged={handlePlaceChanged}
@@ -148,15 +127,15 @@ const GoogleMaps = ({
         />
 
         <Circle
+          center={{ lat: latitude, lng: longitude }}
+          radius={radius}
           options={{
             fillColor: '#FF0000',
-            strokeOpacity: 0.8,
             strokeColor: '#FF0000',
+            strokeOpacity: 0.8,
             strokeWeight: 2,
             fillOpacity: 0.35,
           }}
-          center={{ lat: latitude, lng: longitude }}
-          radius={radius}
         />
       </GoogleMap>
     </div>

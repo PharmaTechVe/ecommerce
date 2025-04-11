@@ -7,7 +7,7 @@ import {
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
-import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/DateUtils';
+import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/constants/DateUtils';
 
 type DatePicker1Props = {
   onDateSelect?: (date: string) => void;
