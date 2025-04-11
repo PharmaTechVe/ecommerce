@@ -259,7 +259,7 @@ export default function RegisterForm() {
             </p>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-600">
+            <label className="mb-1 block font-medium text-[#666666]">
               Fecha de nacimiento
             </label>
             <div
@@ -282,7 +282,7 @@ export default function RegisterForm() {
             </p>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-600">
+            <label className="mb-3 block font-medium text-[#666666]">
               Género
             </label>
             <div className="flex gap-6">

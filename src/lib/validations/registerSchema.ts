@@ -63,11 +63,10 @@ export const registerSchema = z
 
     genero: z
       .string()
-      .transform((value) => (value?.trim() === '' ? null : value))
-      .nullable()
+      .nonempty('Selecciona un género')
       .refine(
-        (value) => value === null || value === 'hombre' || value === 'mujer',
-        'Selecciona un género',
+        (value) => value === 'hombre' || value === 'mujer',
+        'Selecciona un género válido',
       ),
 
     password: z
@@ -84,6 +83,7 @@ export const registerSchema = z
 
     confirmPassword: z.string().nonempty('Debes confirmar la contraseña'),
   })
+
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],

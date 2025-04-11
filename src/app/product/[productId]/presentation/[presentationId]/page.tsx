@@ -131,6 +131,7 @@ export default function ProductDetailPage() {
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState('');
+  const [minWaitDone, setMinWaitDone] = useState(false);
 
   useEffect(() => {
     async function fetchPresentationDetail() {
@@ -244,13 +245,33 @@ export default function ProductDetailPage() {
     }
   }, [presentation, genericProduct]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinWaitDone(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    if (minWaitDone && (!presentation || !genericProduct)) {
+      const timer = setTimeout(() => {
+        router.push('/');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [minWaitDone, presentation, genericProduct, router]);
   if (loading) return <p className="p-4 text-lg">Loading...</p>;
-  if (error || !presentation || !genericProduct) {
+  if (!presentation || !genericProduct) {
+    if (!minWaitDone) {
+      return <p className="p-4 text-lg">Loading...</p>;
+    }
     return (
-      <p className="p-4 text-lg">{error || 'Product detail not found.'}</p>
+      <div className="p-4 text-lg">
+        {error
+          ? error
+          : 'Producto no encontrado. Redirigiendo al inicio en 5 segundos...'}
+      </div>
     );
   }
-
   const productPresentationId = presentation.id;
 
   const breadcrumbItems = [
