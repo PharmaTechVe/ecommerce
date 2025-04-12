@@ -126,37 +126,39 @@ export function Sidebar({
             isMobile
               ? 'fixed left-0 top-0 z-50 h-full w-72 bg-white shadow-lg'
               : 'min-h-[582px] w-[269px]'
-          } flex flex-col rounded-lg bg-[#F1F5FD] p-4 pb-8 ${className}`} // 👈 Agregado `pb-8`
+          } flex flex-col justify-between overflow-y-auto rounded-lg bg-[#F1F5FD] p-4 pb-6 pt-4 ${className}`}
         >
-          {isMobile && (
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="mb-2 p-1 text-gray-600 hover:text-red-500"
-                aria-label="Cerrar menú"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-          )}
+          <div>
+            {isMobile && (
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="mb-2 p-1 text-gray-600 hover:text-red-500"
+                  aria-label="Cerrar menú"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+            )}
 
-          <div className="mb-6 flex items-center gap-3">
-            <Avatar
-              name={user.name}
-              imageUrl={user.avatar}
-              size={48}
-              withDropdown={false}
-            />
-            <div>
-              <h3 className="font-medium text-[#393938]">{user.name}</h3>
-              <p className="text-sm text-[#6e6d6c]">Cuenta Personal</p>
+            <div className="mb-6 flex items-center gap-3">
+              <Avatar
+                name={user.name}
+                imageUrl={user.avatar}
+                size={48}
+                withDropdown={false}
+              />
+              <div>
+                <h3 className="font-medium text-[#393938]">{user.name}</h3>
+                <p className="text-sm text-[#6e6d6c]">Cuenta Personal</p>
+              </div>
             </div>
+
+            <nav className="space-y-1">{renderMenuItems()}</nav>
           </div>
 
-          <nav className="space-y-1">{renderMenuItems()}</nav>
-
           {onLogout && (
-            <div className="mt-auto pt-10">
+            <div className="pt-6">
               <button
                 onClick={onLogout}
                 className="flex items-center gap-2 font-medium text-[#d31510] transition-all duration-200 ease-in-out hover:scale-105 hover:text-red-600"

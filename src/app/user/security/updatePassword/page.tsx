@@ -7,10 +7,11 @@ import UserProfileLayout from '@/components/User/ProfileLayout';
 import UserPasswordForm from '@/components/User/UserPasswordForm';
 import { Colors, FontSizes } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
+import { useAuth } from '@/context/AuthContext';
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
-
+  const { token } = useAuth();
   return (
     <UserProfileLayout>
       {() => (
@@ -32,7 +33,6 @@ export default function UpdatePasswordPage() {
             <UserPasswordForm
               onSubmit={async (password: string, newPassword: string) => {
                 try {
-                  const token = sessionStorage.getItem('jwt');
                   if (!token) {
                     throw new Error('Token no encontrado');
                   }

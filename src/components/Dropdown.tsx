@@ -5,13 +5,23 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 type DropdownProps = {
   label: string;
   items: string[];
+  value?: string;
   onSelect?: (item: string) => void;
 };
 
-export default function Dropdown({ label, items, onSelect }: DropdownProps) {
+export default function Dropdown({
+  label,
+  items,
+  value,
+  onSelect,
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(label);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (value) setSelected(value);
+  }, [value]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -45,7 +55,7 @@ export default function Dropdown({ label, items, onSelect }: DropdownProps) {
       {isOpen && (
         <ul
           className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg"
-          style={{ maxHeight: '15rem' }} // ~240px
+          style={{ maxHeight: '15rem' }}
         >
           {items.map((item) => (
             <li

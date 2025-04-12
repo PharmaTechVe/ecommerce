@@ -26,6 +26,7 @@ interface EditFormProps {
   onCancel?: () => void;
   mode?: 'edit' | 'create';
   onSubmit?: (data: {
+    id?: string;
     address: string;
     zipCode: string;
     additionalInfo: string;
@@ -42,7 +43,7 @@ interface EditFormProps {
 export default function EditAddressForm({
   initialData,
   onCancel,
-  mode = 'edit',
+  mode = 'create',
   onSubmit,
 }: EditFormProps) {
   const [states, setStates] = useState<StateResponse[]>([]);
@@ -165,6 +166,7 @@ export default function EditAddressForm({
 
     if (onSubmit) {
       onSubmit({
+        ...(mode === 'edit' && initialData?.id ? { id: initialData.id } : {}),
         address,
         zipCode,
         additionalInfo,
@@ -180,18 +182,6 @@ export default function EditAddressForm({
 
   return (
     <div className="mt-14 rounded-lg p-4 md:p-6">
-      {!isEditing && mode === 'edit' && (
-        <div className="mb-4 flex justify-end">
-          <Button
-            className="text-sm"
-            variant="submit"
-            onClick={() => setIsEditing(true)}
-          >
-            Editar dirección
-          </Button>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-x-[48px] gap-y-[16px] md:grid-cols-2">
         <div className="flex flex-col">
           <label
@@ -204,6 +194,7 @@ export default function EditAddressForm({
             label="Estado"
             items={states.map((s) => s.name)}
             onSelect={setSelectedState}
+            value={selectedState}
           />
         </div>
         <div className="flex flex-col">
@@ -216,6 +207,7 @@ export default function EditAddressForm({
           <Dropdown
             label="Ciudad"
             items={cities.map((c) => c.name)}
+            value={selectedCity}
             onSelect={(cityName) => {
               setSelectedCity(cityName);
               const foundCity = cities.find((c) => c.name === cityName);
@@ -281,26 +273,36 @@ export default function EditAddressForm({
         />
       </div>
 
-      {isEditing && (
-        <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
+      <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
+        {isEditing ? (
+          <>
+            <Button
+              variant="submit"
+              className="h-[51px] w-full font-semibold text-white md:w-auto"
+              onClick={handleNextClick}
+            >
+              {mode === 'create' ? 'Siguiente' : 'Guardar Cambios'}
+            </Button>
+            {onCancel && (
+              <Button
+                variant="white"
+                className="h-[51px] w-full border border-gray-300 font-semibold text-gray-600 md:w-auto"
+                onClick={onCancel}
+              >
+                Cancelar
+              </Button>
+            )}
+          </>
+        ) : (
           <Button
             variant="submit"
             className="h-[51px] w-full font-semibold text-white md:w-auto"
-            onClick={handleNextClick}
+            onClick={() => setIsEditing(true)}
           >
-            {mode === 'create' ? 'Siguiente' : 'Guardar Cambios'}
+            Actualizar dirección
           </Button>
-          {onCancel && (
-            <Button
-              variant="white"
-              className="h-[51px] w-full border border-gray-300 font-semibold text-gray-600 md:w-auto"
-              onClick={onCancel}
-            >
-              Cancelar
-            </Button>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       {showLocationPopup && (
         <LocationPopup
