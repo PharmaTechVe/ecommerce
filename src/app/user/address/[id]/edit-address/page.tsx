@@ -49,8 +49,6 @@ export default function Page() {
           avatar: profileResponse.profile?.profilePicture || '',
         };
         setUserData(fetchedUserData);
-
-        // Obtener dirección específica
         const response = await api.userAdress.getAddress(
           user.sub,
           params.id as string,
@@ -104,7 +102,12 @@ export default function Page() {
               onSubmit={async (data) => {
                 if (!user || !user.sub || !data.id || !token) return;
                 try {
-                  await api.userAdress.getAddress(user.sub, data.id, token);
+                  await api.userAdress.update(
+                    user.sub,
+                    initialData,
+                    data.id,
+                    token,
+                  );
                   toast.success('Dirección actualizada');
                   router.push('/user/address');
                 } catch (err) {

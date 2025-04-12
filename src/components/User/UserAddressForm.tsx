@@ -224,7 +224,6 @@ export default function EditAddressForm({
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           helperText={errors.address}
-          disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
           placeholder="Ej. Av. Libertador, El Recreo Mall, Local 123"
@@ -243,7 +242,6 @@ export default function EditAddressForm({
           value={zipCode}
           onChange={(e) => setZipCode(e.target.value)}
           helperText={errors.zipCode}
-          disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
           placeholder="Ej. 1010"
@@ -253,7 +251,6 @@ export default function EditAddressForm({
           value={additionalInfo}
           onChange={(e) => setAdditionalInfo(e.target.value)}
           helperText={errors.additionalInfo}
-          disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
           placeholder="Ej. casa, oficina, etc."
@@ -266,7 +263,6 @@ export default function EditAddressForm({
           value={referencePoint}
           onChange={(e) => setReferencePoint(e.target.value)}
           helperText={errors.referencePoint}
-          disabled={!isEditing}
           borderColor="#f3f4f6"
           helperTextColor="red-500"
           height="134px"
