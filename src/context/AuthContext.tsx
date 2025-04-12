@@ -1,45 +1,84 @@
 'use client';
+
 import {
   createContext,
+  useContext,
   useState,
   useEffect,
-  useContext,
   ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { jwtDecode } from 'jwt-decode';
+
+export interface JwtPayload {
+  sub: string;
+  email?: string;
+  name?: string;
+  role?: string;
+  exp?: number;
+}
 
 interface AuthContextType {
   token: string | null;
+  user: JwtPayload | null;
   login: (token: string, remember: boolean) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   token: null,
+  user: null,
   login: () => {},
   logout: () => {},
 });
 
+const decodeToken = (rawToken: string): JwtPayload | null => {
+  try {
+    const decoded = jwtDecode<JwtPayload>(rawToken);
+
+    // (Opcional) Verificar expiración
+    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+      console.warn('Token expirado');
+      return null;
+    }
+
+    return decoded;
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<JwtPayload | null>(null);
   const router = useRouter();
 
-  // Validar el token al inicializar el contexto
   useEffect(() => {
     const storedToken =
       sessionStorage.getItem('pharmatechToken') ||
-      localStorage.getItem('pharmatechToken'); // Verificar ambos lugares
+      localStorage.getItem('pharmatechToken');
+
     if (storedToken) {
       setToken(storedToken);
+      const decoded = decodeToken(storedToken);
+      setUser(decoded);
     }
   }, []);
 
-  // Sincronizar el estado del token entre pestañas
   useEffect(() => {
     const syncLogout = () => {
       const storedToken = localStorage.getItem('pharmatechToken');
       setToken(storedToken);
+
+      if (storedToken) {
+        const decoded = decodeToken(storedToken);
+        setUser(decoded);
+      } else {
+        setUser(null);
+      }
     };
+
     window.addEventListener('storage', syncLogout);
     return () => window.removeEventListener('storage', syncLogout);
   }, []);
@@ -49,8 +88,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (remember) {
       localStorage.setItem('pharmatechToken', newToken);
     }
+
     setToken(newToken);
-    console.log(token);
+    const decoded = decodeToken(newToken);
+    setUser(decoded);
     router.push('/');
   };
 
@@ -58,11 +99,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('pharmatechToken');
     sessionStorage.removeItem('pharmatechToken');
     setToken(null);
+    setUser(null);
     router.push('/');
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

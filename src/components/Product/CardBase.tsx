@@ -1,5 +1,7 @@
+'use client';
 import type React from 'react';
 import Image, { type StaticImageData } from 'next/image';
+import Link from 'next/link';
 import { Colors, CardDimensions, imageSizes } from '@/styles/styles';
 
 export type ImageType = string | StaticImageData;
@@ -10,6 +12,12 @@ interface CardBaseProps {
   imageSrc?: string | ImageType;
   ribbonText?: string;
   label?: string;
+  imageLink?:
+    | string
+    | {
+        pathname: string;
+        query: Record<string, string | string[]>;
+      };
   children: React.ReactNode;
 }
 
@@ -19,6 +27,7 @@ const CardBase: React.FC<CardBaseProps> = ({
   imageSrc,
   ribbonText,
   label,
+  imageLink,
   children,
 }) => {
   const cardSize = CardDimensions.cardSizes[variant];
@@ -76,15 +85,30 @@ const CardBase: React.FC<CardBaseProps> = ({
         className={`relative mt-[80px] flex items-center justify-center bg-white`}
       >
         {imageSrc ? (
-          <div className="relative flex items-center justify-center">
-            <Image
-              src={imageSrc}
-              alt="Product Image"
-              width={currentImageSize.width}
-              height={currentImageSize.height}
-              className="rounded-md object-contain"
-            />
-          </div>
+          imageLink ? (
+            // Envolvemos la imagen en un Link para que sea clickeable
+            <Link href={imageLink}>
+              <div className="relative flex items-center justify-center">
+                <Image
+                  src={imageSrc}
+                  alt="Product Image"
+                  width={currentImageSize.width}
+                  height={currentImageSize.height}
+                  className="rounded-md object-contain"
+                />
+              </div>
+            </Link>
+          ) : (
+            <div className="relative flex items-center justify-center">
+              <Image
+                src={imageSrc}
+                alt="Product Image"
+                width={currentImageSize.width}
+                height={currentImageSize.height}
+                className="rounded-md object-contain"
+              />
+            </div>
+          )
         ) : (
           <span style={{ color: Colors.textMain }}>Sin imagen</span>
         )}
