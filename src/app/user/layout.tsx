@@ -9,12 +9,12 @@ import { api } from '@/lib/sdkConfig';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 import CartOverlay from '@/components/Cart/CartOverlay';
 
-export enum UserGender {
+enum UserGender {
   MALE = 'm',
   FEMALE = 'f',
 }
 
-export type UserProfile = {
+type UserProfile = {
   firstName: string;
   lastName: string;
   email: string;
