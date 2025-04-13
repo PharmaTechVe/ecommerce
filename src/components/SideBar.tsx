@@ -28,7 +28,7 @@ export type SidebarUser = {
 };
 
 interface SidebarProps {
-  user: SidebarUser;
+  user: SidebarUser | null;
   menuItems?: SidebarMenuItem[];
   onLogout?: () => void;
   className?: string;
@@ -143,13 +143,13 @@ export function Sidebar({
 
             <div className="mb-6 flex items-center gap-3">
               <Avatar
-                name={user.name}
-                imageUrl={user.avatar}
+                name={user?.name || ''}
+                imageUrl={user?.avatar || ''}
                 size={48}
                 withDropdown={false}
               />
               <div>
-                <h3 className="font-medium text-[#393938]">{user.name}</h3>
+                <h3 className="font-medium text-[#393938]">{user?.name}</h3>
                 <p className="text-sm text-[#6e6d6c]">Cuenta Personal</p>
               </div>
             </div>

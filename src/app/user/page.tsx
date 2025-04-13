@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import NavBar from '@/components/Navbar';
-import { Sidebar, SidebarUser } from '@/components/SideBar';
-import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 import EditUserForm from '@/components/User/UserProfileForm';
-import { ToastContainer } from 'react-toastify';
 import { api } from '@/lib/sdkConfig';
 
 enum UserGender {
@@ -29,7 +25,7 @@ type UserProfile = {
 };
 
 export default function Page() {
-  const { user, logout, token } = useAuth();
+  const { user, token } = useAuth();
   const [userData, setUserData] = useState<UserProfile | null>(null);
 
   useEffect(() => {
@@ -69,30 +65,5 @@ export default function Page() {
 
   if (!user?.sub || !userData) return <div className="p-6">Cargando...</div>;
 
-  const sidebarUser: SidebarUser = {
-    name: `${userData.firstName} ${userData.lastName}`,
-    role: userData.role ?? '',
-    avatar: userData.profile?.profilePicture ?? '',
-  };
-
-  return (
-    <div className="relative min-h-screen bg-white">
-      <div className="relative z-50">
-        <NavBar onCartClick={() => {}} />
-      </div>
-
-      <div className="px-4 pt-6 md:px-8 lg:px-16">
-        <UserBreadcrumbs />
-      </div>
-
-      <div className="flex gap-8 px-4 pt-8 md:px-8 lg:px-16">
-        <Sidebar user={sidebarUser} onLogout={logout} />
-        <div className="flex-1">
-          <EditUserForm userData={userData} isEditing={false} />
-        </div>
-      </div>
-
-      <ToastContainer />
-    </div>
-  );
+  return <EditUserForm userData={userData} isEditing={false} />;
 }
