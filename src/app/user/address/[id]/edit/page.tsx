@@ -115,7 +115,6 @@ export default function Page() {
                   toast.error('No se pudo actualizar la dirección.');
                 }
               }}
-              onCancel={() => router.push('/user/address')}
             />
           </div>
         </div>

@@ -4,31 +4,32 @@ import { usePathname } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 
 export default function UserBreadcrumbs() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const pathname = usePathname();
-
   const breadcrumbLabels: Record<string, string> = {
     user: 'Mi Perfil',
     address: 'Mis Direcciones',
     edit: 'Editar Perfil',
-    'edit-address': 'Editar Dirección',
+    editAddress: 'Editar Dirección',
     new: 'Nueva Dirección',
     security: 'Seguridad',
     updatePassword: 'Actualizar Contraseña',
     recoverPassword: 'Recuperar Contraseña',
   };
-
-  const nonClickableSegments = ['security', 'edit-address', 'new'];
-
+  const nonClickableSegments = ['security', 'new'];
   const segments = pathname.split('/').filter(Boolean);
-
   const isUUID = (segment: string) => /^[0-9a-fA-F-]{36}$/.test(segment);
 
-  const cleanedSegments = segments.flatMap((segment, index, arr) => {
-    if (isUUID(segment) && arr[index + 1] === 'edit-address') {
-      return [];
+  const cleanedSegments = [];
+  for (let index = 0; index < segments.length; index++) {
+    const segment = segments[index];
+
+    if (isUUID(segment) && segments[index + 1] === 'edit') {
+      cleanedSegments.push('editAddress');
+      break;
     }
-    return [segment];
-  });
+    cleanedSegments.push(segment);
+  }
 
   const limitedSegments =
     cleanedSegments.includes('updatePassword') ||

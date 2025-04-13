@@ -23,7 +23,6 @@ interface EditFormProps {
     cityId: string;
     id: string;
   };
-  onCancel?: () => void;
   mode?: 'edit' | 'create';
   onSubmit?: (data: {
     id?: string;
@@ -42,7 +41,6 @@ interface EditFormProps {
 
 export default function EditAddressForm({
   initialData,
-  onCancel,
   mode = 'create',
   onSubmit,
 }: EditFormProps) {
@@ -56,8 +54,6 @@ export default function EditAddressForm({
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [referencePoint, setReferencePoint] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isEditing, setIsEditing] = useState(mode === 'create' || !initialData);
-
   const [showLocationPopup, setShowLocationPopup] = useState(false);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -181,7 +177,7 @@ export default function EditAddressForm({
   };
 
   return (
-    <div className="mt-14 rounded-lg p-4 md:p-6">
+    <div className="rounded-lg p-4 md:p-6">
       <div className="grid grid-cols-1 gap-x-[48px] gap-y-[16px] md:grid-cols-2">
         <div className="flex flex-col">
           <label
@@ -270,34 +266,13 @@ export default function EditAddressForm({
       </div>
 
       <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
-        {isEditing ? (
-          <>
-            <Button
-              variant="submit"
-              className="h-[51px] w-full font-semibold text-white md:w-auto"
-              onClick={handleNextClick}
-            >
-              {mode === 'create' ? 'Siguiente' : 'Guardar Cambios'}
-            </Button>
-            {onCancel && (
-              <Button
-                variant="white"
-                className="h-[51px] w-full border border-gray-300 font-semibold text-gray-600 md:w-auto"
-                onClick={onCancel}
-              >
-                Cancelar
-              </Button>
-            )}
-          </>
-        ) : (
-          <Button
-            variant="submit"
-            className="h-[51px] w-full font-semibold text-white md:w-auto"
-            onClick={() => setIsEditing(true)}
-          >
-            Actualizar dirección
-          </Button>
-        )}
+        <Button
+          variant="submit"
+          className="h-[51px] w-full font-semibold text-white md:w-auto"
+          onClick={handleNextClick}
+        >
+          {mode === 'create' ? 'Crear Dirección' : 'Actualizar Dirección'}
+        </Button>
       </div>
 
       {showLocationPopup && (

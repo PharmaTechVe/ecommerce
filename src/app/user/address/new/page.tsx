@@ -101,7 +101,6 @@ export default function Page() {
           <div className="flex-1">
             <EditAddressForm
               mode="create"
-              onCancel={() => setShowLocationPopup(false)}
               onAdd={() => setShowLocationPopup(true)}
               onSubmit={handleSubmit}
             />

@@ -210,7 +210,7 @@ export default function AddressPage() {
                         <button
                           className="text-gray-600 hover:text-primary"
                           onClick={() =>
-                            router.push(`/user/address/${addr.id}/edit-address`)
+                            router.push(`/user/address/${addr.id}/edit`)
                           }
                         >
                           <PencilIcon className="h-5 w-5" />
