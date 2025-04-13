@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Input from '@/components/Input/Input';
 import Dropdown from '@/components/Dropdown';
@@ -11,6 +12,7 @@ import { CountryResponse, StateResponse, CityResponse } from '@pharmatech/sdk';
 import { api } from '@/lib/sdkConfig';
 import LocationPopup from '@/components/GoogleMap/UserAddressPopup';
 import { MapPinIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/context/AuthContext';
 
 interface EditFormProps {
   initialData?: {
@@ -21,29 +23,20 @@ interface EditFormProps {
     nameCity: string;
     nameState: string;
     cityId: string;
+    latitude: number | null;
+    longitude: number | null;
     id: string;
   };
   mode?: 'edit' | 'create';
-  onSubmit?: (data: {
-    id?: string;
-    address: string;
-    zipCode: string;
-    additionalInfo: string;
-    referencePoint: string;
-    state: string;
-    city: string;
-    latitude: number;
-    longitude: number;
-    cityId: string;
-  }) => void;
   onAdd?: () => void;
 }
 
 export default function EditAddressForm({
   initialData,
   mode = 'create',
-  onSubmit,
 }: EditFormProps) {
+  const { user, token } = useAuth();
+  const router = useRouter();
   const [states, setStates] = useState<StateResponse[]>([]);
   const [cities, setCities] = useState<CityResponse[]>([]);
   const [selectedState, setSelectedState] = useState('');
@@ -55,8 +48,8 @@ export default function EditAddressForm({
   const [referencePoint, setReferencePoint] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showLocationPopup, setShowLocationPopup] = useState(false);
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
+  const [latitude, setLatitude] = useState<number>(0);
+  const [longitude, setLongitude] = useState<number>(0);
 
   useEffect(() => {
     const loadCountryAndStates = async () => {
@@ -119,20 +112,18 @@ export default function EditAddressForm({
       setSelectedCity(initialData.nameCity);
       setSelectedState(initialData.nameState);
       setSelectedCityId(initialData.cityId);
+      setLatitude(initialData.latitude ?? 0);
+      setLongitude(initialData.longitude ?? 0);
     }
   }, [initialData]);
 
-  const handleLocationAdded = (
-    location: { lat: number; lng: number },
-    selectedAddress: string,
-  ) => {
+  const handleLocationAdded = (location: { lat: number; lng: number }) => {
     setLatitude(location.lat);
     setLongitude(location.lng);
-    setAddress(selectedAddress);
     setShowLocationPopup(false);
   };
 
-  const handleNextClick = async () => {
+  const handleSubmit = async () => {
     const result = addressSchema.safeParse({
       state: selectedState,
       city: selectedCity,
@@ -160,19 +151,47 @@ export default function EditAddressForm({
       return;
     }
 
-    if (onSubmit) {
-      onSubmit({
-        ...(mode === 'edit' && initialData?.id ? { id: initialData.id } : {}),
-        address,
-        zipCode,
-        additionalInfo,
-        referencePoint,
-        state: selectedState,
-        city: selectedCity,
-        latitude,
-        longitude,
-        cityId: selectedCityId,
-      });
+    if (!user?.sub || !token) {
+      toast.error('Sesión inválida. Inicia sesión nuevamente.');
+      return;
+    }
+
+    const addressData = {
+      adress: address,
+      zipCode: zipCode,
+      additionalInformation: additionalInfo,
+      referencePoint: referencePoint,
+      latitude: latitude,
+      longitude: longitude,
+      cityId: selectedCityId,
+    };
+
+    if (mode == 'create') {
+      try {
+        await api.userAdress.createAddress(user.sub, addressData, token);
+        toast.success('Dirección creada exitosamente');
+        router.push('/user/address');
+      } catch (error) {
+        console.error('Error creando dirección:', error);
+        toast.error('Hubo un error al crear la dirección');
+      }
+    } else {
+      if (!initialData) {
+        toast.error('No se pudo encontrar la dirección a actualizar');
+        return;
+      }
+      const updateData = {
+        ...addressData,
+        id: initialData?.id,
+      };
+      try {
+        await api.userAdress.update(user.sub, updateData, updateData.id, token);
+        toast.success('Dirección actualizada');
+        router.push('/user/address');
+      } catch (err) {
+        console.error('Error actualizando dirección:', err);
+        toast.error('No se pudo actualizar la dirección.');
+      }
     }
   };
 
@@ -225,7 +244,7 @@ export default function EditAddressForm({
           placeholder="Ej. Av. Libertador, El Recreo Mall, Local 123"
         />
         <MapPinIcon
-          className="absolute right-4 top-1/2 mb-4 -translate-y-1/2 transform cursor-pointer text-gray-600"
+          className="absolute right-4 top-1/2 mt-3 -translate-y-1/2 transform cursor-pointer text-gray-600"
           width={24}
           height={24}
           onClick={() => setShowLocationPopup(true)}
@@ -269,7 +288,7 @@ export default function EditAddressForm({
         <Button
           variant="submit"
           className="h-[51px] w-full font-semibold text-white md:w-auto"
-          onClick={handleNextClick}
+          onClick={handleSubmit}
         >
           {mode === 'create' ? 'Crear Dirección' : 'Actualizar Dirección'}
         </Button>
@@ -279,7 +298,10 @@ export default function EditAddressForm({
         <LocationPopup
           onAdd={handleLocationAdded}
           onBack={() => setShowLocationPopup(false)}
-          guideText="Mueve el pin hasta tu ubicación exacta"
+          latitude={latitude ? latitude : 10.3121}
+          longitude={longitude ? longitude : -69.3026}
+          setLatitude={setLatitude}
+          setLongitude={setLongitude}
         />
       )}
     </div>

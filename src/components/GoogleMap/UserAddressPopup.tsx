@@ -12,25 +12,28 @@ type LocationPopupProps = {
     cityId: string,
   ) => void;
   onBack: () => void;
-  guideText?: string;
+  setLatitude: React.Dispatch<React.SetStateAction<number>>;
+  setLongitude: React.Dispatch<React.SetStateAction<number>>;
+  latitude: number;
+  longitude: number;
 };
 
 const LocationPopup: React.FC<LocationPopupProps> = ({
   onAdd,
   onBack,
-  guideText,
+  setLatitude,
+  setLongitude,
+  latitude,
+  longitude,
 }) => {
-  const [latitude, setLatitude] = useState(10.3121);
-  const [longitude, setLongitude] = useState(-69.3026);
+  setLatitude(latitude);
+  setLongitude(longitude);
   const [address, setAddress] = useState('');
-  const [radius] = useState(5000);
   const [showGuide, setShowGuide] = useState(true);
-  const [selectedCityId, setSelectedCityId] = useState<string>(''); // ✅ cityId aquí
+  const [selectedCityId, setSelectedCityId] = useState<string>('');
 
-  // Puedes agregar lógica para determinar el cityId desde la API o a través de selección del usuario
-  // Por ahora lo puedes setear manualmente para pruebas
   useEffect(() => {
-    setSelectedCityId('7ec2b919-b961-458d-8275-4ee957010336'); // o dinámico si aplicas lógica
+    setSelectedCityId('7ec2b919-b961-458d-8275-4ee957010336');
   }, []);
 
   const handleCloseModal = (submit: boolean) => {
@@ -55,10 +58,10 @@ const LocationPopup: React.FC<LocationPopupProps> = ({
             Ubica la dirección exacta
           </p>
 
-          {showGuide && guideText && (
+          {showGuide && (
             <div className="relative mb-3 rounded-lg bg-[#34A853] p-3 text-white shadow-md">
               <div className="flex items-center justify-between">
-                <span>{guideText}</span>
+                <span>Mueve el pin hasta tu ubicación exacta</span>
                 <button
                   onClick={() => setShowGuide(false)}
                   className="ml-4 font-bold text-white"
@@ -71,7 +74,7 @@ const LocationPopup: React.FC<LocationPopupProps> = ({
 
           <div className="mb-3 h-[300px] w-full overflow-hidden rounded-md">
             <GoogleMaps
-              radius={radius}
+              radius={100}
               setLatitude={setLatitude}
               setLongitude={setLongitude}
               address={address}

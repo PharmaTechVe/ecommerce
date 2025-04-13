@@ -46,8 +46,8 @@ export default function Page() {
           nameCity: response.nameCity,
           nameState: response.nameState,
           cityId: response.cityId,
-          latitude: response.latitude ?? null,
-          longitude: response.longitude ?? null,
+          latitude: response.latitude,
+          longitude: response.longitude,
         });
       } catch (error) {
         console.error('Error al cargar los datos:', error);
@@ -61,25 +61,6 @@ export default function Page() {
   }, [user?.sub, token, params?.id, router]);
 
   return (
-    initialData && (
-      <EditAddressForm
-        initialData={initialData}
-        mode="edit"
-        onSubmit={async (data) => {
-          if (!user || !user.sub || !data.id || !token) {
-            toast.error('Datos insuficientes para actualizar la dirección.');
-            return;
-          }
-          try {
-            await api.userAdress.update(user.sub, initialData, data.id, token);
-            toast.success('Dirección actualizada');
-            router.push('/user/address');
-          } catch (err) {
-            console.error('Error actualizando dirección:', err);
-            toast.error('No se pudo actualizar la dirección.');
-          }
-        }}
-      />
-    )
+    initialData && <EditAddressForm initialData={initialData} mode="edit" />
   );
 }
