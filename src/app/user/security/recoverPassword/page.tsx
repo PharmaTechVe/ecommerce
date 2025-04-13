@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
@@ -14,8 +13,7 @@ import Button from '@/components/Button';
 import EnterCodeForm from '@/components/User/EnterCodeForm';
 
 export default function RecoverPasswordPage() {
-  const { user, token, logout } = useAuth();
-  const router = useRouter();
+  const { user, token } = useAuth();
 
   const [step, setStep] = useState<'enterCode' | 'resetPassword'>('enterCode');
   const [resendTimer, setResendTimer] = useState(30);
@@ -89,10 +87,6 @@ export default function RecoverPasswordPage() {
       setLoading(true);
       await api.auth.updatePassword(newPassword, finalToken);
       toast.success('Contraseña actualizada correctamente');
-      setTimeout(() => {
-        logout();
-        router.push('/login');
-      }, 800);
     } catch (error) {
       console.error('Error actualizando contraseña:', error);
       toast.error('Error al actualizar la contraseña');

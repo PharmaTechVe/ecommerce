@@ -12,9 +12,14 @@ import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/constants/DateUtils';
 type DatePicker1Props = {
   onDateSelect?: (date: string) => void;
   value?: string;
+  disabled?: boolean;
 };
 
-export default function DatePicker1({ onDateSelect, value }: DatePicker1Props) {
+export default function DatePicker1({
+  onDateSelect,
+  value,
+  disabled,
+}: DatePicker1Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [yearInput, setYearInput] = useState(
     currentDate.getFullYear().toString(),
@@ -107,6 +112,7 @@ export default function DatePicker1({ onDateSelect, value }: DatePicker1Props) {
           iconPosition="right"
           borderSize="1px"
           borderColor={Colors.stroke}
+          disabled={disabled}
         />
       </div>
 

@@ -3,11 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 
-interface UserBreadcrumbsProps {
-  isEditing?: boolean;
-}
-
-export default function UserBreadcrumbs({ isEditing }: UserBreadcrumbsProps) {
+export default function UserBreadcrumbs() {
   const pathname = usePathname();
 
   const breadcrumbLabels: Record<string, string> = {
@@ -56,10 +52,6 @@ export default function UserBreadcrumbs({ isEditing }: UserBreadcrumbsProps) {
       items.push({ label, href: currentPath });
     }
   });
-
-  if (isEditing) {
-    items.push({ label: 'Editar Perfil' });
-  }
 
   return <Breadcrumb items={items} />;
 }

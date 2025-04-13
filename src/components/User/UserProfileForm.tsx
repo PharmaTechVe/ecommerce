@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Input from '@/components/Input/Input';
 import Button from '@/components/Button';
 import RadioButton from '@/components/RadioButton';
 import DatePicker1 from '@/components/Calendar';
+import Avatar from '@/components/Avatar';
+import { Colors } from '@/styles/styles';
 import { editProfileSchema } from '@/lib/validations/registerSchema';
 import { api } from '@/lib/sdkConfig';
 import { useAuth } from '@/context/AuthContext';
@@ -36,18 +37,20 @@ type UserProfile = {
 };
 
 interface EditFormProps {
-  onCancel?: () => void;
   userData: UserProfile;
+  isEditing?: boolean;
 }
 
-export default function EditForm({ userData }: EditFormProps) {
+export default function EditForm({
+  userData,
+  isEditing = false,
+}: EditFormProps) {
   const { user, token } = useAuth();
-  const router = useRouter();
-
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [editing, setEditing] = useState(isEditing);
   const [gender, setGender] = useState<UserGender>(UserGender.MALE);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -112,10 +115,7 @@ export default function EditForm({ userData }: EditFormProps) {
     try {
       await api.user.update(user.sub, payload, token);
       toast.success('Perfil Actualizado exitosamente');
-
-      setTimeout(() => {
-        router.push('/user');
-      }, 1000);
+      setEditing(false);
     } catch (error: unknown) {
       console.error('[UPDATE PROFILE ERROR]', error);
       const errorMessage =
@@ -127,100 +127,159 @@ export default function EditForm({ userData }: EditFormProps) {
   };
 
   return (
-    <div className="mt-14 rounded-lg p-4 md:p-6">
-      <div className="mx-auto w-full max-w-[956px]">
-        <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
-          <Input
-            label="Nombre"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            helperText={errors.firstName}
-            borderColor="#f3f4f6"
-            helperTextColor="red-500"
-          />
-          <Input
-            label="Apellido"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            helperText={errors.lastName}
-            borderColor="#f3f4f6"
-            helperTextColor="red-500"
-          />
-          <Input
-            label="Correo"
-            value={user?.email ?? ''}
-            onChange={() => {}}
-            disabled
-            borderColor="#f3f4f6"
-          />
-          <Input
-            label="Cédula"
-            value={userData.documentId}
-            onChange={() => {}}
-            disabled
-            borderColor="#f3f4f6"
-          />
-          <Input
-            label="telefono"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            helperText={errors.phoneNumber}
-            borderColor="#f3f4f6"
-            helperTextColor="red-500"
-          />
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Birth Date
-            </label>
-            <DatePicker1
-              value={birthDate}
-              onDateSelect={(date) => setBirthDate(date)}
+    <>
+      <div
+        className="relative mx-auto flex w-full flex-col items-center justify-center rounded-[10px] px-6 pb-20 pt-10 shadow md:flex-row md:justify-between md:py-4"
+        style={{ maxWidth: '956px', background: Colors.topBar }}
+      >
+        <div className="relative z-10 -mb-[120px] md:static md:mb-0 md:flex md:items-center md:gap-4">
+          <div className="relative w-fit">
+            <Avatar
+              name={`${userData.firstName} ${userData.lastName}`}
+              imageUrl={userData.profile?.profilePicture}
+              size={80}
+              withDropdown={false}
             />
+            {editing && (
+              <div className="absolute bottom-0 right-0 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-[#2D397B]">
+                <svg
+                  width="15"
+                  height="19"
+                  viewBox="0 0 15 19"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8.40974 16.5121L13.8218 13.529M5.44435 5.18871L11.3094 14.9138M7.88488 3.45702C7.97384 3.60685 7.91605 3.80123 7.75579 3.8912L2.89534 6.6196C2.73508 6.70956 2.53304 6.66103 2.44407 6.5112C0.438238 3.13329 1.74333 1.84064 2.90922 1.18617C4.07511 0.531702 5.87569 0.0734776 7.88488 3.45702ZM8.04596 3.72831L13.739 13.3157C13.8083 13.4324 13.842 13.5661 13.8346 13.7008C13.7407 15.3999 13.5009 16.8887 13.3418 17.7344C13.2662 18.1358 12.8503 18.3715 12.454 18.2369C11.6172 17.9527 10.1627 17.416 8.59372 16.6428C8.46993 16.5818 8.3675 16.4865 8.29812 16.3697L2.60516 6.78248L8.04596 3.72831Z"
+                    stroke="white"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+            )}
+          </div>
+
+          <h2 className="hidden text-xl font-semibold text-black md:block">
+            {userData.firstName} {userData.lastName}
+          </h2>
+        </div>
+
+        {!editing && (
+          <div className="hidden md:block">
+            <Button
+              variant="submit"
+              width="189px"
+              height="51px"
+              className="font-semibold text-white"
+              onClick={() => setEditing(true)}
+            >
+              Editar
+            </Button>
+          </div>
+        )}
+      </div>
+      <div className="mt-14 rounded-lg p-4 md:p-6">
+        <div className="mx-auto w-full max-w-[956px]">
+          <div className="grid grid-cols-1 gap-x-[48px] gap-y-[33px] md:grid-cols-2">
+            <Input
+              label="Nombre"
+              value={firstName}
+              disabled={!editing}
+              onChange={(e) => setFirstName(e.target.value)}
+              helperText={errors.firstName}
+              borderColor="#f3f4f6"
+              helperTextColor="red-500"
+            />
+            <Input
+              label="Apellido"
+              value={lastName}
+              disabled={!editing}
+              onChange={(e) => setLastName(e.target.value)}
+              helperText={errors.lastName}
+              borderColor="#f3f4f6"
+              helperTextColor="red-500"
+            />
+            <Input
+              label="Correo Electrónico"
+              value={user?.email ?? ''}
+              onChange={() => {}}
+              disabled
+              borderColor="#f3f4f6"
+            />
+            <Input
+              label="Cédula"
+              value={userData.documentId}
+              onChange={() => {}}
+              disabled
+              borderColor="#f3f4f6"
+            />
+            <Input
+              label="Número de telefono"
+              value={phoneNumber}
+              disabled={!editing}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              helperText={errors.phoneNumber}
+              borderColor="#f3f4f6"
+              helperTextColor="red-500"
+            />
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Fecha de nacimiento
+              </label>
+              <DatePicker1
+                value={birthDate}
+                disabled={!editing}
+                onDateSelect={(date) => setBirthDate(date)}
+              />
+              <p
+                className={`min-h-[16px] text-xs text-red-500 ${
+                  errors.birthDate ? 'visible' : 'invisible'
+                }`}
+              >
+                {errors.birthDate}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 pb-4">
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Genero
+            </label>
+            <div className="flex gap-4">
+              <RadioButton
+                text="Hombre"
+                disabled={!editing}
+                selected={gender === UserGender.MALE}
+                onSelect={() => setGender(UserGender.MALE)}
+              />
+              <RadioButton
+                text="Mujer"
+                disabled={!editing}
+                selected={gender === UserGender.FEMALE}
+                onSelect={() => setGender(UserGender.FEMALE)}
+              />
+            </div>
             <p
               className={`min-h-[16px] text-xs text-red-500 ${
-                errors.birthDate ? 'visible' : 'invisible'
+                errors.gender ? 'visible' : 'invisible'
               }`}
             >
-              {errors.birthDate}
+              {errors.gender}
             </p>
           </div>
-        </div>
-
-        <div className="mt-6 pb-4">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Genero
-          </label>
-          <div className="flex gap-4">
-            <RadioButton
-              text="Hombre"
-              selected={gender === UserGender.MALE}
-              onSelect={() => setGender(UserGender.MALE)}
-            />
-            <RadioButton
-              text="género"
-              selected={gender === UserGender.FEMALE}
-              onSelect={() => setGender(UserGender.FEMALE)}
-            />
-          </div>
-          <p
-            className={`min-h-[16px] text-xs text-red-500 ${
-              errors.gender ? 'visible' : 'invisible'
-            }`}
-          >
-            {errors.gender}
-          </p>
-        </div>
-
-        <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
-          <Button
-            variant="submit"
-            className="h-[51px] w-full font-semibold text-white md:w-auto"
-            onClick={handleSubmit}
-          >
-            Guardar Cambios
-          </Button>
+          {editing && (
+            <div className="mt-6 flex flex-col gap-4 md:flex-row md:justify-between">
+              <Button
+                variant="submit"
+                className="h-[51px] w-full font-semibold text-white md:w-auto"
+                onClick={handleSubmit}
+              >
+                Guardar Cambios
+              </Button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
