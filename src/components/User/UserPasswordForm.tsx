@@ -100,7 +100,7 @@ export default function UserPasswordForm({ onSubmit }: UserPasswordFormProps) {
       <p className="text-sm">
         ¿Olvidaste tu contraseña?{' '}
         <Link
-          href={`/user/security/recoverPassword`}
+          href={`/user/security/recover-password`}
           style={{ color: Colors.secondaryLight }}
         >
           Haz click aquí
@@ -112,7 +112,7 @@ export default function UserPasswordForm({ onSubmit }: UserPasswordFormProps) {
         className="mt-2 h-[46px] w-full font-semibold text-white"
         disabled={loading}
       >
-        {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
+        {loading ? 'Actualizando...' : 'Cambiar Contraseña'}
       </Button>
     </form>
   );

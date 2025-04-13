@@ -51,7 +51,7 @@ const getDefaultMenuItems = (): SidebarMenuItem[] => [
   {
     id: 'security',
     label: 'Seguridad',
-    href: `/user/security/updatePassword`,
+    href: `/user/security/update-password`,
     icon: <LockClosedIcon className="h-5 w-5" />,
   },
   {

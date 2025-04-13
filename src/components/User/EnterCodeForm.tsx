@@ -3,8 +3,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import Button from '@/components/Button';
-import theme from '@/styles/styles';
-import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
 import { codeSchema } from '@/lib/validations/recoverPasswordSchema';
 
 type EnterCodeFormProps = {
@@ -12,7 +10,7 @@ type EnterCodeFormProps = {
   onNext?: (code: string) => void;
 };
 
-export default function EnterCodeForm({ onBack, onNext }: EnterCodeFormProps) {
+export default function EnterCodeForm({ onNext }: EnterCodeFormProps) {
   const [code, setCode] = useState<string[]>(Array(6).fill(''));
   const [codeError, setCodeError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -79,29 +77,6 @@ export default function EnterCodeForm({ onBack, onNext }: EnterCodeFormProps) {
       noValidate
     >
       <div className="w-full max-w-sm">
-        <p className="mb-4 cursor-pointer text-sm" onClick={onBack}>
-          <ArrowUturnLeftIcon className="mr-1 h-5 w-5" />
-        </p>
-        <h3
-          className="mx-auto mb-4 text-center"
-          style={{
-            fontSize: theme.FontSizes.h3.size,
-            lineHeight: `${theme.FontSizes.h2.lineHeight}px`,
-            color: theme.Colors.textMain,
-          }}
-        >
-          Ingresar código de recuperación
-        </h3>
-        <p
-          className="mx-auto mb-6 text-center"
-          style={{
-            fontSize: theme.FontSizes.b1.size,
-            color: theme.Colors.textMain,
-          }}
-        >
-          Ingresa el código enviado a tu correo
-        </p>
-
         <div className="flex justify-center space-x-2">
           {code.map((char, index) => (
             <input

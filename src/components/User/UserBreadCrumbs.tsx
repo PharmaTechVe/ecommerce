@@ -13,8 +13,8 @@ export default function UserBreadcrumbs() {
     editAddress: 'Editar Dirección',
     new: 'Nueva Dirección',
     security: 'Seguridad',
-    updatePassword: 'Actualizar Contraseña',
-    recoverPassword: 'Recuperar Contraseña',
+    'update-password': 'Actualizar Contraseña',
+    'recover-password': 'Recuperar Contraseña',
   };
   const nonClickableSegments = ['security', 'new'];
   const segments = pathname.split('/').filter(Boolean);
@@ -32,8 +32,8 @@ export default function UserBreadcrumbs() {
   }
 
   const limitedSegments =
-    cleanedSegments.includes('updatePassword') ||
-    cleanedSegments.includes('recoverPassword')
+    cleanedSegments.includes('update-password') ||
+    cleanedSegments.includes('recover-password')
       ? cleanedSegments.slice(0, cleanedSegments.indexOf('security') + 1)
       : cleanedSegments;
 

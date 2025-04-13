@@ -120,8 +120,8 @@ export default function RecoverPasswordPage() {
                       color: Colors.textMain,
                     }}
                   >
-                    Ingrese el código que enviamos a tu correo electrónico para
-                    continuar.
+                    Hemos enviado un código de verificación a tu correo para
+                    restablecer tu contraseña. Ingrésalo aquí
                   </p>
 
                   <EnterCodeForm onNext={handleCodeSubmit} />
@@ -168,12 +168,14 @@ export default function RecoverPasswordPage() {
                       color: Colors.textMain,
                     }}
                   >
-                    Código verificado. Ahora puedes crear una nueva contraseña.
+                    Actualiza tu contraseña para proteger la seguridad de tu
+                    cuenta
                   </p>
                   <div className="mt-6 space-y-6 text-left">
                     <Input
                       label="Nueva contraseña"
                       type="password"
+                      placeholder="Ingresa tu nueva contraseña"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       borderColor="#393938"
@@ -182,8 +184,9 @@ export default function RecoverPasswordPage() {
                       helperTextColor="red-500"
                     />
                     <Input
-                      label="Confirmar contraseña"
+                      label="Confirmar nueva contraseña"
                       type="password"
+                      placeholder="Confirma tu nueva contraseña"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       borderColor="#393938"
