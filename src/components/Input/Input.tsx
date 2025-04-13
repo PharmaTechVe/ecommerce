@@ -21,6 +21,7 @@ interface InputProps {
   showPasswordToggleIconColor?: string;
   borderSize?: string;
   borderColor?: string;
+  height?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -53,13 +54,13 @@ const Input: React.FC<InputProps> = ({
   iconColor = 'text-gray-500',
   iconPosition = 'left',
   helperText,
-  helperTextColor = 'text-gray-500',
   disabled = false,
   type = 'text',
   showPasswordToggle = false,
   showPasswordToggleIconColor = 'text-gray-500',
   borderSize = '2px',
   borderColor = '#000000',
+  height,
   onChange,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -88,16 +89,18 @@ const Input: React.FC<InputProps> = ({
       )}
 
       <div
-        className="relative flex items-center rounded-lg border bg-white px-3 py-2 transition-all"
+        className="relative flex items-center rounded-lg border px-3 py-2 transition-all"
         style={{
-          borderWidth: borderSize,
+          backgroundColor: disabled ? '#f3f4f6' : 'white',
+          borderWidth: disabled ? '1px' : borderSize,
           borderColor: disabled
-            ? '#d1d5db'
+            ? '#f3f4f6'
             : isFocused
               ? focusBorderColor
               : isHovered
                 ? hoverBorderColor
                 : borderColor,
+          boxShadow: disabled ? 'inset 0 0 0 1px #f3f4f6' : undefined,
         }}
         onMouseEnter={() => !disabled && setIsHovered(true)}
         onMouseLeave={() => !disabled && setIsHovered(false)}
@@ -118,9 +121,12 @@ const Input: React.FC<InputProps> = ({
           onChange={onChange}
           onFocus={() => !disabled && setIsFocused(true)}
           onBlur={() => !disabled && setIsFocused(false)}
-          className={`w-full bg-transparent outline-none ${
+          className={`w-full resize-none bg-transparent outline-none ${
             disabled ? 'cursor-not-allowed text-gray-400' : 'text-black'
-          } ${Icon && iconPosition === 'left' ? 'pl-10' : ''} ${Icon && iconPosition === 'right' ? 'pr-10' : ''}`}
+          } ${Icon && iconPosition === 'left' ? 'pl-10' : ''} ${
+            Icon && iconPosition === 'right' ? 'pr-10' : ''
+          }`}
+          style={{ height: height ?? 'auto' }} // 👈 APLICACIÓN DEL TAMAÑO
         />
 
         {Icon && iconPosition === 'right' && (
@@ -149,7 +155,7 @@ const Input: React.FC<InputProps> = ({
       </div>
 
       {helperText && (
-        <p className="mt-1 text-sm" style={{ color: helperTextColor }}>
+        <p className="visible/invisible mt-1 text-sm text-red-500">
           {helperText}
         </p>
       )}
