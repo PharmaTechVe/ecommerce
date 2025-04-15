@@ -55,9 +55,9 @@ const getDefaultMenuItems = (): SidebarMenuItem[] => [
     icon: <LockClosedIcon className="h-5 w-5" />,
   },
   {
-    id: 'orders',
+    id: 'order',
     label: 'Mis Pedidos',
-    href: `/user/orders`,
+    href: `/user/order`,
     icon: <ShoppingCartIcon className="h-5 w-5" />,
   },
 ];

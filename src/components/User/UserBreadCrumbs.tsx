@@ -6,6 +6,7 @@ import Breadcrumb from '@/components/Breadcrumb';
 export default function UserBreadcrumbs() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const pathname = usePathname();
+
   const breadcrumbLabels: Record<string, string> = {
     user: 'Mi Perfil',
     address: 'Mis Direcciones',
@@ -13,17 +14,19 @@ export default function UserBreadcrumbs() {
     editAddress: 'Editar Dirección',
     new: 'Nueva Dirección',
     security: 'Seguridad',
+    order: 'Mis Pedidos',
     'update-password': 'Actualizar Contraseña',
     'recover-password': 'Recuperar Contraseña',
   };
+
   const nonClickableSegments = ['security', 'new'];
+
   const segments = pathname.split('/').filter(Boolean);
   const isUUID = (segment: string) => /^[0-9a-fA-F-]{36}$/.test(segment);
 
   const cleanedSegments = [];
   for (let index = 0; index < segments.length; index++) {
     const segment = segments[index];
-
     if (isUUID(segment) && segments[index + 1] === 'edit') {
       cleanedSegments.push('editAddress');
       break;
@@ -42,17 +45,35 @@ export default function UserBreadcrumbs() {
   ];
   let currentPath = '';
 
-  limitedSegments.forEach((segment, index) => {
-    const label = breadcrumbLabels[segment] || segment;
-    currentPath += `/${segment}`;
-    const isLast = index === limitedSegments.length - 1;
+  if (limitedSegments.length > 2) {
+    const first = limitedSegments[0];
+    const last = limitedSegments[limitedSegments.length - 1];
 
-    if (isLast || nonClickableSegments.includes(segment)) {
-      items.push({ label });
+    currentPath += `/${first}`;
+    const firstLabel = breadcrumbLabels[first] || first;
+    if (!nonClickableSegments.includes(first)) {
+      items.push({ label: firstLabel, href: currentPath });
     } else {
-      items.push({ label, href: currentPath });
+      items.push({ label: firstLabel });
     }
-  });
+
+    items.push({ label: '...' });
+
+    const lastLabel = breadcrumbLabels[last] || last;
+    items.push({ label: lastLabel });
+  } else {
+    limitedSegments.forEach((segment, index) => {
+      const label = breadcrumbLabels[segment] || segment;
+      currentPath += `/${segment}`;
+      const isLast = index === limitedSegments.length - 1;
+
+      if (isLast || nonClickableSegments.includes(segment)) {
+        items.push({ label });
+      } else {
+        items.push({ label, href: currentPath });
+      }
+    });
+  }
 
   return <Breadcrumb items={items} />;
 }
