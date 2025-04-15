@@ -32,6 +32,11 @@ export default function Page() {
         router.push('/login');
       }
       try {
+        if (!params?.id) {
+          toast.error('No se encontró la dirección.');
+          router.push('/user/address');
+          return;
+        }
         const response = await api.userAdress.getAddress(
           user?.sub ?? '',
           params.id as string,
