@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
-export const emailSchema = z
-  .string()
-  .nonempty('El email es obligatorio')
-  .email('Formato de email inválido');
-
-export const resetPasswordSchema = z
+export const updatePasswordSchema = z
   .object({
+    password: z
+      .string()
+      .nonempty('La contraseña es obligatoria')
+      .min(8, 'La contraseña debe tener al menos 8 caracteres'),
     newPassword: z
       .string()
       .nonempty('La contraseña es obligatoria')
@@ -20,7 +19,3 @@ export const resetPasswordSchema = z
     message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   });
-
-export const codeSchema = z
-  .string()
-  .length(6, 'El código debe tener 6 dígitos');

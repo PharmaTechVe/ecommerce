@@ -12,12 +12,7 @@ import { Colors } from '../styles/styles';
 import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { jwtDecode } from 'jwt-decode';
 import { api } from '@/lib/sdkConfig';
-
-interface JwtPayload {
-  sub: string;
-}
 
 interface UserProfile {
   firstName: string;
@@ -48,13 +43,13 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
   const [categories, setCategories] = React.useState<string[]>([]);
   const { cartItems } = useCart();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [userData, setUserData] = React.useState<UserProfile | null>(null);
 
+  // Obtener categorías
   React.useEffect(() => {
     api.category
       .findAll({ page: 1, limit: 20 })
@@ -69,40 +64,27 @@ export default function NavBar({ onCartClick }: NavBarProps) {
       });
   }, []);
 
+  // Obtener perfil si está logueado
   React.useEffect(() => {
-    if (token == null) {
+    if (!token || !user?.sub) {
       setIsLoggedIn(false);
       setUserData(null);
       return;
     }
+
     setIsLoggedIn(true);
 
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      const userId = decoded.sub;
-
-      console.log('UserId:', userId);
-
-      if (!userId) {
-        console.error('No se encontró userId en el token');
-        return;
+    (async () => {
+      try {
+        const profileResponse = await api.user.getProfile(user.sub, token);
+        setUserData(profileResponse);
+        console.log('Perfil obtenido:', profileResponse);
+      } catch (error) {
+        console.error('Error al obtener perfil:', error);
+        setUserData(null);
       }
-
-      (async () => {
-        try {
-          const profileResponse = await api.user.getProfile(userId, token);
-          setUserData(profileResponse);
-          console.log('Perfil obtenido:', profileResponse);
-        } catch (error) {
-          console.error('Error al obtener perfil:', error);
-        }
-      })();
-    } catch (err) {
-      console.error('Error decodificando token:', err);
-      setIsLoggedIn(false);
-      setUserData(null);
-    }
-  }, [token]);
+    })();
+  }, [token, user]);
 
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
@@ -146,6 +128,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 {totalCount}
               </span>
             </div>
+
             {/* Usuario */}
             {isLoggedIn && userData ? (
               <Avatar
@@ -153,6 +136,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 size={52}
                 imageUrl={userData.profile.profilePicture}
                 withDropdown={true}
+                onProfileClick={() => router.push('/user')}
               />
             ) : (
               <Button
@@ -178,6 +162,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               size={52}
               imageUrl={userData.profile.profilePicture}
               withDropdown={true}
+              onProfileClick={() => router.push('/user')}
             />
           ) : (
             <UserCircleIcon

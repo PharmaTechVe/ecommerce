@@ -5,22 +5,38 @@ type RadioButtonProps = {
   text: string;
   selected: boolean;
   onSelect: () => void;
+  disabled?: boolean;
 };
 
 const RadioButton: React.FC<RadioButtonProps> = ({
   text,
   selected,
   onSelect,
+  disabled = false,
 }) => {
+  const handleClick = () => {
+    if (!disabled) {
+      onSelect();
+    }
+  };
+
   return (
     <label
-      className="flex cursor-pointer select-none items-center text-dark dark:text-white"
-      onClick={onSelect}
+      className={`flex select-none items-center text-dark dark:text-white ${
+        disabled ? 'cursor-not-allowed' : 'cursor-pointer'
+      }`}
+      onClick={handleClick}
     >
       <div className="relative">
-        <input type="radio" checked={selected} readOnly className="sr-only" />
+        <input
+          type="radio"
+          checked={selected}
+          readOnly
+          disabled={disabled}
+          className="sr-only"
+        />
         <div
-          className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border`}
+          className="mr-4 flex h-5 w-5 items-center justify-center rounded-full border"
           style={{
             borderColor: Colors.primary,
             backgroundColor: selected ? Colors.primary : 'transparent',

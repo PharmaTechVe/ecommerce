@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Button from './Button';
 import Input from './Input/Input';
 import {
@@ -7,40 +7,55 @@ import {
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
-import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/DateUtils';
+import { MONTH_NAMES, WEEK_DAYS } from '@/lib/utils/constants/DateUtils';
+
 type DatePicker1Props = {
   onDateSelect?: (date: string) => void;
+  value?: string;
+  disabled?: boolean;
 };
-export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
+
+export default function DatePicker1({
+  onDateSelect,
+  value,
+  disabled,
+}: DatePicker1Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [yearInput, setYearInput] = useState(
     currentDate.getFullYear().toString(),
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+
   const formatDate = (day: number, month: number, year: number) => {
     const dayStr = day < 10 ? `0${day}` : `${day}`;
     const monthStr = month + 1 < 10 ? `0${month + 1}` : `${month + 1}`;
     return `${year}-${monthStr}-${dayStr}`;
   };
-  const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
-  // Sincroniza el valor del input del año con currentDate cuando cambie
+
+  const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+
   useEffect(() => {
     setYearInput(currentDate.getFullYear().toString());
   }, [currentDate]);
 
+  useEffect(() => {
+    if (value) {
+      setSelectedDate(value);
+      const [year, month, day] = value.split('-').map(Number);
+      setCurrentDate(new Date(year, month - 1, day));
+    }
+  }, [value]);
+
   const handleYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newYearStr = event.target.value;
-    // Permitir solo números y un máximo de 4 caracteres
     if (/^\d{0,4}$/.test(newYearStr)) {
       setYearInput(newYearStr);
       if (newYearStr.length === 4) {
@@ -51,14 +66,13 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
       }
     }
   };
+
   const handleSelectDate = (day: number) => {
     const newDate = formatDate(day, month, year);
     setSelectedDate(newDate);
-    console.log(newDate);
-    if (onDateSelect) {
-      onDateSelect(newDate);
-    }
+    if (onDateSelect) onDateSelect(newDate);
   };
+
   const handleClearDate = () => {
     setSelectedDate(null);
     setIsCalendarOpen(false);
@@ -66,8 +80,27 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
   const handleDone = () => {
     setIsCalendarOpen(false);
   };
+  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMonth = Number(event.target.value);
+    setCurrentDate(new Date(year, newMonth, 1));
+  };
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsCalendarOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div onClick={() => setIsCalendarOpen(!isCalendarOpen)}>
         <Input
           type="text"
@@ -79,10 +112,12 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
           iconPosition="right"
           borderSize="1px"
           borderColor={Colors.stroke}
+          disabled={disabled}
         />
       </div>
+
       {isCalendarOpen && (
-        <div className="relative mt-2 w-full max-w-md rounded-md bg-white p-4 shadow-lg sm:h-[532px] sm:h-auto sm:w-[509px]">
+        <div className="absolute z-50 mt-2 w-full max-w-md rounded-md bg-white p-4 shadow-lg sm:h-auto sm:w-[509px]">
           <div className="mb-4 flex items-center justify-between px-4">
             <button
               onClick={handlePrevMonth}
@@ -91,13 +126,23 @@ export default function DatePicker1({ onDateSelect }: DatePicker1Props) {
               <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
             </button>
             <div className="flex items-center space-x-4">
-              <span className="text-xl font-medium">{MONTH_NAMES[month]}</span>
+              <select
+                value={month}
+                onChange={handleMonthChange}
+                className="appearance-none bg-transparent text-center text-lg font-medium md:appearance-none"
+              >
+                {MONTH_NAMES.map((m, index) => (
+                  <option key={index} value={index}>
+                    {m}
+                  </option>
+                ))}
+              </select>
               <input
                 type="number"
                 value={yearInput}
                 onChange={handleYearChange}
                 className="w-16 appearance-auto bg-transparent text-center text-lg font-medium outline-none md:appearance-auto"
-                min="0"
+                min="1900"
                 max="3000"
               />
             </div>

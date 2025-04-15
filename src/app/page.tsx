@@ -10,15 +10,10 @@ import { ImageType } from '@/components/Product/CardBase';
 import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
-import { jwtDecode } from 'jwt-decode';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EnterCodeFormModal from '@/components/EmailValidation';
 import { useAuth } from '@/context/AuthContext';
-
-interface JwtPayload {
-  sub: string;
-}
 
 export type Product = {
   id: number;
@@ -65,8 +60,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
-  const [userId, setUserId] = useState('');
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const toastDisplayed = useRef(false);
   const toastId = useRef<number | string | null>(null);
@@ -82,14 +76,12 @@ export default function Home() {
 
   useEffect(() => {
     const checkUserValidation = async () => {
-      if (token == null) return;
+      if (!token || !user?.sub) return;
+
       try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        setUserId(decoded.sub);
+        const userProfile = await api.user.getProfile(user.sub, token);
 
-        const user = await api.user.getProfile(decoded.sub, token);
-
-        if (!user.isValidated && !toastDisplayed.current) {
+        if (!userProfile.isValidated && !toastDisplayed.current) {
           toastId.current = toast.info(
             <div>
               Verifica tu correo electrónico.{' '}
@@ -118,7 +110,7 @@ export default function Home() {
     };
 
     checkUserValidation();
-  }, [token]);
+  }, [token, user]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -157,7 +149,7 @@ export default function Home() {
   return (
     <div>
       {/* Navbar */}
-      <div className="fixed left-0 right-0 top-0 z-50 bg-transparent">
+      <div className="fixed left-0 right-0 top-0 z-50 bg-white">
         <NavBar {...navBarProps} />
       </div>
 
@@ -181,11 +173,12 @@ export default function Home() {
 
       <Footer />
 
-      {token && (
+      {/* Modal para validar email */}
+      {token && user?.sub && (
         <EnterCodeFormModal
           show={showEmailModal}
           onClose={() => setShowEmailModal(false)}
-          userId={userId}
+          userId={user.sub}
           jwt={token}
         />
       )}
