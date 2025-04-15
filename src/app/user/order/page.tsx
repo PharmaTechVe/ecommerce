@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import OrderTable from '@/components/User/UserOrdertable';
-import { mockOrders } from '@/lib/utils/api/Order';
+import { mockOrders } from '@/lib/utils/fixtures/Order';
 
 export default function OrdersPage() {
   const handleViewDetails = (orderId: string) => {
