@@ -117,8 +117,10 @@ interface ProductImage {
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const productId = params.productId as string;
-  const presentationId = params.presentationId as string;
+  const productId =
+    typeof params?.productId === 'string' ? params.productId : '';
+  const presentationId =
+    typeof params?.presentationId === 'string' ? params.presentationId : '';
   const [presentation, setPresentation] =
     useState<PresentationDetailResponse | null>(null);
   const [genericProduct, setGenericProduct] =
