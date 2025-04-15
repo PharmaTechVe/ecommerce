@@ -25,14 +25,13 @@ type UserAddressAPIResponse = {
 export default function AddressPage() {
   const { user, token } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [addresses, setAddresses] = useState<UserAddressAPIResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
-
-  const isNewAddress = searchParams.get('new') === 'true';
+  const rawSearchParams = useSearchParams();
+  const isNewAddress = rawSearchParams?.get('new') === 'true';
 
   const fetchAddresses = async () => {
     try {
