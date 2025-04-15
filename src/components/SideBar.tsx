@@ -84,9 +84,10 @@ export function Sidebar({
 
   const renderMenuItems = () =>
     menuItems.map((item) => {
+      // Check if the item is active
       const isActive =
         pathname === item.href ||
-        (pathname.startsWith(item.href) && item.href !== `/user`);
+        (pathname?.startsWith(item.href) && item.href !== `/user`);
 
       const baseClasses = 'flex items-center gap-3 px-4 py-3 rounded-md';
       const activeClasses =
