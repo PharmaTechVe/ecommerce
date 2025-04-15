@@ -1,16 +1,17 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 
 export default function UserBreadcrumbs() {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const pathname = rawPathname ?? '';
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams?.get('edit') === 'true';
 
   const breadcrumbLabels: Record<string, string> = {
     user: 'Mi Perfil',
     address: 'Mis Direcciones',
-    edit: 'Editar Perfil',
     editAddress: 'Editar Dirección',
     new: 'Nueva Dirección',
     security: 'Seguridad',
@@ -24,7 +25,7 @@ export default function UserBreadcrumbs() {
   const segments = pathname.split('/').filter(Boolean);
   const isUUID = (segment: string) => /^[0-9a-fA-F-]{36}$/.test(segment);
 
-  const cleanedSegments = [];
+  const cleanedSegments: string[] = [];
   for (let index = 0; index < segments.length; index++) {
     const segment = segments[index];
     if (isUUID(segment) && segments[index + 1] === 'edit') {
@@ -45,34 +46,20 @@ export default function UserBreadcrumbs() {
   ];
   let currentPath = '';
 
-  if (limitedSegments.length > 2) {
-    const first = limitedSegments[0];
-    const last = limitedSegments[limitedSegments.length - 1];
+  limitedSegments.forEach((segment, index) => {
+    const label = breadcrumbLabels[segment] || segment;
+    currentPath += `/${segment}`;
+    const isLast = index === limitedSegments.length - 1;
 
-    currentPath += `/${first}`;
-    const firstLabel = breadcrumbLabels[first] || first;
-    if (!nonClickableSegments.includes(first)) {
-      items.push({ label: firstLabel, href: currentPath });
+    if (isLast || nonClickableSegments.includes(segment)) {
+      items.push({ label });
     } else {
-      items.push({ label: firstLabel });
+      items.push({ label, href: currentPath });
     }
+  });
 
-    items.push({ label: '...' });
-
-    const lastLabel = breadcrumbLabels[last] || last;
-    items.push({ label: lastLabel });
-  } else {
-    limitedSegments.forEach((segment, index) => {
-      const label = breadcrumbLabels[segment] || segment;
-      currentPath += `/${segment}`;
-      const isLast = index === limitedSegments.length - 1;
-
-      if (isLast || nonClickableSegments.includes(segment)) {
-        items.push({ label });
-      } else {
-        items.push({ label, href: currentPath });
-      }
-    });
+  if (isEditMode) {
+    items.push({ label: 'Editar Perfil' });
   }
 
   return <Breadcrumb items={items} />;
