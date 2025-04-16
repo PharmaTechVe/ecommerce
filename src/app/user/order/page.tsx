@@ -1,11 +1,15 @@
 'use client';
+
 import React from 'react';
-import OrderTable from '@/components/User/UserOrdertable';
+import { useRouter } from 'next/navigation';
+import OrderTable from '@/components/User/Order/UserOrdertable';
 import { mockOrders } from '@/lib/utils/fixtures/Order';
 
 export default function OrdersPage() {
+  const router = useRouter();
+
   const handleViewDetails = (orderId: string) => {
-    console.log('Ver detalles de la orden:', orderId);
+    router.push(`/user/order/${orderId}/detail`);
   };
 
   return (

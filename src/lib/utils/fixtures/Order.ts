@@ -1,4 +1,4 @@
-import { Order } from '@/components/User/UserOrdertable';
+import { Order } from '@/components/User/Order/UserOrdertable';
 
 export const mockOrders: Order[] = [
   {
