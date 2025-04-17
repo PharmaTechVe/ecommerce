@@ -89,7 +89,7 @@ export default function UserProfileLayout({
         </div>
 
         {/* Breadcrumbs */}
-        <div className="mx-auto max-w-[1440px] px-6 pt-6 sm:px-10 md:px-16 lg:px-24 xl:px-32">
+        <div className="mx-auto ml-[10%] max-w-[1440px] px-6 pt-6 sm:px-10 md:px-16 lg:px-24 xl:px-32">
           <UserBreadcrumbs />
         </div>
 

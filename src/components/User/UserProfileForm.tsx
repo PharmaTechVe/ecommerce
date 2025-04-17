@@ -176,6 +176,22 @@ export default function EditForm({
         className="relative mx-auto flex w-full flex-col items-center justify-center rounded-[10px] px-6 pb-20 pt-10 shadow md:flex-row md:justify-between md:py-4"
         style={{ maxWidth: '956px', background: Colors.topBar }}
       >
+        {/* mobile */}
+        {!editing && (
+          <div className="absolute left-4 top-4 block md:hidden">
+            <button
+              onClick={() => {
+                setEditing(true);
+                setIsEditing?.(true);
+              }}
+              className="text-sm font-medium underline"
+              style={{ color: Colors.primary }}
+            >
+              EDITAR
+            </button>
+          </div>
+        )}
+
         <div className="relative z-10 -mb-[120px] md:static md:mb-0 md:flex md:items-center md:gap-4">
           <div className="relative w-fit">
             {/* Solo visible en mobile */}

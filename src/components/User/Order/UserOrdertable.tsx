@@ -73,7 +73,7 @@ export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
               onClick={() => onViewDetails(order.id)}
               width="120px"
               height="40px"
-              className="rounded-md bg-primary px-3 py-2 text-xs text-white"
+              className="ml-2 rounded-md bg-primary px-3 py-2 text-xs text-white"
             >
               Ver detalles
             </Button>
