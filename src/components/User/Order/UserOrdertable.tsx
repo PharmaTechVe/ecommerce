@@ -4,7 +4,8 @@ import Badge from '@/components/Badge';
 import type { BadgeProps } from '@/components/Badge';
 import Button from '@/components/Button';
 import Pagination from '@/components/Pagination';
-import { FontSizes } from '@/styles/styles';
+//import { FontSizes } from '@/styles/styles';
+//import { api } from '@/lib/sdkConfig';
 
 export type OrderStatus = 'pendiente' | 'pagado' | 'entregado';
 
@@ -70,9 +71,9 @@ export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
             </Badge>
             <Button
               onClick={() => onViewDetails(order.id)}
-              width="111px"
-              height="37px"
-              className={`bg-primary text-white text-[${FontSizes.b1.size}] rounded-md px-4 py-2`}
+              width="120px"
+              height="40px"
+              className="rounded-md bg-primary px-3 py-2 text-xs text-white"
             >
               Ver detalles
             </Button>
@@ -103,7 +104,7 @@ export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
             onClick={() => onViewDetails(order.id)}
             width="120px"
             height="37px"
-            className="font-regular rounded-md bg-primary px-4 py-2 text-sm text-white"
+            className="rounded-md bg-primary px-3 py-1 text-xs text-white"
           >
             Ver detalles
           </Button>

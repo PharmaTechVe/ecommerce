@@ -40,7 +40,7 @@ export default function OrderDetailPage() {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-white px-4 py-6 sm:px-6 lg:px-8">
+    <div className="relative bg-white px-4 py-6 sm:px-6 lg:px-8">
       {orderData ? (
         <UserOrderDetail {...orderData} />
       ) : (

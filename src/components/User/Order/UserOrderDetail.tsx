@@ -102,7 +102,7 @@ export default function OrderDetail({
               {/* Check + Imagen */}
               <div className="flex items-center gap-2">
                 <CheckButton
-                  checked={product.checked}
+                  checked={true}
                   onChange={() => {}}
                   text=""
                   variant="tertiary"

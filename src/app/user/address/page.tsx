@@ -103,7 +103,7 @@ export default function AddressPage() {
               {addresses.map((addr, index) => (
                 <div
                   key={addr.id}
-                  className={`flex h-[43px] w-full items-center justify-between rounded border px-4 md:w-[818px] ${
+                  className={`flex w-full items-start justify-between rounded border px-4 py-3 md:w-[818px] ${
                     index % 2 === 0
                       ? 'border-gray-100 bg-gray-50'
                       : 'border-gray-100 bg-white'
