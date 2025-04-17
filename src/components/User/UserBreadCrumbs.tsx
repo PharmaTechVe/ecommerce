@@ -12,10 +12,11 @@ export default function UserBreadcrumbs() {
   const breadcrumbLabels: Record<string, string> = {
     user: 'Mi Perfil',
     address: 'Mis Direcciones',
-    editAddress: 'Editar Dirección',
+    edit: 'Editar Dirección',
     new: 'Nueva Dirección',
     security: 'Seguridad',
     order: 'Mis Pedidos',
+    detail: 'Detalle del Pedido',
     'update-password': 'Actualizar Contraseña',
     'recover-password': 'Recuperar Contraseña',
   };
@@ -26,12 +27,24 @@ export default function UserBreadcrumbs() {
   const isUUID = (segment: string) => /^[0-9a-fA-F-]{36}$/.test(segment);
 
   const cleanedSegments: string[] = [];
+
   for (let index = 0; index < segments.length; index++) {
     const segment = segments[index];
+
+    const next = segments[index + 1];
+    if (isUUID(segment) && (next === 'detail' || next === 'edit')) {
+      continue;
+    }
+
+    if (isUUID(segment) && index === segments.length - 1) {
+      continue;
+    }
+
     if (isUUID(segment) && segments[index + 1] === 'edit') {
       cleanedSegments.push('editAddress');
       break;
     }
+
     cleanedSegments.push(segment);
   }
 
@@ -41,9 +54,10 @@ export default function UserBreadcrumbs() {
       ? cleanedSegments.slice(0, cleanedSegments.indexOf('security') + 1)
       : cleanedSegments;
 
-  const items: { label: string; href?: string }[] = [
+  const baseItems: { label: string; href?: string }[] = [
     { label: 'Home', href: '/' },
   ];
+
   let currentPath = '';
 
   limitedSegments.forEach((segment, index) => {
@@ -52,14 +66,21 @@ export default function UserBreadcrumbs() {
     const isLast = index === limitedSegments.length - 1;
 
     if (isLast || nonClickableSegments.includes(segment)) {
-      items.push({ label });
+      baseItems.push({ label });
     } else {
-      items.push({ label, href: currentPath });
+      baseItems.push({ label, href: currentPath });
     }
   });
 
   if (isEditMode) {
-    items.push({ label: 'Editar Perfil' });
+    baseItems.push({ label: 'Editar Perfil' });
+  }
+
+  let items = [...baseItems];
+  if (items.length > 4) {
+    const first = items[0];
+    const lastTwo = items.slice(-2);
+    items = [first, { label: '...', href: undefined }, ...lastTwo];
   }
 
   return <Breadcrumb items={items} />;

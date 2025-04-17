@@ -84,7 +84,6 @@ export function Sidebar({
 
   const renderMenuItems = () =>
     menuItems.map((item) => {
-      // Check if the item is active
       const isActive =
         pathname === item.href ||
         (pathname?.startsWith(item.href) && item.href !== `/user`);
@@ -126,8 +125,8 @@ export function Sidebar({
           className={`${
             isMobile
               ? 'fixed left-0 top-0 z-50 h-full w-72 bg-white shadow-lg'
-              : 'min-h-[582px] w-[269px]'
-          } flex flex-col justify-between overflow-y-auto rounded-lg bg-[#F1F5FD] p-4 pb-6 pt-4 ${className}`}
+              : 'max-h-[582px] w-[269px] overflow-y-auto'
+          } flex flex-col justify-between rounded-lg bg-[#F1F5FD] p-4 pb-6 pt-4 ${className}`}
         >
           <div>
             {isMobile && (
@@ -159,7 +158,7 @@ export function Sidebar({
           </div>
 
           {onLogout && (
-            <div className="pt-6">
+            <div className="mt-[87%] pt-6">
               <button
                 onClick={onLogout}
                 className="flex items-center gap-2 font-medium text-[#d31510] transition-all duration-200 ease-in-out hover:scale-105 hover:text-red-600"

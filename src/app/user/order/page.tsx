@@ -13,8 +13,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="mb-6 text-2xl font-bold">Mis Pedidos</h1>
+    <div className="mx-auto max-w-5xl px-6">
       <OrderTable orders={mockOrders} onViewDetails={handleViewDetails} />
     </div>
   );

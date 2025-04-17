@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { StarIcon } from '@heroicons/react/24/outline';
+import CheckButton from '@/components/CheckButton';
 
 interface Product {
   id: string;
@@ -31,67 +32,107 @@ export default function OrderDetail({
   total,
 }: OrderDetailProps) {
   return (
-    <div className="mx-auto w-[954px] max-w-full overflow-auto bg-white p-6">
-      {/* Order Number */}
+    <div className="mx-auto w-full max-w-[954px] bg-white p-6 px-4 sm:px-6">
+      {/* Número de pedido */}
       <div className="mb-4">
         <h2 className="font-medium text-gray-500">Pedido #{orderNumber}</h2>
       </div>
 
-      <div className="my-4 border-t border-gray-200"></div>
+      <div className="my-4 border-t border-gray-200" />
 
       {/* Lista de productos */}
       <div className="space-y-6">
         {products.map((product) => (
-          <div key={product.id} className="flex items-center gap-4">
-            <div className="flex-shrink-0">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-teal-100 text-teal-500">
-                {product.checked && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                )}
+          <div
+            key={product.id}
+            className="flex flex-col gap-4 sm:flex-row sm:items-center"
+          >
+            {/* MOBILE */}
+            <div className="flex w-full flex-col sm:hidden">
+              <div className="flex items-start gap-2">
+                <CheckButton
+                  checked={product.checked}
+                  onChange={() => {}}
+                  text=""
+                  variant="tertiary"
+                />
+
+                <div className="flex w-full items-start gap-2">
+                  {/* Imagen */}
+                  <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <Image
+                      src={
+                        product.image || '/placeholder.svg?height=88&width=88'
+                      }
+                      alt={product.name}
+                      width={88}
+                      height={88}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  {/* Info al lado */}
+                  <div className="flex w-full min-w-0 flex-col justify-start">
+                    <h3 className="overflow-hidden truncate whitespace-nowrap text-sm font-medium text-gray-900">
+                      {product.name}
+                    </h3>
+
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-900">
+                        ${product.price.toFixed(2)}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {product.quantity}
+                      </span>
+                    </div>
+
+                    <div className="mt-2">
+                      <button className="flex items-center text-sm text-[#1C2143]">
+                        <StarIcon className="mr-1 h-4 w-4" />
+                        <span>Ir al producto</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Imagen del producto */}
-            <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-              <Image
-                src={product.image || '/placeholder.svg?height=88&width=88'}
-                alt={product.name}
-                width={88}
-                height={88}
-                className="h-full w-full object-cover"
-              />
-            </div>
+            {/* DESKTOP */}
+            <div className="hidden w-full sm:flex sm:items-center sm:justify-between">
+              {/* Check + Imagen */}
+              <div className="flex items-center gap-2">
+                <CheckButton
+                  checked={product.checked}
+                  onChange={() => {}}
+                  text=""
+                  variant="tertiary"
+                />
+                <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                  <Image
+                    src={product.image || '/placeholder.svg?height=88&width=88'}
+                    alt={product.name}
+                    width={88}
+                    height={88}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
 
-            {/* Detalles */}
-            <div className="flex-grow">
-              <h3 className="font-medium text-gray-900">{product.name}</h3>
-              <p className="text-sm text-gray-500">{product.description}</p>
-              <button className="mt-1 flex items-center text-sm text-[#1C2143]">
-                <StarIcon className="mr-1 h-4 w-4" />
-                <span>Ir al producto</span>
-              </button>
-            </div>
+              {/* Info texto */}
+              <div className="flex w-1/2 flex-col">
+                <h3 className="text-sm font-medium text-gray-900">
+                  {product.name}
+                </h3>
+                <p className="text-xs text-gray-500">{product.description}</p>
+              </div>
 
-            {/* Cantidad */}
-            <div className="w-8 flex-shrink-0 text-center text-gray-500">
-              {product.quantity}
-            </div>
-
-            {/* Precio */}
-            <div className="w-20 flex-shrink-0 text-right font-medium text-gray-900">
-              ${product.price.toFixed(2)}
+              {/* Cantidad + Precio */}
+              <div className="flex items-center gap-10">
+                <div className="text-sm text-gray-500">{product.quantity}</div>
+                <div className="w-20 text-right font-medium text-gray-900">
+                  ${product.price.toFixed(2)}
+                </div>
+              </div>
             </div>
           </div>
         ))}
@@ -120,7 +161,7 @@ export default function OrderDetail({
             <div className="text-gray-700">${tax.toFixed(2)}</div>
           </div>
 
-          <div className="my-2 border-t border-gray-300"></div>
+          <div className="my-2 border-t border-gray-300" />
 
           <div className="flex items-center justify-between font-medium">
             <div className="text-gray-900">TOTAL</div>
