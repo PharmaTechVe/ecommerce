@@ -14,7 +14,7 @@ const CheckoutPage = () => {
       router.replace('/login');
     } else {
       // Redirige al primer paso, por ejemplo, ShippingInfo
-      router.replace('/checkout/shippinginfo');
+      router.replace('/checkout/ShippingInfo');
     }
   }, [token, router]);
 
