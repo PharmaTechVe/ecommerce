@@ -17,12 +17,12 @@ import { useAuth } from '@/context/AuthContext';
 import { useCheckout } from '../CheckoutContext';
 
 const CheckoutStepContent: React.FC = () => {
-  const { step } = useParams();
+  const { step } = useParams<{ step: string }>();
   const router = useRouter();
   const { token } = useAuth();
   const { deliveryMethod, paymentMethod, selectedBranchLabel } = useCheckout();
 
-  // Construcción de los títulos del stepper según método de entrega y pago
+  // 1. Construcción de los títulos del stepper según método de entrega y pago
   let stepsState: string[] = [];
   if (deliveryMethod === 'store') {
     if (paymentMethod === 'pos') {
@@ -51,17 +51,16 @@ const CheckoutStepContent: React.FC = () => {
     }
   }
 
-  // Convierte el parámetro de ruta a minúsculas para switch
+  // 2. Helper para normalizar el paso (minúsculas, trim)
   const getLowerStep = (): string => {
     if (!step) return '';
     return Array.isArray(step)
       ? step[0].toLowerCase().trim()
       : step.toLowerCase().trim();
   };
-
   const lowerStep = getLowerStep();
 
-  // Determina el índice actual del stepper
+  // 3. Índice actual para el Stepper
   const currentStepNumber = (): number => {
     if (deliveryMethod === 'store') {
       if (lowerStep === 'shippinginfo') return 1;
@@ -80,7 +79,7 @@ const CheckoutStepContent: React.FC = () => {
     return 0;
   };
 
-  // Handlers de navegación entre pasos
+  // 4. Handlers de navegación entre pasos
   const handlePayClick = () => {
     if (!deliveryMethod || !paymentMethod || !selectedBranchLabel) {
       alert(
@@ -91,22 +90,14 @@ const CheckoutStepContent: React.FC = () => {
     if (paymentMethod === 'pos') router.push('/checkout/revieworder');
     else router.push('/checkout/paymentprocess');
   };
-
   const handleConfirmPayment = () => router.push('/checkout/revieworder');
   const handleAssignDelivery = () => router.push('/checkout/deliveryinfo');
 
-  // Renderizado de cada paso
+  // 5. Renderizado de cada paso (sin botón de pago en shippinginfo)
   const renderStep = () => {
     switch (lowerStep) {
       case 'shippinginfo':
-        return (
-          <>
-            <ShippingInfo />
-            <div className="mt-6 flex justify-end">
-              <Button onClick={handlePayClick}>Realizar el pago</Button>
-            </div>
-          </>
-        );
+        return <ShippingInfo />;
       case 'paymentprocess':
         return (
           <>
@@ -142,7 +133,7 @@ const CheckoutStepContent: React.FC = () => {
 
   if (!token) return null;
 
-  // Determinar si ocultar el input de cupón: sólo oculto fuera de shippinginfo
+  // 6. Decide si ocultar el cupón
   const hideCoupon = lowerStep !== 'shippinginfo';
 
   return (
@@ -150,6 +141,7 @@ const CheckoutStepContent: React.FC = () => {
       <NavBar />
       <main className="mx-auto max-w-7xl px-4 py-6 text-left md:px-8">
         <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Columna izquierda: breadcrumb, stepper y contenido */}
           <div className="lg:w-3/3 w-full">
             <div className="max-w-4xl">
               <Breadcrumb
@@ -170,8 +162,17 @@ const CheckoutStepContent: React.FC = () => {
             </div>
             {renderStep()}
           </div>
+
+          {/* Columna derecha: OrderSummary y botón de pago */}
           <div className="w-full lg:w-1/3">
             <OrderSummary hideCoupon={hideCoupon} />
+
+            {/* Botón "Realizar el pago" solo en shippinginfo */}
+            {lowerStep === 'shippinginfo' && (
+              <div className="mt-6 flex justify-end">
+                <Button onClick={handlePayClick}>Realizar el pago</Button>
+              </div>
+            )}
           </div>
         </div>
       </main>
