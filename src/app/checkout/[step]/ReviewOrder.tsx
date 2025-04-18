@@ -6,11 +6,7 @@ import Image from 'next/image';
 import { useCheckout } from '../CheckoutContext';
 import { useCart } from '@/context/CartContext';
 
-interface ReviewOrderProps {
-  orderSummary: React.ReactNode;
-}
-
-const ReviewOrder: React.FC<ReviewOrderProps> = ({ orderSummary }) => {
+const ReviewOrder: React.FC = () => {
   const { deliveryMethod, selectedBranchLabel } = useCheckout();
   const { cartItems } = useCart();
 
@@ -18,7 +14,6 @@ const ReviewOrder: React.FC<ReviewOrderProps> = ({ orderSummary }) => {
   const orderNumber = 1;
   const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Para este ejemplo, evaluamos la opción "retiro en sucursal" para mostrar el mapa.
   const isStorePickup = deliveryMethod === 'store';
 
   return (
@@ -48,18 +43,11 @@ const ReviewOrder: React.FC<ReviewOrderProps> = ({ orderSummary }) => {
               Sucursal de retiro: <strong>{selectedBranchLabel}</strong>
             </p>
           </div>
-          {/* Para este caso, se muestra el resumen a la derecha */}
-          <div className="w-full lg:w-1/3">{orderSummary}</div>
         </div>
       ) : (
-        <>
-          <div className="flex flex-col gap-4 lg:flex-row">
-            <div className="w-full">{orderSummary}</div>
-          </div>
-          <div className="text-sm text-gray-700">
-            Revisión de la Orden completada.
-          </div>
-        </>
+        <div className="text-sm text-gray-700">
+          Revisión de la Orden completada.
+        </div>
       )}
     </section>
   );
