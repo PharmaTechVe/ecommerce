@@ -5,8 +5,8 @@ import React, { createContext, useContext, useState } from 'react';
 interface CheckoutState {
   deliveryMethod: 'store' | 'home';
   setDeliveryMethod: (method: 'store' | 'home') => void;
-  paymentMethod: 'pos' | 'bank' | 'mobile';
-  setPaymentMethod: (method: 'pos' | 'bank' | 'mobile') => void;
+  paymentMethod: 'pos' | 'cash' | 'bank' | 'mobile';
+  setPaymentMethod: (method: 'pos' | 'cash' | 'bank' | 'mobile') => void;
   selectedBranchLabel: string;
   setSelectedBranchLabel: (label: string) => void;
   // Nueva variable para almacenar la secuencia de pasos
@@ -22,9 +22,9 @@ export const CheckoutProvider: React.FC<
   const [deliveryMethod, setDeliveryMethod] = useState<'store' | 'home'>(
     'store',
   );
-  const [paymentMethod, setPaymentMethod] = useState<'pos' | 'bank' | 'mobile'>(
-    'pos',
-  );
+  const [paymentMethod, setPaymentMethod] = useState<
+    'pos' | 'cash' | 'bank' | 'mobile'
+  >('pos');
   const [selectedBranchLabel, setSelectedBranchLabel] = useState<string>('');
   const [stepSequence, setStepSequence] = useState<string[] | null>(null);
 

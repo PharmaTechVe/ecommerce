@@ -102,11 +102,6 @@ const CheckoutStepContent: React.FC = () => {
         return (
           <>
             <PaymentProcess />
-            <div className="mt-6 flex justify-end">
-              <Button onClick={handleConfirmPayment}>
-                Confirmar Transferencia
-              </Button>
-            </div>
           </>
         );
       case 'revieworder':
@@ -171,6 +166,13 @@ const CheckoutStepContent: React.FC = () => {
             {lowerStep === 'shippinginfo' && (
               <div className="mt-6 flex justify-end">
                 <Button onClick={handlePayClick}>Realizar el pago</Button>
+              </div>
+            )}
+
+            {/* Botón "Realizar el pago" solo en shippinginfo */}
+            {lowerStep === 'paymentprocess' && (
+              <div className="mt-6 flex justify-end">
+                <Button onClick={handleConfirmPayment}>Confirmar pago</Button>
               </div>
             )}
           </div>

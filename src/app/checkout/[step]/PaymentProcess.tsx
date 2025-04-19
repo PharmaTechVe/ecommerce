@@ -2,48 +2,42 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { useCheckout } from '../CheckoutContext';
-import { useCart } from '@/context/CartContext';
+import { useRouter } from 'next/navigation';
+
+import BankTransferForm from '@/components/Checkout/BankTransferForm';
+import MobilePaymentForm from '@/components/Checkout/MobilePaymentForm';
 
 const PaymentProcess: React.FC = () => {
-  const { selectedBranchLabel } = useCheckout();
-  const { cartItems } = useCart();
+  const { deliveryMethod, paymentMethod } = useCheckout();
+  const router = useRouter();
 
-  // Instrucciones para Transferencia Bancaria
-  const instructions =
-    'Para completar su pago, realice la transferencia bancaria a la cuenta XXXX-XXXX-XXXX. Una vez realizada la transferencia, confirme la operación.';
+  // generic submit handler for both forms
+  const handleSubmit = (data: {
+    bank: string;
+    reference: string;
+    documentNumber: string;
+    phone: string;
+  }) => {
+    console.log('Payment validation data:', data);
+    router.push('/checkout/revieworder');
+  };
 
-  // Cálculo de la cantidad total de productos
-  const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  // decide which form to render
+  if (deliveryMethod === 'store' && paymentMethod === 'bank') {
+    return <BankTransferForm onSubmit={handleSubmit} />;
+  }
+  if (deliveryMethod === 'store' && paymentMethod === 'mobile') {
+    return <MobilePaymentForm onSubmit={handleSubmit} />;
+  }
+  if (deliveryMethod === 'home' && paymentMethod === 'bank') {
+    return <BankTransferForm onSubmit={handleSubmit} />;
+  }
+  if (deliveryMethod === 'home' && paymentMethod === 'mobile') {
+    return <MobilePaymentForm onSubmit={handleSubmit} />;
+  }
 
-  return (
-    <section className="space-y-8">
-      {/* Caja de instrucciones */}
-      <div className="rounded-md border bg-gray-50 p-4">
-        <p className="text-sm text-gray-600">{instructions}</p>
-      </div>
-
-      {/* Total de productos */}
-      <p className="mb-4 text-sm text-gray-600">
-        Productos en el carrito: {totalProducts}
-      </p>
-
-      {/* Visualización del mapa y sucursal */}
-      <div className="mb-4">
-        <Image
-          src="/images/mapa.jpg"
-          alt="Mapa"
-          width={600}
-          height={400}
-          className="rounded-md border"
-        />
-        <p className="mt-2 text-sm text-gray-700">
-          Sucursal de retiro: <strong>{selectedBranchLabel}</strong>
-        </p>
-      </div>
-    </section>
-  );
+  return null;
 };
 
 export default PaymentProcess;
