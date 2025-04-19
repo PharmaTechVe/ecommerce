@@ -11,7 +11,7 @@ const DeliveryInfo: React.FC = () => {
   // En producción, aquí podrías hacer una llamada a la API o esperar un estado.
   const handleFinish = () => {
     // Redirige a una página final de éxito, por ejemplo.
-    router.push('/checkout/successes');
+    router.push('/checkout/Successes');
   };
 
   return (

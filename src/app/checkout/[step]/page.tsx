@@ -88,11 +88,11 @@ const CheckoutStepContent: React.FC = () => {
       return;
     }
     if (paymentMethod === 'pos' || paymentMethod === 'cash')
-      router.push('/checkout/revieworder');
-    else router.push('/checkout/paymentprocess');
+      router.push('/checkout/ReviewOrder');
+    else router.push('/checkout/PaymentProcess');
   };
-  const handleConfirmPayment = () => router.push('/checkout/revieworder');
-  const handleAssignDelivery = () => router.push('/checkout/deliveryinfo');
+  const handleConfirmPayment = () => router.push('/checkout/ReviewOrder');
+  const handleAssignDelivery = () => router.push('/checkout/DeliveryInfo');
 
   // 5. Renderizado de cada paso (sin botón de pago en shippinginfo)
   const renderStep = () => {

@@ -20,7 +20,7 @@ const PaymentProcess: React.FC = () => {
     phone: string;
   }) => {
     console.log('Payment validation data:', data);
-    router.push('/checkout/revieworder');
+    router.push('/checkout/ReviewOrder');
   };
 
   // decide which form to render
