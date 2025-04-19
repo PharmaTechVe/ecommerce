@@ -35,7 +35,7 @@ const CheckoutStepContent: React.FC = () => {
       ];
     }
   } else if (deliveryMethod === 'home') {
-    if (paymentMethod === 'pos') {
+    if (paymentMethod === 'cash') {
       stepsState = [
         'Opciones de Compra',
         'Confirmación de Orden',
@@ -72,8 +72,8 @@ const CheckoutStepContent: React.FC = () => {
     if (deliveryMethod === 'home') {
       if (lowerStep === 'shippinginfo') return 1;
       if (lowerStep === 'paymentprocess') return 2;
-      if (lowerStep === 'revieworder') return paymentMethod === 'pos' ? 2 : 3;
-      if (lowerStep === 'deliveryinfo') return paymentMethod === 'pos' ? 3 : 4;
+      if (lowerStep === 'revieworder') return paymentMethod === 'cash' ? 2 : 3;
+      if (lowerStep === 'deliveryinfo') return paymentMethod === 'cash' ? 3 : 4;
       return 0;
     }
     return 0;
@@ -87,7 +87,8 @@ const CheckoutStepContent: React.FC = () => {
       );
       return;
     }
-    if (paymentMethod === 'pos') router.push('/checkout/revieworder');
+    if (paymentMethod === 'pos' || paymentMethod === 'cash')
+      router.push('/checkout/revieworder');
     else router.push('/checkout/paymentprocess');
   };
   const handleConfirmPayment = () => router.push('/checkout/revieworder');
@@ -165,7 +166,7 @@ const CheckoutStepContent: React.FC = () => {
             {/* Botón "Realizar el pago" solo en shippinginfo */}
             {lowerStep === 'shippinginfo' && (
               <div className="mt-6 flex justify-end">
-                <Button onClick={handlePayClick}>Realizar el pago</Button>
+                <Button onClick={handlePayClick}>Realizar pago</Button>
               </div>
             )}
 

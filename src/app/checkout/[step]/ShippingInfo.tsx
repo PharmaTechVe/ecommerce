@@ -31,7 +31,6 @@ const ShippingInfo: React.FC = () => {
 
   const [selectedBranchId, setSelectedBranchId] = useState('');
   const [branches, setBranches] = useState<Branch[]>([]);
-  // Se inicializa con el valor del contexto o cadena vacía.
   const [localBranch, setLocalBranch] = useState<string>(
     selectedBranchLabel || '',
   );
@@ -39,11 +38,9 @@ const ShippingInfo: React.FC = () => {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        // Se llama a la API para obtener las sucursales
         const response = await api.branch.findAll({ page: 1, limit: 50 }, '');
         if (response && response.results && response.results.length > 0) {
           setBranches(response.results);
-          // No se asigna ningún valor predeterminado si el contexto está vacío.
           if (selectedBranchLabel) {
             setLocalBranch(selectedBranchLabel);
           }
@@ -54,49 +51,36 @@ const ShippingInfo: React.FC = () => {
     };
 
     fetchBranches();
-  }, [selectedBranchLabel]);
+
+    // Actualiza los métodos de pago dependiendo de la opción de entrega
+    if (deliveryMethod === 'home') {
+      setPaymentMethod('cash'); // Envío a Domicilio, se establece "Efectivo"
+    } else {
+      setPaymentMethod('pos'); // Retiro en Sucursal, se establece "Punto de venta"
+    }
+  }, [deliveryMethod, setPaymentMethod, selectedBranchLabel]);
 
   const formattedBranches = branches.map((b) => ({
     id: b.id,
     label: `${b.name} - ${b.city.name}, ${b.city.state.name}`,
   }));
 
-  const handlePaymentSelection = (payment: 'pos' | 'bank' | 'mobile') => {
-    setPaymentMethod(payment);
-  };
-
   const handleDeliverySelection = (delivery: 'store' | 'home') => {
     setDeliveryMethod(delivery);
-    // No se modifica localBranch aquí; la UI del Dropdown se ajustará en el render.
   };
-
-  // Establece el label y placeholder según el método de entrega:
-  const dropdownLabel =
-    deliveryMethod === 'home'
-      ? localBranch
-        ? localBranch
-        : 'Seleccione dirección'
-      : localBranch
-        ? localBranch
-        : 'Seleccione una sucursal';
-
-  const sectionLabel =
-    deliveryMethod === 'home'
-      ? 'Seleccione la dirección de entrega'
-      : 'Seleccione la sucursal';
 
   return (
     <section className="space-y-8">
       {/* Opciones de entrega */}
       <div className="space-y-3">
-        <p className="font-medium text-gray-700">{sectionLabel}</p>
+        <p className="font-medium text-gray-700">
+          {deliveryMethod === 'home'
+            ? 'Seleccione la dirección de entrega'
+            : 'Seleccione la sucursal'}
+        </p>
         <div className="flex flex-col gap-4">
           <label
-            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${
-              deliveryMethod === 'store'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300'
-            }`}
+            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${deliveryMethod === 'store' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
             onClick={() => handleDeliverySelection('store')}
           >
             <span className="flex items-center gap-2">
@@ -112,11 +96,7 @@ const ShippingInfo: React.FC = () => {
             <CubeIcon className="h-5 w-5 text-gray-500" />
           </label>
           <label
-            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${
-              deliveryMethod === 'home'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300'
-            }`}
+            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${deliveryMethod === 'home' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
             onClick={() => handleDeliverySelection('home')}
           >
             <span className="flex items-center gap-2">
@@ -137,11 +117,17 @@ const ShippingInfo: React.FC = () => {
       {/* Selección de dirección (Dropdown) */}
       <div>
         <p className="relative mb-2 font-medium text-gray-700">
-          {sectionLabel}
+          {deliveryMethod === 'home'
+            ? 'Seleccione la dirección de entrega'
+            : 'Seleccione la sucursal'}
         </p>
         <div className="relative z-50">
           <Dropdown
-            label={dropdownLabel}
+            label={
+              deliveryMethod === 'home'
+                ? localBranch
+                : 'Seleccione una sucursal'
+            }
             items={formattedBranches.map((b) => b.label)}
             onSelect={(value: string) => {
               setLocalBranch(value);
@@ -159,21 +145,45 @@ const ShippingInfo: React.FC = () => {
           Seleccione el método de pago
         </p>
         <div className="flex w-full flex-row flex-wrap gap-6 rounded-md border px-4 py-4">
-          <RadioButton
-            text="Punto de venta"
-            selected={paymentMethod === 'pos'}
-            onSelect={() => handlePaymentSelection('pos')}
-          />
-          <RadioButton
-            text="Transferencia Bancaria"
-            selected={paymentMethod === 'bank'}
-            onSelect={() => handlePaymentSelection('bank')}
-          />
-          <RadioButton
-            text="Pago Móvil"
-            selected={paymentMethod === 'mobile'}
-            onSelect={() => handlePaymentSelection('mobile')}
-          />
+          {deliveryMethod === 'store' && (
+            <>
+              <RadioButton
+                text="Punto de venta"
+                selected={paymentMethod === 'pos'}
+                onSelect={() => setPaymentMethod('pos')}
+              />
+              <RadioButton
+                text="Transferencia Bancaria"
+                selected={paymentMethod === 'bank'}
+                onSelect={() => setPaymentMethod('bank')}
+              />
+              <RadioButton
+                text="Pago Móvil"
+                selected={paymentMethod === 'mobile'}
+                onSelect={() => setPaymentMethod('mobile')}
+              />
+            </>
+          )}
+
+          {deliveryMethod === 'home' && (
+            <>
+              <RadioButton
+                text="Efectivo"
+                selected={paymentMethod === 'cash'}
+                onSelect={() => setPaymentMethod('cash')}
+              />
+              <RadioButton
+                text="Transferencia Bancaria"
+                selected={paymentMethod === 'bank'}
+                onSelect={() => setPaymentMethod('bank')}
+              />
+              <RadioButton
+                text="Pago Móvil"
+                selected={paymentMethod === 'mobile'}
+                onSelect={() => setPaymentMethod('mobile')}
+              />
+            </>
+          )}
         </div>
       </div>
       <input type="hidden" value={selectedBranchId} />
