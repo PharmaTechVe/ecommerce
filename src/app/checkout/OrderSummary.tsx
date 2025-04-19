@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 import Input from '@/components/Input/Input';
+import { Colors } from '@/styles/styles';
 
 interface OrderSummaryProps {
   hideCoupon?: boolean;
@@ -50,6 +51,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
               value={couponCode}
               placeholder="Código del Cupón"
               onChange={(e) => setCouponCode(e.target.value)}
+              borderSize="1px"
+              borderColor={Colors.stroke}
             />
             <button
               onClick={handleApplyCoupon}
