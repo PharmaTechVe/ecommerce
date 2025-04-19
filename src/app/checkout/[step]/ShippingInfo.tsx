@@ -54,16 +54,17 @@ const ShippingInfo: React.FC = () => {
 
   // Fetch branches when store is selected
   useEffect(() => {
-    if (deliveryMethod !== 'store' || !token) return;
+    if (deliveryMethod !== 'store') return;
     (async () => {
       try {
-        const res = await api.branch.findAll({ page: 1, limit: 50 }, token);
+        // ahora findAll solo acepta un argumento
+        const res = await api.branch.findAll({ page: 1, limit: 50 });
         setBranches(res.results || []);
       } catch (err) {
         console.error('Error al cargar sucursales:', err);
       }
     })();
-  }, [deliveryMethod, token]);
+  }, [deliveryMethod]);
 
   // Fetch user addresses when home is selected
   useEffect(() => {
