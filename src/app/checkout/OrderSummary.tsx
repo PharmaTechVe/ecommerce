@@ -5,6 +5,8 @@ import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 import Input from '@/components/Input/Input';
+import { useAuth } from '@/context/AuthContext';
+import { api } from '@/lib/sdkConfig';
 import { Colors } from '@/styles/styles';
 
 interface OrderSummaryProps {
@@ -13,13 +15,17 @@ interface OrderSummaryProps {
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
   const { cartItems } = useCart();
+  const { token } = useAuth();
+
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
+
   const itemDiscount = cartItems.reduce((acc, item) => {
     if (item.discount) {
       return acc + item.price * item.quantity * (item.discount / 100);
@@ -27,11 +33,29 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
     return acc;
   }, 0);
 
-  const handleApplyCoupon = () => {
-    if (couponCode === '1') {
-      const newDiscount = (subtotal - itemDiscount) * 0.1;
+  const handleApplyCoupon = async () => {
+    if (!token) {
+      setCouponError('Debe iniciar sesión para aplicar cupones');
+      return;
+    }
+    try {
+      const coupon = await api.coupon.getByCode(couponCode.trim(), token);
+      const { discount, minPurchase, expirationDate } = coupon;
+      if (subtotal < minPurchase) {
+        setCouponError(`Compra mínima de $${minPurchase.toFixed(2)}`);
+        setCouponDiscount(0);
+        return;
+      }
+      if (new Date(expirationDate) < new Date()) {
+        setCouponError('Cupón expirado');
+        setCouponDiscount(0);
+        return;
+      }
+      const newDiscount = (subtotal - itemDiscount) * (discount / 100);
       setCouponDiscount(newDiscount);
-    } else {
+      setCouponError(null);
+    } catch {
+      setCouponError('Cupón inválido');
       setCouponDiscount(0);
     }
   };
@@ -40,7 +64,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
   const total = subtotal - itemDiscount - couponDiscount + tax;
 
   return (
-    <aside className="w-full max-w-[412px] space-y-6 p-6 font-['Poppins']">
+    <aside className="w-full max-w-[412px] space-y-6 rounded-md border border-gray-200 bg-white p-6 font-['Poppins'] shadow-sm">
       {!hideCoupon && (
         <div>
           <p className="mb-2 text-[16px] font-medium text-[#393938]">
@@ -61,6 +85,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
               Aplicar
             </button>
           </div>
+          {couponError && (
+            <p className="mt-1 text-sm text-red-600">{couponError}</p>
+          )}
         </div>
       )}
 
@@ -73,14 +100,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
             ? item.price * (1 - item.discount / 100)
             : item.price;
           return (
-            <div key={item.id} className="flex items-start gap-4">
+            <div key={item.id} className="flex items-start gap-4 border-b pb-4">
               <div className="relative h-24 w-24">
                 <Image
                   src={item.image}
                   alt={item.name}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-md"
+                  fill
+                  className="rounded-md object-cover"
                 />
               </div>
               <div className="flex-1">
@@ -89,7 +115,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
                   ${discountedPrice.toFixed(2)} x {item.quantity}
                 </p>
               </div>
-              <div className="text-right text-sm">
+              <div className="text-right">
                 {item.discount ? (
                   <>
                     <p className="text-[16px] text-[#2ECC71]">
@@ -110,7 +136,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
         })}
       </div>
 
-      <div className="space-y-2 text-sm text-[#393938]">
+      <div className="space-y-2 text-[16px] text-[#393938]">
         <div className="flex justify-between">
           <span>Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
