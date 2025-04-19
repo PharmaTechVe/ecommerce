@@ -1,4 +1,3 @@
-// app/checkout/[step]/ShippingInfo.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,19 +6,26 @@ import Dropdown from '@/components/Dropdown';
 import RadioButton from '@/components/RadioButton';
 import { api } from '@/lib/sdkConfig';
 import { useCheckout } from '../CheckoutContext';
+import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 
 interface Branch {
   id: string;
   name: string;
-  city: {
-    name: string;
-    state: {
-      name: string;
-    };
-  };
+  city: { name: string; state: { name: string } };
+}
+
+interface UserAddressResponse {
+  id: string;
+  adress: string;
 }
 
 const ShippingInfo: React.FC = () => {
+  const { token, user } = useAuth();
+  const userId = user?.sub ?? '';
+  const { cartItems } = useCart();
+  const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
   const {
     deliveryMethod,
     setDeliveryMethod,
@@ -31,56 +37,90 @@ const ShippingInfo: React.FC = () => {
 
   const [selectedBranchId, setSelectedBranchId] = useState('');
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [addresses, setAddresses] = useState<UserAddressResponse[]>([]);
   const [localBranch, setLocalBranch] = useState<string>(
     selectedBranchLabel || '',
   );
 
+  // Whenever deliveryMethod changes, clear dropdown and set default payment
+  const handleDeliverySelection = (delivery: 'store' | 'home') => {
+    setDeliveryMethod(delivery);
+    setLocalBranch('');
+    setSelectedBranchLabel('');
+    setSelectedBranchId('');
+    // default payment by delivery type
+    setPaymentMethod(delivery === 'home' ? 'cash' : 'pos');
+  };
+
+  // Fetch branches when store is selected
   useEffect(() => {
-    const fetchBranches = async () => {
+    if (deliveryMethod !== 'store' || !token) return;
+    (async () => {
       try {
-        const response = await api.branch.findAll({ page: 1, limit: 50 }, '');
-        if (response && response.results && response.results.length > 0) {
-          setBranches(response.results);
-          if (selectedBranchLabel) {
-            setLocalBranch(selectedBranchLabel);
-          }
-        }
-      } catch (error) {
-        console.error('Error al cargar sucursales:', error);
+        const res = await api.branch.findAll({ page: 1, limit: 50 }, token);
+        setBranches(res.results || []);
+      } catch (err) {
+        console.error('Error al cargar sucursales:', err);
       }
-    };
+    })();
+  }, [deliveryMethod, token]);
 
-    fetchBranches();
+  // Fetch user addresses when home is selected
+  useEffect(() => {
+    if (deliveryMethod !== 'home' || !token || !userId) return;
+    (async () => {
+      try {
+        const list = await api.userAdress.getListAddresses(userId, token);
+        setAddresses(list);
+      } catch (err) {
+        console.error('Error al cargar direcciones de usuario:', err);
+      }
+    })();
+  }, [deliveryMethod, userId, token]);
 
-    // Actualiza los métodos de pago dependiendo de la opción de entrega
-    if (deliveryMethod === 'home') {
-      setPaymentMethod('cash'); // Envío a Domicilio, se establece "Efectivo"
-    } else {
-      setPaymentMethod('pos'); // Retiro en Sucursal, se establece "Punto de venta"
-    }
-  }, [deliveryMethod, setPaymentMethod, selectedBranchLabel]);
-
+  // Format items for dropdown
   const formattedBranches = branches.map((b) => ({
     id: b.id,
     label: `${b.name} - ${b.city.name}, ${b.city.state.name}`,
   }));
+  const formattedAddresses = addresses.map((a) => ({
+    id: a.id,
+    label: a.adress,
+  }));
+  const items =
+    deliveryMethod === 'home' ? formattedAddresses : formattedBranches;
 
-  const handleDeliverySelection = (delivery: 'store' | 'home') => {
-    setDeliveryMethod(delivery);
-  };
+  const sectionLabel =
+    deliveryMethod === 'home'
+      ? 'Seleccione la dirección de entrega'
+      : 'Seleccione la sucursal';
+  const dropdownPlaceholder =
+    deliveryMethod === 'home'
+      ? 'Seleccione dirección'
+      : 'Seleccione una sucursal';
 
   return (
     <section className="space-y-8">
-      {/* Opciones de entrega */}
-      <div className="space-y-3">
-        <p className="font-medium text-gray-700">
-          {deliveryMethod === 'home'
-            ? 'Seleccione la dirección de entrega'
-            : 'Seleccione la sucursal'}
+      {/* Nuevo encabezado con total de productos */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Opciones de Compra
+        </h2>
+        <p className="text-base text-gray-600">
+          Hay {totalProducts} productos seleccionados
         </p>
+      </div>
+
+      {/* Metodo de entrega */}
+      <div className="space-y-3">
+        <p className="font-medium text-gray-700">{sectionLabel}</p>
         <div className="flex flex-col gap-4">
           <label
-            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${deliveryMethod === 'store' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${
+              deliveryMethod === 'store'
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300'
+            }`}
             onClick={() => handleDeliverySelection('store')}
           >
             <span className="flex items-center gap-2">
@@ -96,7 +136,11 @@ const ShippingInfo: React.FC = () => {
             <CubeIcon className="h-5 w-5 text-gray-500" />
           </label>
           <label
-            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${deliveryMethod === 'home' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+            className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 ${
+              deliveryMethod === 'home'
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300'
+            }`}
             onClick={() => handleDeliverySelection('home')}
           >
             <span className="flex items-center gap-2">
@@ -114,38 +158,33 @@ const ShippingInfo: React.FC = () => {
         </div>
       </div>
 
-      {/* Selección de dirección (Dropdown) */}
+      {/* Dropdown */}
       <div>
         <p className="relative mb-2 font-medium text-gray-700">
-          {deliveryMethod === 'home'
-            ? 'Seleccione la dirección de entrega'
-            : 'Seleccione la sucursal'}
+          {sectionLabel}
         </p>
         <div className="relative z-50">
           <Dropdown
-            label={
-              deliveryMethod === 'home'
-                ? localBranch
-                : 'Seleccione una sucursal'
-            }
-            items={formattedBranches.map((b) => b.label)}
-            onSelect={(value: string) => {
+            key={deliveryMethod}
+            label={localBranch || dropdownPlaceholder}
+            items={items.map((i) => i.label)}
+            onSelect={(value) => {
               setLocalBranch(value);
-              const selected = formattedBranches.find((b) => b.label === value);
-              setSelectedBranchId(selected?.id || '');
+              const sel = items.find((i) => i.label === value);
+              setSelectedBranchId(sel?.id || '');
               setSelectedBranchLabel(value);
             }}
           />
         </div>
       </div>
 
-      {/* Opciones de método de pago */}
+      {/* Metodo de pago */}
       <div className="space-y-3">
         <p className="font-medium text-gray-700">
           Seleccione el método de pago
         </p>
-        <div className="flex w-full flex-row flex-wrap gap-6 rounded-md border px-4 py-4">
-          {deliveryMethod === 'store' && (
+        <div className="flex flex-wrap gap-6 rounded-md border px-4 py-4">
+          {deliveryMethod === 'store' ? (
             <>
               <RadioButton
                 text="Punto de venta"
@@ -163,9 +202,7 @@ const ShippingInfo: React.FC = () => {
                 onSelect={() => setPaymentMethod('mobile')}
               />
             </>
-          )}
-
-          {deliveryMethod === 'home' && (
+          ) : (
             <>
               <RadioButton
                 text="Efectivo"
@@ -186,6 +223,7 @@ const ShippingInfo: React.FC = () => {
           )}
         </div>
       </div>
+
       <input type="hidden" value={selectedBranchId} />
     </section>
   );
