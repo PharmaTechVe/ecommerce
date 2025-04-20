@@ -12,6 +12,7 @@ import SearchSuggestions from './SuggestionProduct';
 type SearchBarProps = {
   categories: string[];
   onSearch?: (query: string, category: string) => void;
+  width?: string;
   height?: string;
   borderRadius?: string;
   backgroundColor?: string;
@@ -25,6 +26,7 @@ type SearchBarProps = {
 export default function SearchBar({
   categories,
   onSearch,
+  width = '100%',
   height = '2.5rem',
   borderRadius = '0.375rem',
   backgroundColor = 'white',
@@ -51,9 +53,9 @@ export default function SearchBar({
   };
 
   return (
-    <div className="relative flex w-full flex-col overflow-visible">
+    <div className="relative flex flex-col overflow-visible" style={{ width }}>
       <div
-        className="flex w-full border"
+        className="flex border"
         style={{ height, borderRadius, backgroundColor }}
       >
         {!disableDropdown && (
@@ -77,8 +79,8 @@ export default function SearchBar({
             </button>
             {isOpen && (
               <ul
-                className="absolute z-10 mt-1 w-full shadow-md"
-                style={{ backgroundColor }}
+                className="absolute z-10 mt-1 shadow-md"
+                style={{ backgroundColor, width }}
               >
                 {categories.map((category) => (
                   <li
@@ -112,7 +114,7 @@ export default function SearchBar({
           placeholder={inputPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="h-full flex-grow px-4 text-sm focus:outline-none"
+          className="flex-grow px-4 text-sm focus:outline-none"
           style={
             {
               color: textColorDrop,
@@ -124,7 +126,7 @@ export default function SearchBar({
 
         <button
           onClick={handleSearch}
-          className="h-full flex-shrink-0 border-l px-4 hover:bg-gray-100"
+          className="flex-shrink-0 border-l px-4 hover:bg-gray-100"
           style={{
             borderColor: '#d1d5db',
             borderTopRightRadius: borderRadius,
@@ -135,8 +137,7 @@ export default function SearchBar({
         </button>
       </div>
 
-      {/* Opcional: sugerencias bajo el input */}
-      {searchTerm.length > 0 && (
+      {searchTerm.length > 0 && !disableDropdown && (
         <SearchSuggestions query={searchTerm} category={selectedCategory} />
       )}
     </div>
