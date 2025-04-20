@@ -228,6 +228,20 @@ const ShippingInfo: React.FC = () => {
           )}
         </div>
       </div>
+      <div>
+        {deliveryMethod === 'store' && paymentMethod === 'pos' && (
+          <p className="text-[#6E6D6C]">
+            Por favor dirigirse a su sucursal más cercana y pagar en el sitio.
+            La orden estará en proceso de pago hasta que pague en el sitio
+          </p>
+        )}
+        {deliveryMethod === 'home' && paymentMethod === 'cash' && (
+          <p className="text-[#6E6D6C]">
+            Debe pagar al personal del delivery la cantidad exacta de su pedido.
+            La orden estará en proceso de pago hasta que pague en el sitio
+          </p>
+        )}
+      </div>
     </section>
   );
 };
