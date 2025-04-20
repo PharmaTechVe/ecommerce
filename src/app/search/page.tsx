@@ -160,7 +160,6 @@ export default function SearchPage() {
             initialCurrentPriceRange={currentPriceRange}
             onApplyFilters={(filters, price) => {
               console.log('Filtros recibidos de Sidebar:', filters);
-              // Mapeo de singular → plural para el estado
               const mapped = {
                 brands: filters.brand ?? '',
                 presentations: filters.presentation ?? '',
@@ -182,16 +181,22 @@ export default function SearchPage() {
           />
 
           {/* Grid de productos */}
-          <div className="flex-1">
-            <p className="mb-4">
-              Total API: <strong>{products.length}</strong>, Filtrados:{' '}
-              <strong>{filtered.length}</strong>
-            </p>
+          <div className="mt-6 flex-1">
+            {/* Cabecera de resultados */}
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl">
+                Resultados de búsqueda:{' '}
+                <span className="capitalize">{category}</span>
+              </h2>
+              <span className="text-sm text-gray-600">
+                {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+              </span>
+            </div>
 
             {filtered.length === 0 ? (
               <p className="text-center text-gray-500">Sin resultados</p>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                 {filtered.map((p) => (
                   <ProductCard
                     key={p.id}

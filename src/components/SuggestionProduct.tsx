@@ -117,7 +117,7 @@ export default function SearchSuggestions({
     <div
       ref={containerRef}
       className="absolute left-0 top-full z-10 w-[600px] translate-y-4 rounded-md border bg-white shadow-xl"
-      style={{ maxHeight: '500px' }}
+      style={{ maxHeight: '600px' }}
     >
       <div className="flex h-full divide-x">
         {/* Columna de categoría */}
