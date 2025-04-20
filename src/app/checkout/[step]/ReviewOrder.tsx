@@ -1,22 +1,42 @@
 // app/checkout/[step]/ReviewOrder.tsx
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useCheckout } from '../CheckoutContext';
 //import { useCart } from '@/context/CartContext';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
+import { useAuth } from '@/context/AuthContext';
+import { api } from '@/lib/sdkConfig';
 
 const ReviewOrder: React.FC = () => {
   const { deliveryMethod, selectedBranchLabel } = useCheckout();
+  const { user, token } = useAuth();
+
   //const { cartItems } = useCart();
 
-  const userName = 'Dorieliz';
+  const [userName, setUserName] = useState<string>('Usuario'); // Estado local para almacenar el nombre del usuario
   const orderNumber = 1;
   //const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const isStorePickup = deliveryMethod === 'store';
+
+  useEffect(() => {
+    if (user?.sub && token) {
+      const fetchUserName = async () => {
+        try {
+          // Solicitar el nombre del usuario desde la API si no está presente
+          const response = await api.user.getProfile(user.sub, token);
+          setUserName(response.firstName); // Asignar el primer nombre del perfil al estado
+        } catch (error) {
+          console.error('Error al obtener el nombre del usuario:', error);
+        }
+      };
+
+      fetchUserName(); // Llamar a la función para obtener el nombre
+    }
+  }, [user?.sub, token]); // Ejecutar cuando el `user.sub` o `token` cambien
 
   return (
     <section className="space-y-8">
