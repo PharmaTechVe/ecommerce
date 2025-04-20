@@ -87,7 +87,6 @@ const CheckoutStepContent: React.FC = () => {
     }
     return 0;
   };
-
   // 4. Handler de “Realizar pago” con creación de orden para pickup+pos o delivery+cash
   const handlePayClick = async () => {
     if (!deliveryMethod || !paymentMethod || !selectedBranchLabel) {
@@ -104,6 +103,7 @@ const CheckoutStepContent: React.FC = () => {
 
     if (isInstant) {
       // Payload tipado con CreateOrder
+
       const payload: CreateOrder = {
         type:
           deliveryMethod === 'store' ? OrderType.PICKUP : OrderType.DELIVERY,
