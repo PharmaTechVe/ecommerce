@@ -1,6 +1,8 @@
+// app/checkout/[step]/ShippingInfo.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { TruckIcon, CubeIcon } from '@heroicons/react/24/outline';
 import Dropdown from '@/components/Dropdown';
 import RadioButton from '@/components/RadioButton';
@@ -20,6 +22,7 @@ interface UserAddressResponse {
 }
 
 const ShippingInfo: React.FC = () => {
+  const router = useRouter();
   const { token, user } = useAuth();
   const userId = user?.sub ?? '';
   const {
@@ -62,7 +65,6 @@ const ShippingInfo: React.FC = () => {
     if (deliveryMethod !== 'store') return;
     (async () => {
       try {
-        // ahora findAll solo acepta un argumento
         const res = await api.branch.findAll({ page: 1, limit: 50 });
         setBranches(res.results || []);
       } catch (err) {
@@ -171,6 +173,14 @@ const ShippingInfo: React.FC = () => {
             }}
           />
         </div>
+        {deliveryMethod === 'home' && (
+          <p
+            className="mt-2 cursor-pointer text-blue-600 hover:underline"
+            onClick={() => router.push('/user/address/new')}
+          >
+            Agregar nueva dirección
+          </p>
+        )}
       </div>
 
       {/* Método de pago */}
