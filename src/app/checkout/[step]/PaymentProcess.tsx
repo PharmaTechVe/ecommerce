@@ -140,12 +140,6 @@ const PaymentProcess: React.FC = () => {
           borderSize="1px"
           borderColor="#E7E7E6"
         />
-        <button
-          type="submit"
-          className="mt-4 w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          Continuar
-        </button>
       </form>
     </section>
   );
