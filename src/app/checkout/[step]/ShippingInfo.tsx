@@ -9,6 +9,7 @@ import RadioButton from '@/components/RadioButton';
 import { api } from '@/lib/sdkConfig';
 import { useCheckout } from '../CheckoutContext';
 import { useAuth } from '@/context/AuthContext';
+import { Colors } from '@/styles/styles';
 
 interface Branch {
   id: string;
@@ -175,7 +176,8 @@ const ShippingInfo: React.FC = () => {
         </div>
         {deliveryMethod === 'home' && (
           <p
-            className="mt-2 cursor-pointer text-blue-600 hover:underline"
+            className="mt-2 cursor-pointer hover:underline"
+            style={{ color: Colors.primary }}
             onClick={() => router.push('/user/address/new')}
           >
             Agregar nueva dirección
