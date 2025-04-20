@@ -10,6 +10,7 @@ import { api } from '@/lib/sdkConfig';
 import { useCheckout } from '../CheckoutContext';
 import { useAuth } from '@/context/AuthContext';
 import { Colors } from '@/styles/styles';
+import { useCart } from '@/context/CartContext';
 interface Branch {
   id: string;
   name: string;
@@ -23,6 +24,7 @@ interface UserAddressResponse {
 const ShippingInfo: React.FC = () => {
   const router = useRouter();
   const { token, user } = useAuth();
+  const { cartItems } = useCart();
   const userId = user?.sub ?? '';
   const {
     deliveryMethod,
@@ -40,6 +42,7 @@ const ShippingInfo: React.FC = () => {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [addresses, setAddresses] = useState<UserAddressResponse[]>([]);
   const [localBranch, setLocalBranch] = useState<string>(selectedBranchLabel);
+  const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   // Reset cupón a montar
   useEffect(() => {
@@ -96,6 +99,15 @@ const ShippingInfo: React.FC = () => {
 
   return (
     <section className="space-y-8">
+      <h2
+        className="sm:text-[20px] md:text-[40px]"
+        style={{ color: Colors.textMain }}
+      >
+        Opciones de compra
+      </h2>
+      <p className="text-base text-gray-600">
+        Hay {totalProducts} productos seleccionados
+      </p>
       {/* Método de entrega */}
       <div className="space-y-3">
         <p className="font-medium text-gray-700">{sectionLabel}</p>
