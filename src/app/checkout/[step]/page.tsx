@@ -121,7 +121,7 @@ const CheckoutStepContent: React.FC = () => {
       case 'deliveryinfo':
         return <DeliveryInfo />;
       case 'rejected':
-        return <RejectedOrder />;
+        return <RejectedOrder deliveryMethod={deliveryMethod} />;
       default:
         return <div>El paso &quot;{step}&quot; no existe.</div>;
     }
