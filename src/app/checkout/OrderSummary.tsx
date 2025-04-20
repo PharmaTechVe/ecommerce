@@ -108,7 +108,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
               className={`h-[37px] w-[126px] rounded-md px-7 py-2 text-[16px] text-white ${
                 couponSuccess
                   ? 'cursor-not-allowed bg-gray-400'
-                  : 'bg-[#1C2143] hover:bg-[#161835]'
+                  : 'bg-[#1C2143] hover:opacity-60'
               }`}
             >
               Aplicar
