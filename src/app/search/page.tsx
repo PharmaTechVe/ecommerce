@@ -1,10 +1,9 @@
-// app/search/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import NavBar from '@/components/Navbar';
-import SidebarFilter from '@/components/SidebarFilter';
+import SidebarFilter, { Filters } from '@/components/SidebarFilter';
 import ProductCard from '@/components/Product/ProductCard';
 import CartOverlay from '@/components/Cart/CartOverlay';
 import Footer from '@/components/Footer';
@@ -25,112 +24,154 @@ interface UIProduct {
   categories: string[];
 }
 
+interface ProductPaginationRequest {
+  page: number;
+  limit: number;
+  q?: string;
+  manufacturerId?: string[];
+  categoryId?: string[];
+  branchId?: string[];
+  presentationId?: string[];
+  priceRange?: { min: number; max: number };
+}
+
 export default function SearchPage() {
   const params = useSearchParams();
   const query = params.get('query') ?? '';
-  const category = params.get('category') ?? 'Categorías';
+  const categoryName = params.get('category') ?? 'Categorías';
 
-  const [products, setProducts] = useState<UIProduct[]>([]);
-  const [filtered, setFiltered] = useState<UIProduct[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const [activeFilters, setActiveFilters] = useState({
-    brands: '',
-    presentations: '',
-    activeIngredients: '',
-  });
+  const [allProducts, setAllProducts] = useState<UIProduct[]>([]);
+  const [displayProducts, setDisplayProducts] = useState<UIProduct[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
   const [currentPriceRange, setCurrentPriceRange] = useState<[number, number]>([
     0, 0,
   ]);
+  const [loading, setLoading] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState<Filters>({
+    category: null,
+    brand: null,
+    presentation: null,
+    activeIngredient: null,
+  });
 
-  // 1️⃣ Fetch + prefiltrado por query & categoría de URL
-  useEffect(() => {
-    setLoading(true);
-    setProducts([]);
-    setFiltered([]);
-
-    const params: { page: number; limit: number; q?: string } = {
-      page: 1,
-      limit: 50,
+  interface APIProduct {
+    id: string;
+    product: {
+      id: string;
+      name: string;
+      manufacturer?: { name: string };
+      genericName?: string;
+      categories?: { name: string }[];
+      images?: { url: string }[];
     };
-    if (query.trim()) params.q = query.trim();
+    presentation: {
+      id: string;
+      name: string;
+      quantity: number;
+    };
+    price: number;
+  }
 
-    api.product
-      .getProducts(params)
-      .then(({ results }) => {
-        const ui: UIProduct[] = results.map((item) => ({
-          id: item.id,
-          productPresentationId: item.id,
-          productId: item.product.id,
-          presentationId: item.presentation.id,
-          productName: `${item.product.name} ${item.presentation.name}`,
-          stock: item.presentation.quantity,
-          currentPrice: item.price,
-          imageSrc: item.product.images?.[0]?.url || '',
-          brand:
-            (item.product as { manufacturer?: { name: string } }).manufacturer
-              ?.name || '',
-          presentation: item.presentation.name,
-          activeIngredient:
-            (item.product as { genericName?: string }).genericName || '',
-          categories: Array.isArray(item.product.categories)
-            ? item.product.categories.map((c: { name: string }) => c.name)
-            : [],
-        }));
+  const mapToUI = useCallback(
+    (results: APIProduct[]): UIProduct[] =>
+      results.map((item) => ({
+        id: item.id,
+        productPresentationId: item.id,
+        productId: item.product.id,
+        presentationId: String(item.presentation.id),
+        productName: `${item.product.name} ${item.presentation.name}`,
+        stock: item.presentation.quantity,
+        currentPrice: item.price,
+        imageSrc: item.product.images?.[0]?.url || '',
+        brand: item.product.manufacturer?.name || '',
+        presentation: item.presentation.name,
+        activeIngredient: item.product.genericName || '',
+        categories: Array.isArray(item.product.categories)
+          ? item.product.categories.map((c) => c.name)
+          : [],
+      })),
+    [],
+  );
 
-        const preFiltered =
-          category !== 'Categorías'
-            ? ui.filter((p) => p.categories.includes(category))
-            : ui;
-
-        setProducts(preFiltered);
-        setFiltered(preFiltered);
-
-        const prices = preFiltered.map((x) => x.currentPrice);
-        if (prices.length) {
-          const min = Math.min(...prices);
-          const max = Math.max(...prices);
-          setPriceRange([min, max]);
-          setCurrentPriceRange([min, max]);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [query, category]);
-
-  // 2️⃣ Aplicar filtros adicionales (marca, presentación, principio activo, precio)
   useEffect(() => {
-    setFiltered(
-      products.filter((p) => {
-        if (activeFilters.brands && p.brand !== activeFilters.brands)
-          return false;
-        if (
-          activeFilters.presentations &&
-          p.presentation !== activeFilters.presentations
-        )
-          return false;
-        if (
-          activeFilters.activeIngredients &&
-          p.activeIngredient !== activeFilters.activeIngredients
-        )
-          return false;
-        if (
-          p.currentPrice < currentPriceRange[0] ||
-          p.currentPrice > currentPriceRange[1]
-        )
-          return false;
-        return true;
-      }),
-    );
-  }, [
-    products,
-    activeFilters.brands,
-    activeFilters.presentations,
-    activeFilters.activeIngredients,
-    currentPriceRange,
-  ]);
+    const fetchInitial = async () => {
+      setLoading(true);
+      try {
+        const req: ProductPaginationRequest = { page: 1, limit: 50 };
+        if (query.trim()) req.q = query.trim();
+        const resp = await api.product.getProducts(req);
+        let ui = mapToUI(resp.results);
+
+        if (categoryName !== 'Categorías') {
+          ui = ui.filter((p) => p.categories.includes(categoryName));
+        }
+
+        setAllProducts(ui);
+        setDisplayProducts(ui);
+        const prices = ui.map((p) => p.currentPrice);
+        if (prices.length) {
+          setPriceRange([Math.min(...prices), Math.max(...prices)]);
+          setCurrentPriceRange([Math.min(...prices), Math.max(...prices)]);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInitial();
+  }, [query, categoryName, mapToUI]);
+
+  const handleApplyFilters = async (
+    filters: Filters,
+    price: [number, number],
+  ) => {
+    setCurrentFilters(filters);
+    setLoading(true);
+    try {
+      const req: ProductPaginationRequest = {
+        page: 1,
+        limit: 50,
+        ...(query.trim() && { q: query.trim() }),
+        ...(filters.brand && { manufacturerId: [filters.brand] }),
+        ...(filters.category && { categoryId: [filters.category] }),
+        ...(filters.activeIngredient && {
+          branchId: [filters.activeIngredient],
+        }),
+        ...(filters.presentation && { presentationId: [filters.presentation] }),
+        priceRange: { min: price[0], max: price[1] },
+      };
+
+      const resp = await api.product.getProducts(req);
+      let ui = mapToUI(resp.results);
+
+      if (filters.presentation) {
+        ui = ui.filter((p) => p.presentationId === filters.presentation);
+      }
+
+      setDisplayProducts(ui);
+      setCurrentPriceRange(price);
+    } catch (err) {
+      console.error('Error aplicando filtros:', err);
+    } finally {
+      setLoading(false);
+      setShowMobileFilters(false);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setCurrentFilters({
+      category: null,
+      brand: null,
+      presentation: null,
+      activeIngredient: null,
+    });
+    setDisplayProducts(allProducts);
+    setCurrentPriceRange(priceRange);
+    setShowMobileFilters(false);
+  };
 
   if (loading) {
     return <p className="p-4 text-center">Cargando...</p>;
@@ -138,80 +179,79 @@ export default function SearchPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Navbar + Carrito */}
-      <div className="fixed left-0 right-0 top-0 z-50 bg-white">
+      <header className="fixed inset-x-0 top-0 z-50 bg-white">
         <NavBar onCartClick={() => setIsCartOpen(true)} />
-      </div>
+      </header>
       {isCartOpen && (
         <CartOverlay isOpen closeCart={() => setIsCartOpen(false)} />
       )}
 
-      <main className="container mx-auto flex-grow space-y-6 px-4 pt-[124px]">
-        <div className="flex gap-6">
-          {/* Sidebar de filtros */}
-          <SidebarFilter
-            initialFilters={{
-              category,
-              brand: activeFilters.brands,
-              presentation: activeFilters.presentations,
-              activeIngredient: activeFilters.activeIngredients,
-            }}
-            initialPriceRange={priceRange}
-            initialCurrentPriceRange={currentPriceRange}
-            onApplyFilters={(filters, price) => {
-              console.log('Filtros recibidos de Sidebar:', filters);
-              const mapped = {
-                brands: filters.brand ?? '',
-                presentations: filters.presentation ?? '',
-                activeIngredients: filters.activeIngredient ?? '',
-              };
-              console.log('Mapeo a activeFilters:', mapped);
-              setActiveFilters(mapped);
-              setCurrentPriceRange(price);
-            }}
-            onClearFilters={() => {
-              console.log('Limpiando filtros');
-              setActiveFilters({
-                brands: '',
-                presentations: '',
-                activeIngredients: '',
-              });
-              setCurrentPriceRange(priceRange);
-            }}
-          />
+      <main className="container mx-auto flex-grow px-4 pt-[124px] sm:px-6 lg:px-8">
+        {showMobileFilters && (
+          <div className="fixed inset-0 z-50 flex bg-black/50">
+            <div className="w-full max-w-xs overflow-auto bg-white p-4">
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="mb-4 w-full text-right font-semibold"
+              >
+                Cerrar ✕
+              </button>
+              <SidebarFilter
+                initialFilters={currentFilters}
+                initialPriceRange={priceRange}
+                initialCurrentPriceRange={currentPriceRange}
+                onApplyFilters={handleApplyFilters}
+                onClearFilters={handleClearFilters}
+              />
+            </div>
+          </div>
+        )}
 
-          {/* Grid de productos */}
-          <div className="mt-6 flex-1">
-            {/* Cabecera de resultados */}
+        <div className="flex flex-col gap-6 md:flex-row">
+          <div className="hidden w-full flex-shrink-0 md:block md:w-64">
+            <SidebarFilter
+              initialFilters={currentFilters}
+              initialPriceRange={priceRange}
+              initialCurrentPriceRange={currentPriceRange}
+              onApplyFilters={handleApplyFilters}
+              onClearFilters={handleClearFilters}
+            />
+          </div>
+
+          <div className="flex-1">
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="mb-4 mt-6 block rounded bg-[#1C2143] px-4 py-2 text-white md:hidden"
+            >
+              Filtrar
+            </button>
+
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl">
                 Resultados de búsqueda:{' '}
-                <span className="capitalize">{category}</span>
+                <span className="capitalize">{categoryName}</span>
               </h2>
               <span className="text-sm text-gray-600">
-                {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+                {displayProducts.length} resultado
+                {displayProducts.length !== 1 ? 's' : ''}
               </span>
             </div>
 
-            {filtered.length === 0 ? (
-              <p className="text-center text-gray-500">Sin resultados</p>
-            ) : (
-              <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                {filtered.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    productPresentationId={p.productPresentationId}
-                    productId={p.productId}
-                    presentationId={p.presentationId}
-                    imageSrc={p.imageSrc}
-                    productName={p.productName}
-                    stock={p.stock}
-                    currentPrice={p.currentPrice}
-                    variant="regular"
-                  />
-                ))}
-              </div>
-            )}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+              {displayProducts.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  productPresentationId={p.productPresentationId}
+                  productId={p.productId}
+                  presentationId={p.presentationId}
+                  imageSrc={p.imageSrc}
+                  productName={p.productName}
+                  stock={p.stock}
+                  currentPrice={p.currentPrice}
+                  variant="regular"
+                />
+              ))}
+            </div>
           </div>
         </div>
       </main>
