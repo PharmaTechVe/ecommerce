@@ -1,3 +1,4 @@
+// src/app/checkout/CheckoutContext.tsx
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
@@ -12,10 +13,13 @@ interface CheckoutState {
   selectedBranchLabel: string;
   setSelectedBranchLabel: (label: string) => void;
 
+  selectedBranchId: string;
+  setSelectedBranchId: (id: string) => void;
+
   stepSequence: string[] | null;
   setStepSequence: (steps: string[]) => void;
 
-  // **Estado de cupón**:
+  // Cupón
   couponCode: string;
   setCouponCode: (code: string) => void;
   couponDiscount: number;
@@ -34,9 +38,9 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
     'pos' | 'cash' | 'bank' | 'mobile'
   >('pos');
   const [selectedBranchLabel, setSelectedBranchLabel] = useState<string>('');
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [stepSequence, setStepSequence] = useState<string[] | null>(null);
 
-  // Cupón
   const [couponCode, setCouponCode] = useState<string>('');
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
@@ -49,6 +53,8 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         setPaymentMethod,
         selectedBranchLabel,
         setSelectedBranchLabel,
+        selectedBranchId,
+        setSelectedBranchId,
         stepSequence,
         setStepSequence,
         couponCode,

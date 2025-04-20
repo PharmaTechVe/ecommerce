@@ -15,12 +15,21 @@ import OrderSummary from '../OrderSummary';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCheckout } from '../CheckoutContext';
+import { useCart } from '@/context/CartContext';
+import { api } from '@/lib/sdkConfig';
+import { CreateOrder, OrderType } from '@pharmatech/sdk';
 
 const CheckoutStepContent: React.FC = () => {
   const { step } = useParams<{ step: string }>();
   const router = useRouter();
   const { token } = useAuth();
-  const { deliveryMethod, paymentMethod, selectedBranchLabel } = useCheckout();
+  const {
+    deliveryMethod,
+    paymentMethod,
+    selectedBranchLabel,
+    selectedBranchId, // <-- ID de sucursal o dirección
+  } = useCheckout();
+  const { cartItems } = useCart();
 
   // 1. Construcción de los títulos del stepper según método de entrega y pago
   let stepsState: string[] = [];
@@ -79,32 +88,57 @@ const CheckoutStepContent: React.FC = () => {
     return 0;
   };
 
-  // 4. Handlers de navegación entre pasos
-  const handlePayClick = () => {
+  // 4. Handler de “Realizar pago” con creación de orden para pickup+pos o delivery+cash
+  const handlePayClick = async () => {
     if (!deliveryMethod || !paymentMethod || !selectedBranchLabel) {
       alert(
-        'Debe seleccionar el método de retiro, la sucursal y el método de pago',
+        'Debe seleccionar el método de retiro, la sucursal/dirección y el método de pago',
       );
       return;
     }
-    if (paymentMethod === 'pos' || paymentMethod === 'cash')
-      router.push('/checkout/ReviewOrder');
-    else router.push('/checkout/PaymentProcess');
-  };
-  const handleConfirmPayment = () => router.push('/checkout/ReviewOrder');
-  const handleAssignDelivery = () => router.push('/checkout/DeliveryInfo');
 
-  // 5. Renderizado de cada paso (sin botón de pago en shippinginfo)
+    // Sólo creamos orden para pickup+pos o delivery+cash
+    const isInstant =
+      (deliveryMethod === 'store' && paymentMethod === 'pos') ||
+      (deliveryMethod === 'home' && paymentMethod === 'cash');
+
+    if (isInstant) {
+      // Payload tipado con CreateOrder
+      const payload: CreateOrder = {
+        type:
+          deliveryMethod === 'store' ? OrderType.PICKUP : OrderType.DELIVERY,
+        products: cartItems.map((item) => ({
+          productPresentationId: item.id,
+          quantity: item.quantity,
+        })),
+        ...(deliveryMethod === 'store'
+          ? { branchId: selectedBranchId }
+          : { userAddressId: selectedBranchId }),
+      };
+
+      try {
+        await api.order.create(payload, token!);
+      } catch (err) {
+        console.error('Error al crear la orden:', err);
+        alert('Ocurrió un error al crear la orden');
+        return;
+      }
+      router.push('/checkout/revieworder');
+    } else {
+      router.push('/checkout/paymentprocess');
+    }
+  };
+
+  const handleConfirmPayment = () => router.push('/checkout/revieworder');
+  const handleAssignDelivery = () => router.push('/checkout/deliveryinfo');
+
+  // 5. Renderizado de cada paso
   const renderStep = () => {
     switch (lowerStep) {
       case 'shippinginfo':
         return <ShippingInfo />;
       case 'paymentprocess':
-        return (
-          <>
-            <PaymentProcess />
-          </>
-        );
+        return <PaymentProcess />;
       case 'revieworder':
         return (
           <>
@@ -137,7 +171,7 @@ const CheckoutStepContent: React.FC = () => {
       <NavBar />
       <main className="mx-auto max-w-7xl px-4 py-6 text-left md:px-8">
         <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Columna izquierda: breadcrumb, stepper y contenido */}
+          {/* IZQUIERDA */}
           <div className="lg:w-3/3 w-full">
             <div className="max-w-4xl">
               <Breadcrumb
@@ -159,18 +193,15 @@ const CheckoutStepContent: React.FC = () => {
             {renderStep()}
           </div>
 
-          {/* Columna derecha: OrderSummary y botón de pago */}
+          {/* DERECHA */}
           <div className="w-full lg:w-1/3">
             <OrderSummary hideCoupon={hideCoupon} />
 
-            {/* Botón "Realizar el pago" solo en shippinginfo */}
             {lowerStep === 'shippinginfo' && (
               <div className="mt-6 flex justify-end">
                 <Button onClick={handlePayClick}>Realizar pago</Button>
               </div>
             )}
-
-            {/* Botón "Realizar el pago" solo en shippinginfo */}
             {lowerStep === 'paymentprocess' && (
               <div className="mt-6 flex justify-end">
                 <Button onClick={handleConfirmPayment}>Confirmar pago</Button>

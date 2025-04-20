@@ -9,14 +9,12 @@ import RadioButton from '@/components/RadioButton';
 import { api } from '@/lib/sdkConfig';
 import { useCheckout } from '../CheckoutContext';
 import { useAuth } from '@/context/AuthContext';
-import { Colors } from '@/styles/styles';
 
 interface Branch {
   id: string;
   name: string;
   city: { name: string; state: { name: string } };
 }
-
 interface UserAddressResponse {
   id: string;
   adress: string;
@@ -33,61 +31,49 @@ const ShippingInfo: React.FC = () => {
     setPaymentMethod,
     selectedBranchLabel,
     setSelectedBranchLabel,
-    // Cupón:
+    setSelectedBranchId,
+    // Cupón
     setCouponCode,
     setCouponDiscount,
   } = useCheckout();
 
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [branches, setBranches] = useState<Branch[]>([]);
   const [addresses, setAddresses] = useState<UserAddressResponse[]>([]);
-  const [localBranch, setLocalBranch] = useState<string>(
-    selectedBranchLabel || '',
-  );
+  const [localBranch, setLocalBranch] = useState<string>(selectedBranchLabel);
 
-  // Al montar/reseteo de ShippingInfo, limpio cupón
+  // Reset cupón a montar
   useEffect(() => {
     setCouponCode('');
     setCouponDiscount(0);
   }, [setCouponCode, setCouponDiscount]);
 
-  // Cada vez que cambie deliveryMethod, limpio dropdown
+  // Cambio de método de entrega
   const handleDeliverySelection = (delivery: 'store' | 'home') => {
     setDeliveryMethod(delivery);
     setLocalBranch('');
     setSelectedBranchLabel('');
     setSelectedBranchId('');
-    // Y cambio pago por defecto según tipo
     setPaymentMethod(delivery === 'home' ? 'cash' : 'pos');
   };
 
-  // Fetch branches when store is selected
+  // Carga sucursales
   useEffect(() => {
     if (deliveryMethod !== 'store') return;
-    (async () => {
-      try {
-        const res = await api.branch.findAll({ page: 1, limit: 50 });
-        setBranches(res.results || []);
-      } catch (err) {
-        console.error('Error al cargar sucursales:', err);
-      }
-    })();
+    api.branch
+      .findAll({ page: 1, limit: 50 })
+      .then((res) => setBranches(res.results || []))
+      .catch(console.error);
   }, [deliveryMethod]);
 
-  // Carga direcciones de usuario
+  // Carga direcciones
   useEffect(() => {
     if (deliveryMethod !== 'home' || !token || !userId) return;
-    (async () => {
-      try {
-        const list = await api.userAdress.getListAddresses(userId, token);
-        setAddresses(list);
-      } catch {
-        console.error('Error al cargar direcciones de usuario');
-      }
-    })();
-  }, [deliveryMethod, userId, token]);
+    api.userAdress
+      .getListAddresses(userId, token)
+      .then(setAddresses)
+      .catch(console.error);
+  }, [deliveryMethod, token, userId]);
 
-  // Formateo para el dropdown
   const formattedBranches = branches.map((b) => ({
     id: b.id,
     label: `${b.name} - ${b.city.name}, ${b.city.state.name}`,
@@ -157,7 +143,7 @@ const ShippingInfo: React.FC = () => {
         </div>
       </div>
 
-      {/* Dropdown de sucursal o dirección */}
+      {/* Dropdown */}
       <div>
         <p className="relative mb-2 font-medium text-gray-700">
           {sectionLabel}
@@ -168,16 +154,15 @@ const ShippingInfo: React.FC = () => {
             items={items.map((i) => i.label)}
             onSelect={(value) => {
               setLocalBranch(value);
-              const sel = items.find((i) => i.label === value);
-              setSelectedBranchId(sel?.id || '');
+              const found = items.find((i) => i.label === value);
+              setSelectedBranchId(found?.id || '');
               setSelectedBranchLabel(value);
             }}
           />
         </div>
         {deliveryMethod === 'home' && (
           <p
-            className="mt-2 cursor-pointer hover:underline"
-            style={{ color: Colors.primary }}
+            className="mt-2 cursor-pointer text-blue-600 hover:underline"
             onClick={() => router.push('/user/address/new')}
           >
             Agregar nueva dirección
@@ -230,8 +215,6 @@ const ShippingInfo: React.FC = () => {
           )}
         </div>
       </div>
-
-      <input type="hidden" value={selectedBranchId} />
     </section>
   );
 };
