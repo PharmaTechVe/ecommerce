@@ -7,7 +7,6 @@ import RadioButton from '@/components/RadioButton';
 import { api } from '@/lib/sdkConfig';
 import { useCheckout } from '../CheckoutContext';
 import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
 
 interface Branch {
   id: string;
@@ -23,9 +22,6 @@ interface UserAddressResponse {
 const ShippingInfo: React.FC = () => {
   const { token, user } = useAuth();
   const userId = user?.sub ?? '';
-  const { cartItems } = useCart();
-  const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
   const {
     deliveryMethod,
     setDeliveryMethod,
@@ -33,22 +29,31 @@ const ShippingInfo: React.FC = () => {
     setPaymentMethod,
     selectedBranchLabel,
     setSelectedBranchLabel,
+    // Cupón:
+    setCouponCode,
+    setCouponDiscount,
   } = useCheckout();
 
-  const [selectedBranchId, setSelectedBranchId] = useState('');
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [branches, setBranches] = useState<Branch[]>([]);
   const [addresses, setAddresses] = useState<UserAddressResponse[]>([]);
   const [localBranch, setLocalBranch] = useState<string>(
     selectedBranchLabel || '',
   );
 
-  // Whenever deliveryMethod changes, clear dropdown and set default payment
+  // Al montar/reseteo de ShippingInfo, limpio cupón
+  useEffect(() => {
+    setCouponCode('');
+    setCouponDiscount(0);
+  }, [setCouponCode, setCouponDiscount]);
+
+  // Cada vez que cambie deliveryMethod, limpio dropdown
   const handleDeliverySelection = (delivery: 'store' | 'home') => {
     setDeliveryMethod(delivery);
     setLocalBranch('');
     setSelectedBranchLabel('');
     setSelectedBranchId('');
-    // default payment by delivery type
+    // Y cambio pago por defecto según tipo
     setPaymentMethod(delivery === 'home' ? 'cash' : 'pos');
   };
 
@@ -66,20 +71,20 @@ const ShippingInfo: React.FC = () => {
     })();
   }, [deliveryMethod]);
 
-  // Fetch user addresses when home is selected
+  // Carga direcciones de usuario
   useEffect(() => {
     if (deliveryMethod !== 'home' || !token || !userId) return;
     (async () => {
       try {
         const list = await api.userAdress.getListAddresses(userId, token);
         setAddresses(list);
-      } catch (err) {
-        console.error('Error al cargar direcciones de usuario:', err);
+      } catch {
+        console.error('Error al cargar direcciones de usuario');
       }
     })();
   }, [deliveryMethod, userId, token]);
 
-  // Format items for dropdown
+  // Formateo para el dropdown
   const formattedBranches = branches.map((b) => ({
     id: b.id,
     label: `${b.name} - ${b.city.name}, ${b.city.state.name}`,
@@ -102,17 +107,7 @@ const ShippingInfo: React.FC = () => {
 
   return (
     <section className="space-y-8">
-      {/* Nuevo encabezado con total de productos */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-800">
-          Opciones de Compra
-        </h2>
-        <p className="text-base text-gray-600">
-          Hay {totalProducts} productos seleccionados
-        </p>
-      </div>
-
-      {/* Metodo de entrega */}
+      {/* Método de entrega */}
       <div className="space-y-3">
         <p className="font-medium text-gray-700">{sectionLabel}</p>
         <div className="flex flex-col gap-4">
@@ -159,14 +154,13 @@ const ShippingInfo: React.FC = () => {
         </div>
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown de sucursal o dirección */}
       <div>
         <p className="relative mb-2 font-medium text-gray-700">
           {sectionLabel}
         </p>
         <div className="relative z-50">
           <Dropdown
-            key={deliveryMethod}
             label={localBranch || dropdownPlaceholder}
             items={items.map((i) => i.label)}
             onSelect={(value) => {
@@ -179,7 +173,7 @@ const ShippingInfo: React.FC = () => {
         </div>
       </div>
 
-      {/* Metodo de pago */}
+      {/* Método de pago */}
       <div className="space-y-3">
         <p className="font-medium text-gray-700">
           Seleccione el método de pago
