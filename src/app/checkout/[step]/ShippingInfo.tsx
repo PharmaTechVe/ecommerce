@@ -162,6 +162,7 @@ const ShippingInfo: React.FC = () => {
         </p>
         <div className="relative z-50">
           <Dropdown
+            key={deliveryMethod}
             label={localBranch || dropdownPlaceholder}
             items={items.map((i) => i.label)}
             onSelect={(value) => {
