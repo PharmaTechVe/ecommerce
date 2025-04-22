@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useCheckout } from '../CheckoutContext';
 import { useRouter } from 'next/navigation';
 import Input from '@/components/Input/Input';
+import { api } from '@/lib/sdkConfig';
+import { PaymentInfoResponse } from '@pharmatech/sdk';
 
 const PaymentProcess: React.FC = () => {
   const { paymentMethod, couponDiscount } = useCheckout();
@@ -49,6 +51,37 @@ const PaymentProcess: React.FC = () => {
     ? 'Debes hacer el pago del monto exacto, la orden se creará cuando se confirme el pago'
     : 'Debes hacer el pago del monto exacto, de lo contrario no se creará la orden';
 
+  const [paymentDetails, setPaymentDetails] =
+    useState<PaymentInfoResponse | null>(null);
+
+  useEffect(() => {
+    const fetchPaymentMethodDetails = async () => {
+      try {
+        let response: PaymentInfoResponse | undefined;
+        let id: string | undefined;
+
+        //El design contempla una sola info para transferencia y una para pago movil por lo que hardcodee el id
+        if (paymentMethod === 'bank') {
+          id = '7c9eb7fb-1c4f-417c-a878-37c266f9f6ce';
+        } else if (paymentMethod === 'mobile') {
+          id = '2f09bf3d-bdd9-49be-9d6c-27230a96ffe5';
+        }
+
+        if (id) {
+          response = await api.paymentInformation.getById(id);
+        }
+
+        if (response) {
+          setPaymentDetails(response);
+        }
+      } catch (error) {
+        console.error('Error fetching payment method details:', error);
+      }
+    };
+
+    fetchPaymentMethodDetails();
+  }, [paymentMethod]);
+
   return (
     <section className="space-y-8">
       {/* Header */}
@@ -70,27 +103,27 @@ const PaymentProcess: React.FC = () => {
         <div>
           <p className="text-base text-gray-500">Banco Asociado</p>
           <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-            Banco Venezuela
+            {paymentDetails?.bank}
           </div>
         </div>
         <div>
           <p className="text-base text-gray-500">RIF</p>
           <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-            J-008720001
+            {paymentDetails?.documentId}
           </div>
         </div>
         {isBank ? (
           <div>
             <p className="text-base text-gray-500">Nº de Cuenta</p>
             <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-              0134-2452-30-2536432346
+              {paymentDetails?.account}
             </div>
           </div>
         ) : (
           <div>
             <p className="text-base text-gray-500">Teléfono Móvil</p>
             <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-              0424-138 00 42
+              {paymentDetails?.phoneNumber}
             </div>
           </div>
         )}
