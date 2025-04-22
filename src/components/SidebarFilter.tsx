@@ -52,10 +52,7 @@ export default function SidebarFilter({
   }, [initialFilters, initialCurrentPriceRange]);
 
   const fetchOptions = async (
-    serviceFn: (req: {
-      page: number;
-      limit: number;
-    }) => Promise<{
+    serviceFn: (req: { page: number; limit: number }) => Promise<{
       results: {
         id: string;
         name: string;
