@@ -35,6 +35,10 @@ const CheckoutStepContent: React.FC = () => {
   } = useCheckout();
 
   const [isFormValid, setIsFormValid] = useState(false);
+  const notify = {
+    payment: (id: string) => toast.success(`Pago confirmado: ${id}`),
+    order: (id: string) => toast.success(`Orden creada: ${id}`),
+  };
 
   // 1. Construcción de los títulos del stepper según método de entrega y pago
   let stepsState: string[] = [];
@@ -101,14 +105,11 @@ const CheckoutStepContent: React.FC = () => {
       return;
     }
 
-    // Sólo creamos orden para pickup+pos o delivery+cash
     const isInstant =
       (deliveryMethod === 'store' && paymentMethod === 'pos') ||
       (deliveryMethod === 'home' && paymentMethod === 'cash');
 
     if (isInstant) {
-      // Payload tipado con CreateOrder
-
       const payload: CreateOrder = {
         type:
           deliveryMethod === 'store' ? OrderType.PICKUP : OrderType.DELIVERY,
@@ -123,7 +124,7 @@ const CheckoutStepContent: React.FC = () => {
 
       try {
         const response = await api.order.create(payload, token!);
-        toast.success(response.id || 'Orden creada correctamente');
+        notify.order(response.id);
       } catch (err) {
         console.error('Error al crear la orden:', err);
         alert('Ocurrió un error al crear la orden');
@@ -148,16 +149,15 @@ const CheckoutStepContent: React.FC = () => {
       alert('Debes iniciar sesión para continuar.');
       return;
     }
-
     try {
-      // ✨ Aquí ya es un PaymentConfirmation válido
+      // 1️⃣ Confirmación de pago
       const confirmation = await api.paymentConfirmation.create(
         paymentConfirmationData,
         token,
       );
-      toast.success(`Pago confirmado: ${confirmation.id}`);
+      notify.payment(confirmation.id);
 
-      // Creamos la orden a continuación
+      // 2️⃣ Creación de la orden
       const payload: CreateOrder = {
         type:
           deliveryMethod === 'store' ? OrderType.PICKUP : OrderType.DELIVERY,
@@ -170,8 +170,9 @@ const CheckoutStepContent: React.FC = () => {
           : { userAddressId: selectedBranchId }),
       };
       const orderRes = await api.order.create(payload, token);
-      toast.success(`Orden creada: ${orderRes.id}`);
+      notify.order(orderRes.id);
 
+      // 3️⃣ Navegación final
       router.push('/checkout/revieworder');
     } catch (err) {
       console.error(err);

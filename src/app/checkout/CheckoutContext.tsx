@@ -20,23 +20,25 @@ interface CheckoutState {
   stepSequence: string[] | null;
   setStepSequence: (steps: string[]) => void;
 
-  // Cupón
   couponCode: string;
   setCouponCode: (code: string) => void;
   couponDiscount: number;
   setCouponDiscount: (amount: number) => void;
 
-  // ——— NUEVO: datos de confirmación de pago ———
+  // ahora siempre es un objeto completo, nunca Partial ni null
   paymentConfirmationData: PaymentConfirmation;
   setPaymentConfirmationData: (data: PaymentConfirmation) => void;
 }
+
+const CheckoutContext = createContext<CheckoutState | null>(null);
+
+// Valores iniciales “vacíos” pero completos
 const INITIAL_PAYMENT_CONFIRMATION: PaymentConfirmation = {
   bank: '',
   reference: '',
   documentId: '',
   phoneNumber: '',
 };
-const CheckoutContext = createContext<CheckoutState | null>(null);
 
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -54,7 +56,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   const [couponCode, setCouponCode] = useState<string>('');
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
-  // ——— NUEVO: estado para los datos de confirmación ———
+  // Estado ya tipado como completo
   const [paymentConfirmationData, setPaymentConfirmationData] =
     useState<PaymentConfirmation>(INITIAL_PAYMENT_CONFIRMATION);
 
