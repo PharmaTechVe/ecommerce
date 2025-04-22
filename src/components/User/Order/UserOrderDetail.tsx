@@ -27,14 +27,15 @@ export default function UserOrderDetail({
   total,
 }: OrderDetailProps) {
   return (
-    <div className="mx-auto w-full max-w-[954px] bg-white p-6 px-4 sm:px-6">
+    <div className="mx-auto w-full max-w-[954px] bg-white px-2 py-6 sm:px-6">
+      {/* Encabezado */}
       <div className="mb-4">
         <h2 className="font-medium text-gray-500">Pedido {orderNumber}</h2>
       </div>
-
       <div className="my-4 border-t border-gray-200" />
 
-      <div className="space-y-6">
+      {/* Lista con scroll en mobile */}
+      <div className="max-h-[460px] space-y-6 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:max-h-none sm:overflow-visible [&::-webkit-scrollbar]:hidden">
         {products.map((item, idx) => {
           const presentation: OrderDetailProductPresentationResponse =
             item.productPresentation;
@@ -51,60 +52,60 @@ export default function UserOrderDetail({
             >
               {/* MOBILE */}
               <div className="flex w-full flex-col sm:hidden">
-                <div className="flex items-start gap-2">
-                  <CheckButton
-                    checked={true}
-                    onChange={() => {}}
-                    text=""
-                    variant="tertiary"
-                  />
-                  <div className="flex w-full items-start gap-2">
-                    <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                      <Image
-                        src={product.images?.[0]?.url ?? '/placeholder.png'}
-                        alt={product.name}
-                        width={88}
-                        height={88}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="flex w-full min-w-0 flex-col justify-start">
-                      <h3 className="overflow-hidden truncate whitespace-nowrap text-sm font-medium text-gray-900">
+                <div className="flex gap-2">
+                  {/* Imagen */}
+                  <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <Image
+                      src={product.images?.[0]?.url ?? '/placeholder.png'}
+                      alt={product.name}
+                      width={88}
+                      height={88}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <div className="flex w-full flex-col">
+                    {/* Nombre y cantidad */}
+                    <div className="flex justify-between">
+                      <h3 className="truncate text-sm font-medium text-gray-900">
                         {product.name}
                       </h3>
+                      <span className="text-xs text-gray-500">
+                        Cantidad: {item.quantity}
+                      </span>
+                    </div>
 
-                      <div className="mt-1 flex items-center justify-between">
-                        <div className="flex flex-col items-start">
-                          {originalPrice && (
-                            <span className="text-xs text-gray-400 line-through">
-                              ${originalPrice.toFixed(2)}
-                            </span>
-                          )}
-                          <span className="text-sm font-medium text-gray-900">
-                            ${item.subtotal.toFixed(2)}
+                    {/* Descripción */}
+                    <p className="max-w-[13ch] truncate text-xs text-gray-500">
+                      {product.description}
+                    </p>
+
+                    {/* Precios */}
+                    <div className="mt-1 flex items-center justify-between">
+                      <div className="flex flex-col">
+                        {originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            ${originalPrice.toFixed(2)}
                           </span>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {item.quantity}
+                        )}
+                        <span className="text-sm font-medium text-gray-900">
+                          ${item.subtotal.toFixed(2)}
                         </span>
                       </div>
+                    </div>
 
-                      <p className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
-                        {product.description}
-                      </p>
-
-                      <div className="mt-2">
-                        <Link
-                          href={{
-                            pathname: `/product/${product.id}/presentation/${presentation.presentation.id}`,
-                            query: { productPresentationId: presentation.id },
-                          }}
-                          className="flex items-center text-sm text-[#1C2143]"
-                        >
-                          <StarIcon className="mr-1 h-4 w-4" />
-                          <span>Ir al producto</span>
-                        </Link>
-                      </div>
+                    {/* Ir al producto */}
+                    <div className="mt-1">
+                      <Link
+                        href={{
+                          pathname: `/product/${product.id}/presentation/${presentation.presentation.id}`,
+                          query: { productPresentationId: presentation.id },
+                        }}
+                        className="flex items-center text-xs text-[#1C2143]"
+                      >
+                        <StarIcon className="mr-1 h-4 w-4" />
+                        <span>Ir al producto</span>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -114,7 +115,7 @@ export default function UserOrderDetail({
               <div className="hidden w-full sm:flex sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <CheckButton
-                    checked={true}
+                    checked
                     onChange={() => {}}
                     text=""
                     variant="tertiary"

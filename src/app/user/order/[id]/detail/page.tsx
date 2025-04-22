@@ -73,7 +73,7 @@ export default function OrderDetailPage() {
   }, [id, token]);
 
   return (
-    <div className="relative bg-white px-4 py-6 sm:px-6 lg:px-8">
+    <div className="relative bg-white px-2 py-6 sm:px-6 lg:px-8">
       {loading ? (
         <div className="mt-10 text-center text-gray-600">
           Cargando detalles...
