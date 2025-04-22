@@ -30,8 +30,8 @@ export default function UserBreadcrumbs() {
 
   for (let index = 0; index < segments.length; index++) {
     const segment = segments[index];
-
     const next = segments[index + 1];
+
     if (isUUID(segment) && (next === 'detail' || next === 'edit')) {
       continue;
     }
@@ -77,7 +77,7 @@ export default function UserBreadcrumbs() {
   }
 
   let items = [...baseItems];
-  if (items.length > 4) {
+  if (items.length > 3) {
     const first = items[0];
     const lastTwo = items.slice(-2);
     items = [first, { label: '...', href: undefined }, ...lastTwo];

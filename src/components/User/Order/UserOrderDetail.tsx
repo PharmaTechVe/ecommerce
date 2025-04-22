@@ -1,29 +1,24 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { StarIcon } from '@heroicons/react/24/outline';
 import CheckButton from '@/components/CheckButton';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  quantity: number;
-  image: string;
-  checked: boolean;
-}
+import {
+  OrderDetailResponse,
+  OrderDetailProductPresentationResponse,
+} from '@pharmatech/sdk';
 
 interface OrderDetailProps {
   orderNumber: string;
-  products: Product[];
+  products: OrderDetailResponse[];
   subtotal: number;
   discount: number;
   tax: number;
   total: number;
 }
 
-export default function OrderDetail({
+export default function UserOrderDetail({
   orderNumber,
   products,
   subtotal,
@@ -32,38 +27,36 @@ export default function OrderDetail({
   total,
 }: OrderDetailProps) {
   return (
-    <div className="mx-auto w-full max-w-[954px] bg-white p-6 px-4 sm:px-6">
-      {/* Número de pedido */}
+    <div className="mx-auto w-full max-w-[954px] bg-white px-2 py-6 sm:px-6">
+      {/* Encabezado */}
       <div className="mb-4">
-        <h2 className="font-medium text-gray-500">Pedido #{orderNumber}</h2>
+        <h2 className="font-medium text-gray-500">Pedido {orderNumber}</h2>
       </div>
-
       <div className="my-4 border-t border-gray-200" />
 
-      {/* Lista de productos */}
-      <div className="space-y-6">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="flex flex-col gap-4 sm:flex-row sm:items-center"
-          >
-            {/* MOBILE */}
-            <div className="flex w-full flex-col sm:hidden">
-              <div className="flex items-start gap-2">
-                <CheckButton
-                  checked={product.checked}
-                  onChange={() => {}}
-                  text=""
-                  variant="tertiary"
-                />
+      {/* Lista con scroll en mobile */}
+      <div className="max-h-[460px] space-y-6 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:max-h-none sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+        {products.map((item, idx) => {
+          const presentation: OrderDetailProductPresentationResponse =
+            item.productPresentation;
+          const product = presentation.product;
 
-                <div className="flex w-full items-start gap-2">
+          const originalPrice = presentation.promo
+            ? presentation.price * item.quantity
+            : null;
+
+          return (
+            <div
+              key={`${presentation.id}-${idx}`}
+              className="flex flex-col gap-4 sm:flex-row sm:items-center"
+            >
+              {/* MOBILE */}
+              <div className="flex w-full flex-col sm:hidden">
+                <div className="flex gap-2">
                   {/* Imagen */}
                   <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                     <Image
-                      src={
-                        product.image || '/placeholder.svg?height=88&width=88'
-                      }
+                      src={product.images?.[0]?.url ?? '/placeholder.png'}
                       alt={product.name}
                       width={88}
                       height={88}
@@ -71,71 +64,108 @@ export default function OrderDetail({
                     />
                   </div>
 
-                  {/* Info al lado */}
-                  <div className="flex w-full min-w-0 flex-col justify-start">
-                    <h3 className="overflow-hidden truncate whitespace-nowrap text-sm font-medium text-gray-900">
-                      {product.name}
-                    </h3>
-
-                    <div className="mt-1 flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {product.quantity}
+                  <div className="flex w-full flex-col">
+                    {/* Nombre y cantidad */}
+                    <div className="flex justify-between">
+                      <h3 className="truncate text-sm font-medium text-gray-900">
+                        {product.name}
+                      </h3>
+                      <span className="text-xs text-gray-500">
+                        Cantidad: {item.quantity}
                       </span>
                     </div>
 
-                    <div className="mt-2">
-                      <button className="flex items-center text-sm text-[#1C2143]">
+                    {/* Descripción */}
+                    <p className="max-w-[13ch] truncate text-xs text-gray-500">
+                      {product.description}
+                    </p>
+
+                    {/* Precios */}
+                    <div className="mt-1 flex items-center justify-between">
+                      <div className="flex flex-col">
+                        {originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            ${originalPrice.toFixed(2)}
+                          </span>
+                        )}
+                        <span className="text-sm font-medium text-gray-900">
+                          ${item.subtotal.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Ir al producto */}
+                    <div className="mt-1">
+                      <Link
+                        href={{
+                          pathname: `/product/${product.id}/presentation/${presentation.presentation.id}`,
+                          query: { productPresentationId: presentation.id },
+                        }}
+                        className="flex items-center text-xs text-[#1C2143]"
+                      >
                         <StarIcon className="mr-1 h-4 w-4" />
                         <span>Ir al producto</span>
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* DESKTOP */}
-            <div className="hidden w-full sm:flex sm:items-center sm:justify-between">
-              {/* Check + Imagen */}
-              <div className="flex items-center gap-2">
-                <CheckButton
-                  checked={true}
-                  onChange={() => {}}
-                  text=""
-                  variant="tertiary"
-                />
-                <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                  <Image
-                    src={product.image || '/placeholder.svg?height=88&width=88'}
-                    alt={product.name}
-                    width={88}
-                    height={88}
-                    className="h-full w-full object-cover"
+              {/* DESKTOP */}
+              <div className="hidden w-full sm:flex sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckButton
+                    checked
+                    onChange={() => {}}
+                    text=""
+                    variant="tertiary"
                   />
+                  <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <Image
+                      src={product.images?.[0]?.url ?? '/placeholder.png'}
+                      alt={product.name}
+                      width={88}
+                      height={88}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Info texto */}
-              <div className="flex w-1/2 flex-col">
-                <h3 className="text-sm font-medium text-gray-900">
-                  {product.name}
-                </h3>
-                <p className="text-xs text-gray-500">{product.description}</p>
-              </div>
+                <div className="flex w-1/2 flex-col">
+                  <h3 className="text-sm font-medium text-gray-900">
+                    {product.name}
+                  </h3>
+                  <p className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
+                    {product.description}
+                  </p>
 
-              {/* Cantidad + Precio */}
-              <div className="flex items-center gap-10">
-                <div className="text-sm text-gray-500">{product.quantity}</div>
-                <div className="w-20 text-right font-medium text-gray-900">
-                  ${product.price.toFixed(2)}
+                  <Link
+                    href={{
+                      pathname: `/product/${product.id}/presentation/${presentation.presentation.id}`,
+                      query: { productPresentationId: presentation.id },
+                    }}
+                    className="mt-1 flex w-fit items-center text-xs text-[#1C2143]"
+                  >
+                    <StarIcon className="mr-1 h-4 w-4" />
+                    <span>Ir al producto</span>
+                  </Link>
+                </div>
+
+                <div className="flex items-center gap-10">
+                  <div className="text-sm text-gray-500">{item.quantity}</div>
+                  <div className="flex w-28 flex-col items-end text-right font-medium text-gray-900">
+                    {originalPrice && (
+                      <span className="text-xs text-gray-400 line-through">
+                        ${originalPrice.toFixed(2)}
+                      </span>
+                    )}
+                    <span>${item.subtotal.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Resumen del pedido */}
@@ -166,6 +196,10 @@ export default function OrderDetail({
           <div className="flex items-center justify-between font-medium">
             <div className="text-gray-900">TOTAL</div>
             <div className="text-gray-900">${total.toFixed(2)}</div>
+          </div>
+
+          <div className="text-right text-xs text-gray-500">
+            El total ya incluye los descuentos aplicados.
           </div>
         </div>
       </div>

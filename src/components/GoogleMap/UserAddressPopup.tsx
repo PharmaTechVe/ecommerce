@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@/components/Button';
 import GoogleMaps from '@/components/GoogleMap/GoogleMap';
 import { Colors, FontSizes } from '@/styles/styles';
@@ -26,8 +26,6 @@ const LocationPopup: React.FC<LocationPopupProps> = ({
   latitude,
   longitude,
 }) => {
-  setLatitude(latitude);
-  setLongitude(longitude);
   const [address, setAddress] = useState('');
   const [showGuide, setShowGuide] = useState(true);
   const [selectedCityId, setSelectedCityId] = useState<string>('');
@@ -74,13 +72,24 @@ const LocationPopup: React.FC<LocationPopupProps> = ({
 
           <div className="mb-3 h-[300px] w-full overflow-hidden rounded-md">
             <GoogleMaps
-              radius={100}
-              setLatitude={setLatitude}
-              setLongitude={setLongitude}
-              address={address}
-              setAddress={setAddress}
-              latitude={latitude}
-              longitude={longitude}
+              draggable
+              center={{ lat: latitude, lng: longitude }}
+              onCoordinateChange={(lat, lng) => {
+                setLatitude(lat);
+                setLongitude(lng);
+                const geocoder = new window.google.maps.Geocoder();
+                const latLng = new window.google.maps.LatLng(lat, lng);
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                  if (
+                    status === google.maps.GeocoderStatus.OK &&
+                    results?.length
+                  ) {
+                    setAddress(results[0]?.formatted_address || '');
+                  } else {
+                    setAddress('Dirección no encontrada');
+                  }
+                });
+              }}
             />
           </div>
 
