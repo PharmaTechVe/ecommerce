@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import EditUserForm from '@/components/User/UserProfileForm';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/sdkConfig';
 
 enum UserGender {
@@ -27,6 +28,24 @@ type UserProfile = {
 export default function Page() {
   const { user, token } = useAuth();
   const [userData, setUserData] = useState<UserProfile | null>(null);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    const isEditMode = searchParams?.get('edit') === 'true';
+
+    setIsEditing(isEditMode);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (isEditing) {
+      router.push('/user?edit=true');
+    } else {
+      router.push('/user');
+    }
+  }, [isEditing, router]);
 
   useEffect(() => {
     if (!user?.sub || !token) {
@@ -65,5 +84,11 @@ export default function Page() {
 
   if (!user?.sub || !userData) return <div className="p-6">Cargando...</div>;
 
-  return <EditUserForm userData={userData} isEditing={false} />;
+  return (
+    <EditUserForm
+      userData={userData}
+      isEditing={isEditing}
+      setIsEditing={setIsEditing}
+    />
+  );
 }

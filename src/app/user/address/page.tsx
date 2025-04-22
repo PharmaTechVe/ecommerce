@@ -25,14 +25,13 @@ type UserAddressAPIResponse = {
 export default function AddressPage() {
   const { user, token } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [addresses, setAddresses] = useState<UserAddressAPIResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
-
-  const isNewAddress = searchParams.get('new') === 'true';
+  const rawSearchParams = useSearchParams();
+  const isNewAddress = rawSearchParams?.get('new') === 'true';
 
   const fetchAddresses = async () => {
     try {
@@ -104,7 +103,7 @@ export default function AddressPage() {
               {addresses.map((addr, index) => (
                 <div
                   key={addr.id}
-                  className={`flex h-[43px] w-full items-center justify-between rounded border px-4 md:w-[818px] ${
+                  className={`flex w-full items-start justify-between rounded border px-4 py-3 md:w-[818px] ${
                     index % 2 === 0
                       ? 'border-gray-100 bg-gray-50'
                       : 'border-gray-100 bg-white'

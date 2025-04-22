@@ -38,8 +38,8 @@ interface ProductPaginationRequest {
 
 export default function SearchPage() {
   const params = useSearchParams();
-  const query = params.get('query') ?? '';
-  const categoryName = params.get('category') ?? 'Categorías';
+  const query = params?.get('query') ?? '';
+  const categoryName = params?.get('category') ?? 'Categorías';
 
   const [allProducts, setAllProducts] = useState<UIProduct[]>([]);
   const [displayProducts, setDisplayProducts] = useState<UIProduct[]>([]);

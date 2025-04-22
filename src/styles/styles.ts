@@ -12,6 +12,7 @@ export const Colors = {
     'linear-gradient(80deg, #E5E7EB 0%, #DCEBFA 100%, #1C2143 37%, #2563EB 80%)',
   neuter: '#6B7280',
   ribbon: '#FFD569',
+  tertiary_300: '#76D2C2',
 
   textMain: '#393938',
   textWhite: '#FFFFFF',

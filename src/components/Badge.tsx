@@ -4,7 +4,7 @@ import '../styles/globals.css';
 import { Colors } from '../styles/styles';
 export interface BadgeProps {
   variant: 'filled' | 'outlined' | 'text';
-  color: 'primary' | 'warning' | 'danger' | 'success' | 'info';
+  color: 'primary' | 'tertiary' | 'warning' | 'danger' | 'success' | 'info';
   size: 'small' | 'medium' | 'large';
   borderRadius?: 'rounded' | 'square';
   children: React.ReactNode;
@@ -32,6 +32,12 @@ const Badge: React.FC<BadgeProps> = ({
       color: Colors.textWhite,
       borderColor: Colors.primary,
     },
+    tertiary: {
+      backgroundColor: Colors.secondaryLight,
+      color: Colors.textWhite,
+      borderColor: Colors.secondaryLight,
+    },
+
     warning: {
       backgroundColor: Colors.semanticWarning,
       color: Colors.textWhite,
@@ -57,6 +63,10 @@ const Badge: React.FC<BadgeProps> = ({
     primary: {
       color: Colors.primary,
       border: `1px solid ${Colors.primary}`,
+    },
+    tertiary: {
+      color: Colors.secondaryLight,
+      border: `1px solid ${Colors.secondaryLight}`,
     },
     warning: {
       color: Colors.semanticWarning,

@@ -82,21 +82,32 @@ export default function UserProfileLayout({
 
   return (
     <div>
-      <div className="relative min-h-screen bg-white">
+      <div className="relative bg-white">
+        {/* Nav */}
         <div className="relative z-50">
           <NavBar onCartClick={() => setIsCartOpen(true)} />
         </div>
 
-        <div className="px-4 pt-6 md:px-8 lg:px-16">
+        {/* Breadcrumbs */}
+        <div className="mx-auto ml-[10%] max-w-[1440px] px-6 pt-6 sm:px-10 md:px-16 lg:px-24 xl:px-32">
           <UserBreadcrumbs />
         </div>
 
-        <div className="flex gap-8 px-4 pt-8 md:px-8 lg:px-16">
-          <Sidebar user={sidebarUser} onLogout={logout} />
+        {/* Main layout */}
+        <div className="mx-auto flex max-w-[1440px] items-start gap-8 px-6 pt-8 sm:px-10 md:px-16 lg:px-24 xl:px-32">
+          {/* Sidebar con altura fija */}
+          <div className="h-[582px]">
+            <Sidebar user={sidebarUser} onLogout={logout} />
+          </div>
+
+          {/* Contenido */}
           <div className="flex-1">{children}</div>
         </div>
+
         <ToastContainer />
       </div>
+
+      {/* Cart Overlay */}
       {isCartOpen && (
         <CartOverlay
           isOpen={isCartOpen}
