@@ -349,8 +349,7 @@ export default function ProductDetailPage() {
               </p>
               <CardButton
                 product={{
-                  productId: productId,
-                  presentationId: presentationId,
+                  productPresentationId,
                   name: ` ${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name} ${presentation.presentation.quantity} ${presentation.presentation.measurementUnit} `,
                   price: presentation.price || presentation.price,
                   // discount: discountPercentage,

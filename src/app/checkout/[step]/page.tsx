@@ -17,6 +17,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCheckout } from '../CheckoutContext';
 import { useCart } from '@/context/CartContext';
 import { api } from '@/lib/sdkConfig';
+import { toast } from 'react-toastify';
 import { CreateOrder, OrderType } from '@pharmatech/sdk';
 
 const CheckoutStepContent: React.FC = () => {
@@ -117,7 +118,8 @@ const CheckoutStepContent: React.FC = () => {
       };
 
       try {
-        await api.order.create(payload, token!);
+        const response = await api.order.create(payload, token!);
+        toast.success(response.id || 'Orden creada correctamente');
       } catch (err) {
         console.error('Error al crear la orden:', err);
         alert('Ocurrió un error al crear la orden');

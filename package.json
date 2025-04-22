@@ -19,7 +19,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@next/third-parties": "^15.3.0",
-    "@pharmatech/sdk": "^0.4.4",
+    "@pharmatech/sdk": "^0.4.7",
     "@react-google-maps/api": "^2.20.6",
     "@types/google.maps": "^3.58.1",
     "jwt-decode": "^4.0.0",
