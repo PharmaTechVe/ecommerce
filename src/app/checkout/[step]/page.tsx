@@ -1,7 +1,7 @@
 // app/checkout/[step]/page.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import NavBar from '@/components/Navbar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Stepper from '@/components/Stepper';
@@ -131,7 +131,20 @@ const CheckoutStepContent: React.FC = () => {
     }
   };
 
-  const handleConfirmPayment = () => router.push('/checkout/revieworder');
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  const handleValidSubmit = (isValid: boolean) => {
+    setIsFormValid(isValid); // Guardamos si el formulario es válido
+  };
+
+  const handleConfirmPayment = () => {
+    if (isFormValid) {
+      router.push('/checkout/revieworder');
+    } else {
+      alert('Por favor, corrige los errores antes de continuar.');
+    }
+  };
+
   const handleAssignDelivery = () => router.push('/checkout/deliveryinfo');
 
   // 5. Renderizado de cada paso
@@ -140,7 +153,7 @@ const CheckoutStepContent: React.FC = () => {
       case 'shippinginfo':
         return <ShippingInfo />;
       case 'paymentprocess':
-        return <PaymentProcess />;
+        return <PaymentProcess onValidSubmit={handleValidSubmit} />;
       case 'revieworder':
         return (
           <>
@@ -206,7 +219,9 @@ const CheckoutStepContent: React.FC = () => {
             )}
             {lowerStep === 'paymentprocess' && (
               <div className="mt-6 flex justify-end">
-                <Button onClick={handleConfirmPayment}>Confirmar pago</Button>
+                <Button onClick={handleConfirmPayment} disabled={!isFormValid}>
+                  Confirmar pago
+                </Button>
               </div>
             )}
           </div>

@@ -3,15 +3,27 @@
 import React, { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useCheckout } from '../CheckoutContext';
-import { useRouter } from 'next/navigation';
+//import { useRouter } from 'next/navigation';
 import Input from '@/components/Input/Input';
 import { api } from '@/lib/sdkConfig';
 import { PaymentInfoResponse } from '@pharmatech/sdk';
+import { checkoutPaymentProcessSchema } from '@/lib/validations/checkoutPaymentProcessSchema';
 
-const PaymentProcess: React.FC = () => {
+type Errors = {
+  bank?: string;
+  reference?: string;
+  documentNumber?: string;
+  phone?: string;
+};
+
+type Props = {
+  onValidSubmit: (isValid: boolean) => void; // Callback para pasar la validación
+};
+
+const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
   const { paymentMethod, couponDiscount } = useCheckout();
   const { cartItems } = useCart();
-  const router = useRouter();
+  //const router = useRouter();
 
   const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -35,13 +47,25 @@ const PaymentProcess: React.FC = () => {
   const [reference, setReference] = useState('');
   const [documentNumber, setDocumentNumber] = useState('');
   const [phone, setPhone] = useState('');
+  const [errors, setErrors] = useState<Errors>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = React.useCallback(() => {
     const data = { bank, reference, documentNumber, phone };
-    console.log('Payment validation data:', data);
-    router.push('/checkout/ReviewOrder');
-  };
+
+    // Validación con Zod
+    const result = checkoutPaymentProcessSchema.safeParse(data);
+
+    if (result.success) {
+      onValidSubmit(true); // Pasamos la validación exitosa al componente padre
+    } else {
+      const errorMessages: Errors = {};
+      result.error.errors.forEach((error) => {
+        errorMessages[error.path[0] as keyof Errors] = error.message;
+      });
+      setErrors(errorMessages);
+      onValidSubmit(false); // Pasamos validación fallida al componente padre
+    }
+  }, [bank, reference, documentNumber, phone, onValidSubmit, setErrors]);
 
   // Determine form type
   const isBank = paymentMethod === 'bank';
@@ -81,6 +105,10 @@ const PaymentProcess: React.FC = () => {
 
     fetchPaymentMethodDetails();
   }, [paymentMethod]);
+
+  useEffect(() => {
+    validateForm();
+  }, [bank, reference, documentNumber, phone, validateForm]);
 
   return (
     <section className="space-y-8">
@@ -136,7 +164,7 @@ const PaymentProcess: React.FC = () => {
       </div>
 
       {/* Validation form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
         <p className="font-medium text-gray-700">
           Ingrese los datos para validar el pago
         </p>
@@ -149,6 +177,8 @@ const PaymentProcess: React.FC = () => {
           borderSize="1px"
           borderColor="#E7E7E6"
         />
+        {errors.bank && <p className="text-xs text-red-500">{errors.bank}</p>}
+
         <Input
           value={reference}
           onChange={(e) => setReference(e.target.value)}
@@ -157,6 +187,10 @@ const PaymentProcess: React.FC = () => {
           borderSize="1px"
           borderColor="#E7E7E6"
         />
+        {errors.reference && (
+          <p className="text-xs text-red-500">{errors.reference}</p>
+        )}
+
         <Input
           value={documentNumber}
           onChange={(e) => setDocumentNumber(e.target.value)}
@@ -165,6 +199,10 @@ const PaymentProcess: React.FC = () => {
           borderSize="1px"
           borderColor="#E7E7E6"
         />
+        {errors.documentNumber && (
+          <p className="text-xs text-red-500">{errors.documentNumber}</p>
+        )}
+
         <Input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
@@ -173,6 +211,7 @@ const PaymentProcess: React.FC = () => {
           borderSize="1px"
           borderColor="#E7E7E6"
         />
+        {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
       </form>
     </section>
   );
