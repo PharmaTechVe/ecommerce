@@ -2,6 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
+import { PaymentConfirmation } from '@pharmatech/sdk';
 
 interface CheckoutState {
   deliveryMethod: 'store' | 'home';
@@ -24,8 +25,17 @@ interface CheckoutState {
   setCouponCode: (code: string) => void;
   couponDiscount: number;
   setCouponDiscount: (amount: number) => void;
-}
 
+  // ——— NUEVO: datos de confirmación de pago ———
+  paymentConfirmationData: PaymentConfirmation;
+  setPaymentConfirmationData: (data: PaymentConfirmation) => void;
+}
+const INITIAL_PAYMENT_CONFIRMATION: PaymentConfirmation = {
+  bank: '',
+  reference: '',
+  documentId: '',
+  phoneNumber: '',
+};
 const CheckoutContext = createContext<CheckoutState | null>(null);
 
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -44,6 +54,10 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   const [couponCode, setCouponCode] = useState<string>('');
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
 
+  // ——— NUEVO: estado para los datos de confirmación ———
+  const [paymentConfirmationData, setPaymentConfirmationData] =
+    useState<PaymentConfirmation>(INITIAL_PAYMENT_CONFIRMATION);
+
   return (
     <CheckoutContext.Provider
       value={{
@@ -61,6 +75,8 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         setCouponCode,
         couponDiscount,
         setCouponDiscount,
+        paymentConfirmationData,
+        setPaymentConfirmationData,
       }}
     >
       {children}

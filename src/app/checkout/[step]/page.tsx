@@ -24,13 +24,17 @@ const CheckoutStepContent: React.FC = () => {
   const { step } = useParams<{ step: string }>();
   const router = useRouter();
   const { token } = useAuth();
+  const { cartItems } = useCart();
+
   const {
     deliveryMethod,
     paymentMethod,
     selectedBranchLabel,
     selectedBranchId, // <-- ID de sucursal o dirección
+    paymentConfirmationData,
   } = useCheckout();
-  const { cartItems } = useCart();
+
+  const [isFormValid, setIsFormValid] = useState(false);
 
   // 1. Construcción de los títulos del stepper según método de entrega y pago
   let stepsState: string[] = [];
@@ -131,17 +135,47 @@ const CheckoutStepContent: React.FC = () => {
     }
   };
 
-  const [isFormValid, setIsFormValid] = useState(false);
-
   const handleValidSubmit = (isValid: boolean) => {
     setIsFormValid(isValid); // Guardamos si el formulario es válido
   };
 
-  const handleConfirmPayment = () => {
-    if (isFormValid) {
-      router.push('/checkout/revieworder');
-    } else {
+  const handleConfirmPayment = async () => {
+    if (!isFormValid) {
       alert('Por favor, corrige los errores antes de continuar.');
+      return;
+    }
+    if (!token) {
+      alert('Debes iniciar sesión para continuar.');
+      return;
+    }
+
+    try {
+      // ✨ Aquí ya es un PaymentConfirmation válido
+      const confirmation = await api.paymentConfirmation.create(
+        paymentConfirmationData,
+        token,
+      );
+      toast.success(`Pago confirmado: ${confirmation.id}`);
+
+      // Creamos la orden a continuación
+      const payload: CreateOrder = {
+        type:
+          deliveryMethod === 'store' ? OrderType.PICKUP : OrderType.DELIVERY,
+        products: cartItems.map((i) => ({
+          productPresentationId: i.id,
+          quantity: i.quantity,
+        })),
+        ...(deliveryMethod === 'store'
+          ? { branchId: selectedBranchId }
+          : { userAddressId: selectedBranchId }),
+      };
+      const orderRes = await api.order.create(payload, token);
+      toast.success(`Orden creada: ${orderRes.id}`);
+
+      router.push('/checkout/revieworder');
+    } catch (err) {
+      console.error(err);
+      alert('Ocurrió un error procesando pago u orden.');
     }
   };
 

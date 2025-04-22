@@ -3,10 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useCheckout } from '../CheckoutContext';
-//import { useRouter } from 'next/navigation';
 import Input from '@/components/Input/Input';
 import { api } from '@/lib/sdkConfig';
-import { PaymentInfoResponse } from '@pharmatech/sdk';
+import { PaymentInfoResponse, PaymentConfirmation } from '@pharmatech/sdk';
 import { checkoutPaymentProcessSchema } from '@/lib/validations/checkoutPaymentProcessSchema';
 
 type Errors = {
@@ -21,9 +20,9 @@ type Props = {
 };
 
 const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
-  const { paymentMethod, couponDiscount } = useCheckout();
+  const { paymentMethod, couponDiscount, setPaymentConfirmationData } =
+    useCheckout();
   const { cartItems } = useCart();
-  //const router = useRouter();
 
   const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -48,6 +47,15 @@ const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
   const [documentNumber, setDocumentNumber] = useState('');
   const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState<Errors>({});
+
+  useEffect(() => {
+    setPaymentConfirmationData({
+      bank,
+      reference,
+      documentId: documentNumber,
+      phoneNumber: phone,
+    } as PaymentConfirmation);
+  }, [bank, reference, documentNumber, phone, setPaymentConfirmationData]);
 
   const validateForm = React.useCallback(() => {
     const data = { bank, reference, documentNumber, phone };
