@@ -95,7 +95,11 @@ export default function SearchSuggestions({
               <div
                 key={item.id}
                 className="mb-3 flex cursor-pointer gap-3 p-2 hover:bg-gray-100"
-                onClick={() => router.push(`/product/${item.id}`)}
+                onClick={() =>
+                  router.push(
+                    `/product/${item.product.id}/presentation/${item.presentation.id}?productPresentationId=${item.id}`,
+                  )
+                }
               >
                 <div className="relative h-20 w-20 flex-shrink-0">
                   <Image
