@@ -3,45 +3,82 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import UserOrderDetail from '@/components/User/Order/UserOrderDetail';
-import { orderDetailsMap } from '@/lib/utils/fixtures/OrderDetail';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  quantity: number;
-  image: string;
-  checked: boolean;
-}
+import { api } from '@/lib/sdkConfig';
+import { OrderResponse, OrderDetailResponse } from '@pharmatech/sdk';
+import { useAuth } from '@/context/AuthContext';
 
 interface OrderDetailData {
   orderNumber: string;
-  products: Product[];
+  products: OrderDetailResponse[];
   subtotal: number;
   discount: number;
   tax: number;
   total: number;
 }
 
-const typedOrderDetailsMap: Record<string, OrderDetailData> = orderDetailsMap;
+// Extends de OrderRespons  para incluir detalles
+type ExtendedOrderResponse = OrderResponse & {
+  details: OrderDetailResponse[];
+};
 
 export default function OrderDetailPage() {
   const params = useParams();
+  const { token } = useAuth();
   const id = Array.isArray(params?.id) ? params.id[0] : (params?.id ?? '');
   const [orderData, setOrderData] = useState<OrderDetailData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id && typedOrderDetailsMap[id]) {
-      setOrderData(typedOrderDetailsMap[id]);
-    } else {
-      setOrderData(null);
-    }
-  }, [id]);
+    const fetchOrder = async () => {
+      if (!id || !token) return;
+
+      try {
+        const order: ExtendedOrderResponse = await api.order.getById(id, token);
+
+        const products: OrderDetailResponse[] = order.details;
+
+        const subtotal = products.reduce((sum, item) => sum + item.subtotal, 0);
+
+        const discount = products.reduce((acc, item) => {
+          const promo = item.productPresentation.promo;
+          if (promo) {
+            const originalPrice =
+              item.productPresentation.price * item.quantity;
+            const itemDiscount = originalPrice - item.subtotal;
+            return acc + itemDiscount;
+          }
+          return acc;
+        }, 0);
+
+        const tax = 0;
+        const total = order.totalPrice;
+
+        setOrderData({
+          orderNumber: `#${order.id.slice(0, 8)}`,
+          products,
+          subtotal,
+          discount,
+          tax,
+          total,
+        });
+      } catch (error) {
+        console.error('Error al obtener detalles del pedido:', error);
+        setOrderData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [id, token]);
 
   return (
     <div className="relative bg-white px-4 py-6 sm:px-6 lg:px-8">
-      {orderData ? (
+      {loading ? (
+        <div className="mt-10 text-center text-gray-600">
+          Cargando detalles...
+        </div>
+      ) : orderData ? (
         <UserOrderDetail {...orderData} />
       ) : (
         <div className="mt-10 text-center text-gray-600">

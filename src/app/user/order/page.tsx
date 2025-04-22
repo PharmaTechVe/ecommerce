@@ -7,39 +7,50 @@ import OrderTable, {
   OrderStatus,
 } from '@/components/User/Order/UserOrdertable';
 import { api } from '@/lib/sdkConfig';
-
-interface APIOrder {
-  id: string;
-  createdAt: string;
-  status: string;
-  totalPrice: number;
-}
-
-interface APIOrderResponse {
-  results: APIOrder[];
-  count: number;
-  next: string | null;
-  previous: string | null;
-}
+import {
+  OrderResponse,
+  Pagination,
+  OrderPaginationRequest,
+} from '@pharmatech/sdk';
+import { useAuth } from '@/context/AuthContext';
 
 export default function OrdersPage() {
+  const { token, user } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const mapStatus = (statusFromAPI: string): OrderStatus => {
-    if (statusFromAPI === 'requested') return 'pendiente';
-    if (statusFromAPI === 'paid') return 'pagado';
-    if (statusFromAPI === 'delivered') return 'entregado';
-    return 'pendiente';
+    switch (statusFromAPI) {
+      case 'requested':
+        return 'pendiente';
+      case 'paid':
+        return 'pagado';
+      case 'delivered':
+        return 'entregado';
+      default:
+        return 'pendiente';
+    }
   };
 
   const fetchOrders = React.useCallback(async () => {
+    if (!token || !user?.sub) {
+      console.error('Error de carga de ordenes');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response: APIOrderResponse = await api.order.findAll({
+      const params: OrderPaginationRequest = {
         page: 1,
         limit: 100,
-      });
+        userId: user.sub,
+      };
+
+      const response: Pagination<OrderResponse> = await api.order.findAll(
+        params,
+        token,
+      );
 
       const mapped: Order[] = response.results.map((order) => ({
         id: order.id,
@@ -55,7 +66,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token, user?.sub]);
 
   useEffect(() => {
     fetchOrders();
