@@ -228,7 +228,7 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="my-32">
-          <ProductBranch productId={productId} />
+          <ProductBranch productPresentationId={presentation.id} />
         </div>
 
         <div className="mt-12">
