@@ -116,7 +116,7 @@ export default function SearchSuggestions({
                   <p className="text-xs text-gray-500">
                     {item.product.description}
                   </p>
-                  <p className="font-semibold">Bs {item.price}</p>
+                  <p className="font-semibold">$ {item.price}</p>
                 </div>
               </div>
             ))}

@@ -229,7 +229,7 @@ export default function SearchPage() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl">
                 Resultados de búsqueda:{' '}
-                <span className="capitalize">{categoryName}</span>
+                <span className="capitalize">{query}</span>
               </h2>
               <span className="text-sm text-gray-600">
                 {displayProducts.length} resultado
