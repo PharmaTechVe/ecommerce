@@ -1,3 +1,4 @@
+// src/app/search/page.tsx  (o donde tengas tu SearchPage)
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -50,10 +51,10 @@ export default function SearchPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentFilters, setCurrentFilters] = useState<Filters>({
-    category: null,
-    brand: null,
-    presentation: null,
-    activeIngredient: null,
+    category: [],
+    brand: [],
+    presentation: [],
+    activeIngredient: [],
   });
 
   interface APIProduct {
@@ -66,11 +67,7 @@ export default function SearchPage() {
       categories?: { name: string }[];
       images?: { url: string }[];
     };
-    presentation: {
-      id: string;
-      name: string;
-      quantity: number;
-    };
+    presentation: { id: string; name: string; quantity: number };
     price: number;
   }
 
@@ -80,7 +77,7 @@ export default function SearchPage() {
         id: item.id,
         productPresentationId: item.id,
         productId: item.product.id,
-        presentationId: String(item.presentation.id),
+        presentationId: `${item.presentation.id}`,
         productName: `${item.product.name} ${item.presentation.name}`,
         stock: item.presentation.quantity,
         currentPrice: item.price,
@@ -88,40 +85,37 @@ export default function SearchPage() {
         brand: item.product.manufacturer?.name || '',
         presentation: item.presentation.name,
         activeIngredient: item.product.genericName || '',
-        categories: Array.isArray(item.product.categories)
-          ? item.product.categories.map((c) => c.name)
-          : [],
+        categories: item.product.categories?.map((c) => c.name) || [],
       })),
     [],
   );
 
   useEffect(() => {
-    const fetchInitial = async () => {
+    (async () => {
       setLoading(true);
       try {
         const req: ProductPaginationRequest = { page: 1, limit: 50 };
         if (query.trim()) req.q = query.trim();
         const resp = await api.product.getProducts(req);
         let ui = mapToUI(resp.results);
-
         if (categoryName !== 'Categorías') {
           ui = ui.filter((p) => p.categories.includes(categoryName));
         }
-
         setAllProducts(ui);
         setDisplayProducts(ui);
         const prices = ui.map((p) => p.currentPrice);
         if (prices.length) {
-          setPriceRange([Math.min(...prices), Math.max(...prices)]);
-          setCurrentPriceRange([Math.min(...prices), Math.max(...prices)]);
+          const min = Math.min(...prices);
+          const max = Math.max(...prices);
+          setPriceRange([min, max]);
+          setCurrentPriceRange([min, max]);
         }
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
-    };
-    fetchInitial();
+    })();
   }, [query, categoryName, mapToUI]);
 
   const handleApplyFilters = async (
@@ -135,23 +129,18 @@ export default function SearchPage() {
         page: 1,
         limit: 50,
         ...(query.trim() && { q: query.trim() }),
-        ...(filters.brand && { manufacturerId: [filters.brand] }),
-        ...(filters.category && { categoryId: [filters.category] }),
-        ...(filters.activeIngredient && {
-          branchId: [filters.activeIngredient],
+        ...(filters.brand.length > 0 && { manufacturerId: filters.brand }),
+        ...(filters.category.length > 0 && { categoryId: filters.category }),
+        ...(filters.activeIngredient.length > 0 && {
+          branchId: filters.activeIngredient,
         }),
-        ...(filters.presentation && { presentationId: [filters.presentation] }),
+        ...(filters.presentation.length > 0 && {
+          presentationId: filters.presentation,
+        }),
         priceRange: { min: price[0], max: price[1] },
       };
-
       const resp = await api.product.getProducts(req);
-      let ui = mapToUI(resp.results);
-
-      if (filters.presentation) {
-        ui = ui.filter((p) => p.presentationId === filters.presentation);
-      }
-
-      setDisplayProducts(ui);
+      setDisplayProducts(mapToUI(resp.results));
       setCurrentPriceRange(price);
     } catch (err) {
       console.error('Error aplicando filtros:', err);
@@ -163,19 +152,17 @@ export default function SearchPage() {
 
   const handleClearFilters = () => {
     setCurrentFilters({
-      category: null,
-      brand: null,
-      presentation: null,
-      activeIngredient: null,
+      category: [],
+      brand: [],
+      presentation: [],
+      activeIngredient: [],
     });
     setDisplayProducts(allProducts);
     setCurrentPriceRange(priceRange);
     setShowMobileFilters(false);
   };
 
-  if (loading) {
-    return <p className="p-4 text-center">Cargando...</p>;
-  }
+  if (loading) return <p className="p-4 text-center">Cargando...</p>;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -187,6 +174,7 @@ export default function SearchPage() {
       )}
 
       <main className="container mx-auto flex-grow px-4 pt-[124px] sm:px-6 lg:px-8">
+        {/* Filtros Móvil */}
         {showMobileFilters && (
           <div className="fixed inset-0 z-50 flex bg-black/50">
             <div className="w-full max-w-xs overflow-auto bg-white p-4">
@@ -208,7 +196,8 @@ export default function SearchPage() {
         )}
 
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="hidden w-full flex-shrink-0 md:block md:w-64">
+          {/* Sidebar Desktop */}
+          <aside className="hidden md:block md:w-64">
             <SidebarFilter
               initialFilters={currentFilters}
               initialPriceRange={priceRange}
@@ -216,9 +205,10 @@ export default function SearchPage() {
               onApplyFilters={handleApplyFilters}
               onClearFilters={handleClearFilters}
             />
-          </div>
+          </aside>
 
-          <div className="flex-1">
+          {/* Resultados */}
+          <section className="flex-1">
             <button
               onClick={() => setShowMobileFilters(true)}
               className="mb-4 mt-6 block rounded bg-[#1C2143] px-4 py-2 text-white md:hidden"
@@ -228,16 +218,15 @@ export default function SearchPage() {
 
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl">
-                Resultados de búsqueda:{' '}
-                <span className="capitalize">{query}</span>
+                Resultados para: <span className="capitalize">{query}</span>
               </h2>
               <span className="text-sm text-gray-600">
                 {displayProducts.length} resultado
-                {displayProducts.length !== 1 ? 's' : ''}
+                {displayProducts.length !== 1 && 's'}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {displayProducts.map((p) => (
                 <ProductCard
                   key={p.id}
@@ -252,7 +241,7 @@ export default function SearchPage() {
                 />
               ))}
             </div>
-          </div>
+          </section>
         </div>
       </main>
 

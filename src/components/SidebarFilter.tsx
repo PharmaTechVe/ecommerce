@@ -11,10 +11,10 @@ import {
 } from '@radix-ui/react-slider';
 
 export interface Filters {
-  category: string | null;
-  brand: string | null;
-  presentation: string | null;
-  activeIngredient: string | null;
+  category: string[];
+  brand: string[];
+  presentation: string[];
+  activeIngredient: string[];
 }
 
 interface SidebarFilterProps {
@@ -52,17 +52,20 @@ export default function SidebarFilter({
   }, [initialFilters, initialCurrentPriceRange]);
 
   const fetchOptions = async (
-    serviceFn: (req: { page: number; limit: number }) => Promise<{
+    serviceFn: (req: {
+      page: number;
+      limit: number;
+    }) => Promise<{
       results: {
         id: string;
-        name?: string;
+        name: string;
         quantity?: number;
         measurementUnit?: string;
       }[];
     }>,
     mapFn: (item: {
       id: string;
-      name?: string;
+      name: string;
       quantity?: number;
       measurementUnit?: string;
     }) => Option,
@@ -82,12 +85,12 @@ export default function SidebarFilter({
   useEffect(() => {
     fetchOptions(
       api.category.findAll,
-      (p) => ({ id: p.id, name: p.name || 'Unknown' }),
+      (p) => ({ id: p.id, name: p.name }),
       setCategoriesList,
     );
     fetchOptions(
       api.manufacturer.findAll,
-      (p) => ({ id: p.id, name: p.name || 'Unknown' }),
+      (p) => ({ id: p.id, name: p.name }),
       setBrandsList,
     );
     fetchOptions(
@@ -100,129 +103,120 @@ export default function SidebarFilter({
     );
   }, []);
 
+  const toggleSelection = (key: keyof Filters, id: string) => {
+    setLocalFilters((f) => {
+      const arr = f[key];
+      return {
+        ...f,
+        [key]: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id],
+      } as Filters;
+    });
+  };
+
   const handleClear = () => {
     setLocalFilters({
-      category: null,
-      brand: null,
-      presentation: null,
-      activeIngredient: null,
+      category: [],
+      brand: [],
+      presentation: [],
+      activeIngredient: [],
     });
     setLocalPrice(initialPriceRange);
     onClearFilters();
   };
 
-  const handleApply = () => {
-    onApplyFilters(localFilters, localPrice);
-  };
+  const handleApply = () => onApplyFilters(localFilters, localPrice);
 
   const scrollClass =
     'max-h-32 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-white bg-white';
 
   return (
-    <div className="w-full flex-shrink-0 md:w-64">
-      <div className="bg-white p-4">
-        <div className="mb-4 flex items-center justify-between rounded bg-[#D4F3EC] p-3">
-          <h3 className="font-semibold text-gray-700">Filtros</h3>
-          <button
-            onClick={handleClear}
-            className="text-sm text-gray-600 hover:underline"
-          >
-            Limpiar
-          </button>
-        </div>
-
-        {/* Categoría */}
-        <section className="mb-6">
-          <h4 className="mb-2 font-medium text-gray-700">Categoría</h4>
-          <div className={scrollClass}>
-            {categoriesList.map((opt) => (
-              <div key={opt.id} className="mb-2">
-                <CheckButton
-                  text={opt.name}
-                  checked={localFilters.category === opt.id}
-                  onChange={(checked) =>
-                    setLocalFilters((f) => ({
-                      ...f,
-                      category: checked ? opt.id : null,
-                    }))
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Marca */}
-        <section className="mb-6">
-          <h4 className="mb-2 font-medium text-gray-700">Marca</h4>
-          <div className={scrollClass}>
-            {brandsList.map((opt) => (
-              <div key={opt.id} className="mb-2">
-                <CheckButton
-                  text={opt.name}
-                  checked={localFilters.brand === opt.id}
-                  onChange={(checked) =>
-                    setLocalFilters((f) => ({
-                      ...f,
-                      brand: checked ? opt.id : null,
-                    }))
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Presentación */}
-        <section className="mb-6">
-          <h4 className="mb-2 font-medium text-gray-700">Presentación</h4>
-          <div className={scrollClass}>
-            {presentationsList.map((opt) => (
-              <div key={opt.id} className="mb-2">
-                <CheckButton
-                  text={opt.name}
-                  checked={localFilters.presentation === opt.id}
-                  onChange={(checked) =>
-                    setLocalFilters((f) => ({
-                      ...f,
-                      presentation: checked ? opt.id : null,
-                    }))
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Precio */}
-        <section className="mb-6">
-          <h4 className="mb-2 font-medium text-gray-700">Precio</h4>
-          <SliderRoot
-            className="relative flex h-5 w-full touch-none select-none items-center"
-            min={initialPriceRange![0]}
-            max={initialPriceRange![1]}
-            value={localPrice}
-            onValueChange={(vals) => setLocalPrice(vals as [number, number])}
-          >
-            <SliderTrack className="relative h-2 flex-1 rounded bg-gray-200">
-              <SliderRange className="absolute h-full rounded bg-[#1C2143]" />
-            </SliderTrack>
-            <SliderThumb className="block h-5 w-5 rounded-full border-2 border-[#1C2143] bg-[#1C2143]" />
-            <SliderThumb className="block h-5 w-5 rounded-full border-2 border-[#1C2143] bg-[#1C2143]" />
-          </SliderRoot>
-          <div className="mt-1 flex justify-between text-xs">
-            <span>Bs {localPrice[0]}</span>
-            <span>Bs {localPrice[1]}</span>
-          </div>
-        </section>
-
+    <div className="w-full bg-white p-4 md:w-64">
+      <div className="mb-4 flex items-center justify-between rounded bg-[#D4F3EC] p-3">
+        <h3 className="font-semibold text-gray-700">Filtros</h3>
         <button
-          onClick={handleApply}
-          className="w-full rounded bg-[#1C2143] py-2 text-sm text-white"
+          onClick={handleClear}
+          className="text-sm text-gray-600 hover:underline"
         >
-          Aplicar filtros
+          Limpiar
         </button>
       </div>
+
+      {/* Categoría */}
+      <section className="mb-6">
+        <h4 className="mb-2 font-medium">Categoría</h4>
+        <div className={scrollClass}>
+          {categoriesList.map((opt) => (
+            <div key={opt.id} className="mb-2">
+              <CheckButton
+                text={opt.name}
+                checked={localFilters.category.includes(opt.id)}
+                onChange={() => toggleSelection('category', opt.id)}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Marca */}
+      <section className="mb-6">
+        <h4 className="mb-2 font-medium">Marca</h4>
+        <div className={scrollClass}>
+          {brandsList.map((opt) => (
+            <div key={opt.id} className="mb-2">
+              <CheckButton
+                text={opt.name}
+                checked={localFilters.brand.includes(opt.id)}
+                onChange={() => toggleSelection('brand', opt.id)}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Presentación */}
+      <section className="mb-6">
+        <h4 className="mb-2 font-medium">Presentación</h4>
+        <div className={scrollClass}>
+          {presentationsList.map((opt) => (
+            <div key={opt.id} className="mb-2">
+              <CheckButton
+                text={opt.name}
+                checked={localFilters.presentation.includes(opt.id)}
+                onChange={() => toggleSelection('presentation', opt.id)}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Precio */}
+      <section className="mb-6">
+        <h4 className="mb-2 font-medium">Precio</h4>
+        <SliderRoot
+          className="relative flex h-5 w-full touch-none select-none items-center"
+          min={initialPriceRange[0]}
+          max={initialPriceRange[1]}
+          value={localPrice}
+          onValueChange={(vals) => setLocalPrice(vals as [number, number])}
+        >
+          <SliderTrack className="relative h-2 flex-1 rounded bg-gray-200">
+            <SliderRange className="absolute h-full rounded bg-[#1C2143]" />
+          </SliderTrack>
+          <SliderThumb className="block h-5 w-5 rounded-full border-2 border-[#1C2143] bg-[#1C2143]" />
+          <SliderThumb className="block h-5 w-5 rounded-full border-2 border-[#1C2143] bg-[#1C2143]" />
+        </SliderRoot>
+        <div className="mt-1 flex justify-between text-xs">
+          <span>Bs {localPrice[0]}</span>
+          <span>Bs {localPrice[1]}</span>
+        </div>
+      </section>
+
+      <button
+        onClick={handleApply}
+        className="w-full rounded bg-[#1C2143] py-2 text-sm text-white"
+      >
+        Aplicar filtros
+      </button>
     </div>
   );
 }
