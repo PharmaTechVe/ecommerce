@@ -82,7 +82,7 @@ export default function Page() {
     })();
   }, [user?.sub, token]);
 
-  if (!user?.sub || !userData) return <div className="p-6">Cargando...</div>;
+  if (!user?.sub || !userData) return;
 
   return (
     <EditUserForm

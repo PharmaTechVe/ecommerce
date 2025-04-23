@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   PencilIcon,
@@ -14,6 +14,7 @@ import { FontSizes, Colors } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
 import ModalConfirm from '@/components/ModalConfirm';
 import { toast } from 'react-toastify';
+import Loading from '@/app/loading';
 
 type UserAddressAPIResponse = {
   id: string;
@@ -67,10 +68,10 @@ export default function AddressPage() {
     }
   };
 
-  if (!user || loading) return <div className="p-6">Cargando...</div>;
+  if (!user || loading) return <Loading />;
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <>
       <div className="flex flex-1 flex-col items-center px-4 md:px-0">
         <div className="w-full max-w-3xl space-y-6 py-4 md:py-6">
           <div className="w-full md:flex md:items-center md:justify-between">
@@ -160,6 +161,6 @@ export default function AddressPage() {
           confirmText="Eliminar"
         />
       )}
-    </Suspense>
+    </>
   );
 }

@@ -1,16 +1,13 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import NavBar from '@/components/Navbar';
 import Carousel from '@/components/Carousel';
 import ProductCarousel from '@/components/Product/ProductCarousel';
-import Footer from '@/components/Footer';
-import CartOverlay from '@/components/Cart/CartOverlay';
 import { api } from '@/lib/sdkConfig';
 import { ImageType } from '@/components/Product/CardBase';
 import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EnterCodeFormModal from '@/components/EmailValidation';
 import { useAuth } from '@/context/AuthContext';
@@ -57,16 +54,10 @@ interface ProductApiResponse {
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const { token, user } = useAuth();
-
   const toastDisplayed = useRef(false);
   const toastId = useRef<number | string | null>(null);
-  const navBarProps = {
-    onCartClick: () => setIsCartOpen(true),
-  };
 
   const slides = [
     { id: 1, imageUrl: Banner1 },
@@ -134,44 +125,29 @@ export default function Home() {
           }),
         );
         setProducts(backendProducts);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
-        setLoading(false);
       }
     };
 
     fetchProducts();
   }, []);
 
-  if (loading) return <h1 className="p-4 text-lg">Pharmatech...</h1>;
-
   return (
     <div>
-      {/* Navbar */}
-      <div className="fixed left-0 right-0 top-0 z-50 bg-white">
-        <NavBar {...navBarProps} />
-      </div>
-
-      <main className="mb-12 pt-[124px]">
-        <h1 className="mb-12 text-2xl font-bold text-white">Pharmatech</h1>
-
-        <div className="md:max-w-8xl mx-auto mt-12 w-full max-w-[75vw] md:p-2">
-          {' '}
-          {/* Agregamos mt-12 */}
-          <Carousel slides={slides} />
-          <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
-            Productos en Oferta Exclusiva
-          </h3>
-          <div className="mt-8">
-            <div className="cursor-pointer">
-              <ProductCarousel carouselType="regular" products={products} />
-            </div>
+      <h1 className="mb-12 text-2xl font-bold text-white">Pharmatech</h1>
+      <div className="md:max-w-8xl mx-auto mb-12 w-full max-w-[75vw] md:p-2">
+        {' '}
+        <Carousel slides={slides} />
+        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
+          Productos en Oferta Exclusiva
+        </h3>
+        <div className="mt-8">
+          <div className="cursor-pointer">
+            <ProductCarousel carouselType="regular" products={products} />
           </div>
         </div>
-      </main>
-
-      <Footer />
+      </div>
 
       {/* Modal para validar email */}
       {token && user?.sub && (
@@ -180,15 +156,6 @@ export default function Home() {
           onClose={() => setShowEmailModal(false)}
           userId={user.sub}
           jwt={token}
-        />
-      )}
-
-      <ToastContainer />
-
-      {isCartOpen && (
-        <CartOverlay
-          isOpen={isCartOpen}
-          closeCart={() => setIsCartOpen(false)}
         />
       )}
     </div>

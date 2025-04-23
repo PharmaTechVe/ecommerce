@@ -3,12 +3,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import NavBar from '@/components/Navbar';
 import SidebarFilter, { Filters } from '@/components/SidebarFilter';
 import ProductCard from '@/components/Product/ProductCard';
-import CartOverlay from '@/components/Cart/CartOverlay';
-import Footer from '@/components/Footer';
 import { api } from '@/lib/sdkConfig';
+import Loading from '@/app/loading';
 
 interface UIProduct {
   id: string;
@@ -48,7 +46,6 @@ export default function SearchPage() {
     0, 0,
   ]);
   const [loading, setLoading] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentFilters, setCurrentFilters] = useState<Filters>({
     category: [],
@@ -162,18 +159,9 @@ export default function SearchPage() {
     setShowMobileFilters(false);
   };
 
-  if (loading) return <p className="p-4 text-center">Cargando...</p>;
-
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="fixed inset-x-0 top-0 z-50 bg-white">
-        <NavBar onCartClick={() => setIsCartOpen(true)} />
-      </header>
-      {isCartOpen && (
-        <CartOverlay isOpen closeCart={() => setIsCartOpen(false)} />
-      )}
-
-      <main className="container mx-auto flex-grow px-4 pt-[124px] sm:px-6 lg:px-8">
+      <main className="container mx-auto mt-10 flex-grow px-4 sm:px-6 lg:px-8">
         {/* Filtros Móvil */}
         {showMobileFilters && (
           <div className="fixed inset-0 z-50 flex bg-black/50">
@@ -208,44 +196,48 @@ export default function SearchPage() {
           </aside>
 
           {/* Resultados */}
-          <section className="mb-12 flex-1">
-            <button
-              onClick={() => setShowMobileFilters(true)}
-              className="mb-4 mt-6 block rounded bg-[#1C2143] px-4 py-2 text-white md:hidden"
-            >
-              Filtrar
-            </button>
-
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl">
-                Resultados para: <span className="capitalize">{query}</span>
-              </h2>
-              <span className="text-sm text-gray-600">
-                {displayProducts.length} resultado
-                {displayProducts.length !== 1 && 's'}
-              </span>
+          {loading ? (
+            <div className="flex flex-1 items-center justify-center">
+              <Loading />
             </div>
+          ) : (
+            <section className="mb-12 flex-1">
+              <button
+                onClick={() => setShowMobileFilters(true)}
+                className="mb-4 mt-6 block rounded bg-[#1C2143] px-4 py-2 text-white md:hidden"
+              >
+                Filtrar
+              </button>
 
-            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-              {displayProducts.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  productPresentationId={p.productPresentationId}
-                  productId={p.productId}
-                  presentationId={p.presentationId}
-                  imageSrc={p.imageSrc}
-                  productName={p.productName}
-                  stock={p.stock}
-                  currentPrice={p.currentPrice}
-                  variant="regular"
-                />
-              ))}
-            </div>
-          </section>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl">
+                  Resultados para: <span className="capitalize">{query}</span>
+                </h2>
+                <span className="text-sm text-gray-600">
+                  {displayProducts.length} resultado
+                  {displayProducts.length !== 1 && 's'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+                {displayProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    productPresentationId={p.productPresentationId}
+                    productId={p.productId}
+                    presentationId={p.presentationId}
+                    imageSrc={p.imageSrc}
+                    productName={p.productName}
+                    stock={p.stock}
+                    currentPrice={p.currentPrice}
+                    variant="regular"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

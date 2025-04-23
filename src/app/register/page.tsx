@@ -8,13 +8,15 @@ export default function RegisterPage() {
   return (
     <div className="relative min-h-screen bg-white">
       <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 md:left-4 md:top-4 md:w-40 md:-translate-x-0">
-        <Image
-          src="/images/logo-horizontal.svg"
-          alt="Pharmatech Logo"
-          width={160}
-          height={40}
-          layout="responsive"
-        />
+        <Link href="/">
+          <Image
+            src="/images/logo-horizontal.svg"
+            alt="Pharmatech Logo"
+            width={160}
+            height={40}
+            layout="responsive"
+          />
+        </Link>
       </div>
 
       <div className="flex justify-center px-4 pt-32">

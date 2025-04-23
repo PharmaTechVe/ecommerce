@@ -7,7 +7,7 @@ import Input from '@/components/Input/Input';
 import { Colors } from '@/styles/styles';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
-import { useCheckout } from '@/app/checkout/CheckoutContext';
+import { useCheckout } from '@/app/(shop)/checkout/CheckoutContext';
 
 interface OrderSummaryProps {
   hideCoupon?: boolean;

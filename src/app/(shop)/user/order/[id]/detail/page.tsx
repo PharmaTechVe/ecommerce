@@ -6,6 +6,7 @@ import UserOrderDetail from '@/components/User/Order/UserOrderDetail';
 import { api } from '@/lib/sdkConfig';
 import { OrderResponse, OrderDetailResponse } from '@pharmatech/sdk';
 import { useAuth } from '@/context/AuthContext';
+import Loading from '@/app/loading';
 
 interface OrderDetailData {
   orderNumber: string;
@@ -75,9 +76,7 @@ export default function OrderDetailPage() {
   return (
     <div className="relative bg-white px-2 py-6 sm:px-6 lg:px-8">
       {loading ? (
-        <div className="mt-10 text-center text-gray-600">
-          Cargando detalles...
-        </div>
+        <Loading />
       ) : orderData ? (
         <UserOrderDetail {...orderData} />
       ) : (
