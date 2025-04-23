@@ -8,8 +8,11 @@ export const Colors = {
   secondaryWhite: '#FFFFFF',
   disabled: '#D3D3D3',
   primaryTransparent: 'rgb(28, 33, 67, .75)',
+  topBar:
+    'linear-gradient(80deg, #E5E7EB 0%, #DCEBFA 100%, #1C2143 37%, #2563EB 80%)',
   neuter: '#6B7280',
   ribbon: '#FFD569',
+  tertiary_300: '#76D2C2',
 
   textMain: '#393938',
   textWhite: '#FFFFFF',

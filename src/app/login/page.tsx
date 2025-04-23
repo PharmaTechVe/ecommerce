@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Head from 'next/head';
 import { ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,14 +33,16 @@ export default function LoginPage() {
       <div className="relative flex h-screen flex-col md:flex-row">
         {/* Logo */}
         <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 md:left-4 md:top-4 md:w-40 md:-translate-x-0">
-          <Image
-            src="/images/logo-horizontal.svg"
-            alt="Pharmatech"
-            width={128}
-            height={32}
-            layout="responsive"
-            sizes="(max-width: 768px) 100vw, 128px"
-          />
+          <Link href={'/'}>
+            <Image
+              src="/images/logo-horizontal.svg"
+              alt="Pharmatech"
+              width={128}
+              height={32}
+              layout="responsive"
+              sizes="(max-width: 768px) 100vw, 128px"
+            />
+          </Link>
         </div>
 
         {/* Sección Izquierda - Formulario */}

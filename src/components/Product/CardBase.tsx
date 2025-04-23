@@ -1,5 +1,7 @@
+'use client';
 import type React from 'react';
 import Image, { type StaticImageData } from 'next/image';
+import Link from 'next/link';
 import { Colors, CardDimensions, imageSizes } from '@/styles/styles';
 
 export type ImageType = string | StaticImageData;
@@ -10,15 +12,22 @@ interface CardBaseProps {
   imageSrc?: string | ImageType;
   ribbonText?: string;
   label?: string;
+  imageLink?:
+    | string
+    | {
+        pathname: string;
+        query: Record<string, string | string[]>;
+      };
   children: React.ReactNode;
 }
 
 const CardBase: React.FC<CardBaseProps> = ({
   variant = 'regular',
   showRibbon = false,
-  imageSrc,
+  imageSrc = '',
   ribbonText,
   label,
+  imageLink,
   children,
 }) => {
   const cardSize = CardDimensions.cardSizes[variant];
@@ -27,7 +36,7 @@ const CardBase: React.FC<CardBaseProps> = ({
 
   return (
     <div
-      className={`relative ${cardSize} box-border rounded-[16px] border bg-white`}
+      className={`relative ${cardSize} box-border flex h-full flex-col justify-between rounded-[16px] border bg-white`}
     >
       {/* Ribbon (se muestra solo en variantes que no sean 'responsive') */}
       {variant !== 'responsive' && showRibbon && ribbonText && (
@@ -72,19 +81,32 @@ const CardBase: React.FC<CardBaseProps> = ({
       )}
 
       {/* Contenedor de la imagen */}
-      <div
-        className={`relative mt-[80px] flex items-center justify-center bg-white`}
-      >
+      <div className="relative flex items-center justify-center bg-white py-4">
         {imageSrc ? (
-          <div className="relative flex items-center justify-center">
-            <Image
-              src={imageSrc}
-              alt="Product Image"
-              width={currentImageSize.width}
-              height={currentImageSize.height}
-              className="rounded-md object-contain"
-            />
-          </div>
+          imageLink ? (
+            // Envolvemos la imagen en un Link para que sea clickeable
+            <Link href={imageLink}>
+              <div className="relative flex items-center justify-center">
+                <Image
+                  src={imageSrc}
+                  alt="Product Image"
+                  width={currentImageSize.width}
+                  height={currentImageSize.height}
+                  className="rounded-md object-contain"
+                />
+              </div>
+            </Link>
+          ) : (
+            <div className="relative flex items-center justify-center">
+              <Image
+                src={imageSrc}
+                alt="Product Image"
+                width={currentImageSize.width}
+                height={currentImageSize.height}
+                className="rounded-md object-contain"
+              />
+            </div>
+          )
         ) : (
           <span style={{ color: Colors.textMain }}>Sin imagen</span>
         )}

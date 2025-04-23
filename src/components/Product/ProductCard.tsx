@@ -35,14 +35,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
   discountPercentage,
   variant,
 }) => {
+  // Definimos el objeto de la ruta para el detalle del producto
+  const detailLink = {
+    pathname: `/product/${productId}/presentation/${presentationId}`,
+    query: { productPresentationId },
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center">
       <CardBase
         variant={variant}
         showRibbon={!!ribbonText}
         ribbonText={ribbonText}
         imageSrc={imageSrc}
         label={label}
+        imageLink={detailLink} // PASAMOS LA RUTA: la imagen ahora es clickeable
       >
         <div
           className={`flex flex-col px-[24px] ${
@@ -53,8 +60,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <div className="mb-[5px] flex justify-end">
               <CardButton
                 product={{
-                  productId: productId, // del API
-                  presentationId: presentationId, // del API
+                  productPresentationId: productPresentationId, // del API
                   name: productName,
                   price: lastPrice || currentPrice,
                   discount: discountPercentage,
@@ -64,12 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               />
             </div>
           )}
-          <Link
-            href={{
-              pathname: `/product/${productId}/presentation/${presentationId}`,
-              query: { productPresentationId },
-            }}
-          >
+          <Link href={detailLink}>
             <p
               className="w-full text-left"
               style={{
@@ -207,8 +208,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {variant !== 'responsive' && (
               <CardButton
                 product={{
-                  productId: productId, // del API
-                  presentationId: presentationId, // del API
+                  productPresentationId: productPresentationId, // del API
                   name: productName,
                   price: lastPrice || currentPrice,
                   discount: discountPercentage,

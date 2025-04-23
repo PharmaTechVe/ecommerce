@@ -4,8 +4,7 @@ import { Colors, FontSizes } from '@/styles/styles';
 import { useCart } from '@/context/CartContext';
 
 export type ProductInfo = {
-  productId: string;
-  presentationId: string;
+  productPresentationId: string;
   name: string;
   price: number;
   discount?: number;
@@ -31,7 +30,7 @@ const CardButton: React.FC<CardButtonProps> = (props) => {
   const { cartItems, addItem, updateItemQuantity, removeItem } = useCart();
   if ('product' in props && props.product) {
     const { product, className } = props;
-    const compositeId = `${product.productId}-${product.presentationId}`;
+    const compositeId = `${product.productPresentationId}`;
     const existingItem = cartItems.find((item) => item.id === compositeId);
     const quantity = existingItem ? existingItem.quantity : 0;
 

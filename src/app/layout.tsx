@@ -3,10 +3,14 @@ import theme from '../styles/styles';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastContainer } from 'react-toastify';
+import { Suspense } from 'react';
+import Loading from './loading';
+
 export const metadata: Metadata = {
   title: 'Pharmatech',
   description: 'La farmacia más grande de Venezuela',
 };
+
 export default function RootLayout({
   children,
 }: {
@@ -16,9 +20,11 @@ export default function RootLayout({
     <html lang="es" className={theme.poppins.variable}>
       <body>
         <AuthProvider>
-          <CartProvider>{children}</CartProvider>
+          <CartProvider>
+            <Suspense fallback={<Loading />}>{children}</Suspense>
+            <ToastContainer />
+          </CartProvider>
         </AuthProvider>
-        <ToastContainer></ToastContainer>
       </body>
     </html>
   );

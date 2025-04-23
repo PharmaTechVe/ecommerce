@@ -2,19 +2,22 @@ import React from 'react';
 import { Colors } from '@/styles/styles';
 
 type CheckButtonProps = {
-  text: string;
+  text?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  variant?: 'primary' | 'tertiary';
 };
 
 const CheckButton: React.FC<CheckButtonProps> = ({
   text,
   checked,
+  variant = 'primary',
   onChange,
 }) => {
   const handleCheckboxChange = () => {
     onChange(!checked);
   };
+  const color = variant === 'tertiary' ? Colors.tertiary_300 : Colors.primary;
 
   return (
     <label className="flex cursor-pointer select-none items-center text-dark dark:text-white">
@@ -28,8 +31,8 @@ const CheckButton: React.FC<CheckButtonProps> = ({
         <div
           className={`mr-4 flex h-5 w-5 items-center justify-center rounded border transition-all duration-200`}
           style={{
-            backgroundColor: checked ? Colors.primary : 'transparent',
-            borderColor: checked ? Colors.primary : Colors.primary,
+            backgroundColor: checked ? color : 'transparent',
+            borderColor: color,
           }}
         >
           {checked && (
