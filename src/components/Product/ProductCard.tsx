@@ -60,8 +60,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <div className="mb-[5px] flex justify-end">
               <CardButton
                 product={{
-                  productId: productId, // del API
-                  presentationId: presentationId, // del API
+                  productPresentationId: productPresentationId, // del API
                   name: productName,
                   price: lastPrice || currentPrice,
                   discount: discountPercentage,
@@ -209,8 +208,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {variant !== 'responsive' && (
               <CardButton
                 product={{
-                  productId: productId, // del API
-                  presentationId: presentationId, // del API
+                  productPresentationId: productPresentationId, // del API
                   name: productName,
                   price: lastPrice || currentPrice,
                   discount: discountPercentage,

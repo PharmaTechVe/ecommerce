@@ -155,7 +155,7 @@ export default function ProductDetailPage() {
       </div>
     );
   }
-
+  const productPresentationId = presentation.id;
   const breadcrumbItems = [
     { label: 'Inicio', href: '/' },
     {
@@ -210,8 +210,7 @@ export default function ProductDetailPage() {
               </p>
               <CardButton
                 product={{
-                  productId,
-                  presentationId,
+                  productPresentationId,
                   name: `${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name}`,
                   price: presentation.price,
                   stock: presentation.presentation.quantity,
