@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+//import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCheckout } from '../CheckoutContext';
 import { api } from '@/lib/sdkConfig';
@@ -10,7 +10,6 @@ import { Colors } from '@/styles/styles';
 import { OrderDetailedResponse } from '@pharmatech/sdk';
 
 const DeliveryInfo: React.FC = () => {
-  const router = useRouter();
   const { token } = useAuth();
   const { orderId } = useCheckout();
 
@@ -22,8 +21,6 @@ const DeliveryInfo: React.FC = () => {
     if (!orderId || !token) return;
     api.order.getById(orderId, token).then(setOrderDetail).catch(console.error);
   }, [orderId, token]);
-
-  const handleFinish = () => router.push('/checkout/Successes');
 
   const orderNumber = orderDetail?.id || 'No asignado';
 
@@ -109,15 +106,6 @@ const DeliveryInfo: React.FC = () => {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={handleFinish}
-          className="rounded bg-green-500 px-4 py-2 text-white"
-        >
-          Finalizar Pedido
-        </button>
       </div>
     </section>
   );
