@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   PencilIcon,
@@ -33,7 +33,7 @@ export default function AddressPage() {
   const rawSearchParams = useSearchParams();
   const isNewAddress = rawSearchParams?.get('new') === 'true';
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     try {
       if (!token || !user?.sub) return;
       const response = await api.userAdress.getListAddresses(user.sub, token);
@@ -43,11 +43,11 @@ export default function AddressPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, user?.sub]);
 
   useEffect(() => {
     if (!isNewAddress) fetchAddresses();
-  }, [user?.sub, token, isNewAddress]);
+  }, [user?.sub, token, isNewAddress, fetchAddresses]);
 
   const handleConfirmDelete = async () => {
     if (!token || !user?.sub || !addressToDelete) return;
