@@ -154,15 +154,15 @@ export default function Home() {
       </div>
 
       <main className="pt-[124px]">
-        <h1 className="text-2xl font-bold text-white">Pharmatech</h1>
+        <h1 className="mb-12 text-2xl font-bold text-white">Pharmatech</h1>
 
-        <div className="md:max-w-8xl mx-auto w-full max-w-[75vw] md:p-2">
+        <div className="md:max-w-8xl mx-auto mt-12 w-full max-w-[75vw] md:p-2">
+          {' '}
+          {/* Agregamos mt-12 */}
           <Carousel slides={slides} />
-
           <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
             Productos en Oferta Exclusiva
           </h3>
-
           <div className="mt-8">
             <div className="cursor-pointer">
               <ProductCarousel carouselType="regular" products={products} />

@@ -42,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center">
       <CardBase
         variant={variant}
         showRibbon={!!ribbonText}

@@ -226,7 +226,7 @@ export default function SearchPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
               {displayProducts.map((p) => (
                 <ProductCard
                   key={p.id}

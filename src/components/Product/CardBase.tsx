@@ -24,7 +24,7 @@ interface CardBaseProps {
 const CardBase: React.FC<CardBaseProps> = ({
   variant = 'regular',
   showRibbon = false,
-  imageSrc,
+  imageSrc = '',
   ribbonText,
   label,
   imageLink,
@@ -36,7 +36,7 @@ const CardBase: React.FC<CardBaseProps> = ({
 
   return (
     <div
-      className={`relative ${cardSize} box-border rounded-[16px] border bg-white`}
+      className={`relative ${cardSize} box-border flex h-full flex-col justify-between rounded-[16px] border bg-white`}
     >
       {/* Ribbon (se muestra solo en variantes que no sean 'responsive') */}
       {variant !== 'responsive' && showRibbon && ribbonText && (
@@ -81,9 +81,7 @@ const CardBase: React.FC<CardBaseProps> = ({
       )}
 
       {/* Contenedor de la imagen */}
-      <div
-        className={`relative mt-[80px] flex items-center justify-center bg-white`}
-      >
+      <div className="relative flex items-center justify-center bg-white py-4">
         {imageSrc ? (
           imageLink ? (
             // Envolvemos la imagen en un Link para que sea clickeable

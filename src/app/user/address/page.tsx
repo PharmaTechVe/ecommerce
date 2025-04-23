@@ -47,7 +47,7 @@ export default function AddressPage() {
 
   useEffect(() => {
     if (!isNewAddress) fetchAddresses();
-  }, [user?.sub, token, isNewAddress]);
+  }, [user?.sub, token, isNewAddress, fetchAddresses]);
 
   const handleConfirmDelete = async () => {
     if (!token || !user?.sub || !addressToDelete) return;
