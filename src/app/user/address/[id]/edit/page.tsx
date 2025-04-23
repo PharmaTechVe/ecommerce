@@ -63,7 +63,7 @@ export default function Page() {
     };
 
     fetchData();
-  }, [user?.sub, token, params?.id, router]);
+  }, [user?.sub, token, params?.id, router, user]);
 
   return (
     initialData && <EditAddressForm initialData={initialData} mode="edit" />

@@ -208,7 +208,7 @@ export default function SearchPage() {
           </aside>
 
           {/* Resultados */}
-          <section className="flex-1">
+          <section className="mb-12 flex-1">
             <button
               onClick={() => setShowMobileFilters(true)}
               className="mb-4 mt-6 block rounded bg-[#1C2143] px-4 py-2 text-white md:hidden"
@@ -226,7 +226,7 @@ export default function SearchPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
               {displayProducts.map((p) => (
                 <ProductCard
                   key={p.id}

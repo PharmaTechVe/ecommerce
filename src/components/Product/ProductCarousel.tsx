@@ -73,12 +73,13 @@ export default function ProductSlider({
   const marginLR = variant === 'responsive' ? '16px' : '56px';
   const gapBetween = variant === 'responsive' ? 'gap-2' : 'gap-4';
   // Define la altura de la card en mobile; ajusta este valor según tu diseño.
-  const cardHeight = variant === 'responsive' ? '400px' : 'auto';
+  //const cardHeight = variant === 'responsive' ? '400px' : 'auto';
 
   return (
-    <section className="relative mt-[-10%]">
+    <section className="relative mt-8">
+      {' '}
+      {/* Cambiamos mt-[-10%] a mt-8 */}
       {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
-
       <div className="relative w-full">
         {/* Flecha izquierda */}
         <div className="absolute left-0 top-1/2 z-10 -translate-y-1/2">
@@ -94,16 +95,15 @@ export default function ProductSlider({
           </button>
         </div>
 
-        {/* Carrusel: se fija la altura en mobile al valor de cardHeight */}
+        {/* Carrusel */}
         <div
           ref={sliderRef}
-          className={`hide-scrollbar mx-auto flex w-[90%] items-center overflow-x-auto overflow-y-hidden ${gapBetween}`}
+          className={`hide-scrollbar mx-auto flex w-[90%] items-stretch overflow-x-auto overflow-y-hidden ${gapBetween}`}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             marginLeft: marginLR,
             marginRight: marginLR,
-            height: cardHeight,
           }}
         >
           {products.map((product) => (
