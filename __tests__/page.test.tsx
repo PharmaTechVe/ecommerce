@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 describe('Home Page', () => {
   it('displays the main heading', () => {
     render(<Home />);
-    const heading = screen.getByText('Pharmatech...');
+    const heading = screen.getByText('Pharmatech');
     expect(heading).toBeTruthy(); // Check if the element exists
   });
 
