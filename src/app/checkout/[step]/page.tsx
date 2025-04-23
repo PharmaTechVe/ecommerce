@@ -1,7 +1,7 @@
 // app/checkout/[step]/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/Navbar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Stepper from '@/components/Stepper';
@@ -26,7 +26,8 @@ const CheckoutStepContent: React.FC = () => {
   const router = useRouter();
   const { token } = useAuth();
   const { cartItems } = useCart();
-  const { setOrderId } = useCheckout();
+  const { orderId, setOrderId } = useCheckout();
+  const { clearCart } = useCart();
 
   const {
     deliveryMethod,
@@ -206,7 +207,7 @@ const CheckoutStepContent: React.FC = () => {
             {deliveryMethod === 'home' && (
               <div className="mt-6 flex justify-end">
                 <Button onClick={handleAssignDelivery}>
-                  Asignar Repartidor
+                  Ver datos del Repartidor
                 </Button>
               </div>
             )}
@@ -220,6 +221,68 @@ const CheckoutStepContent: React.FC = () => {
         return <div>El paso &quot;{step}&quot; no existe.</div>;
     }
   };
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      router.replace('/');
+      return;
+    }
+
+    if (!token) return;
+
+    // Si no hay orden y no estamos en ShippingInfo, volvemos
+    if (!orderId && !['shippinginfo', 'paymentprocess'].includes(lowerStep)) {
+      router.replace('/checkout/shippinginfo');
+      return;
+    }
+
+    // Si ya hay orderId, chequeamos su estado
+    if (orderId) {
+      api.order
+        .getById(orderId, token)
+        .then((order) => {
+          const status = order.status.toUpperCase();
+
+          if (status === 'CANCELED') {
+            router.replace('/checkout/rejected');
+            return;
+          }
+
+          if (status === 'COMPLETED') {
+            clearCart();
+            setOrderId('');
+            router.replace('/');
+            return;
+          }
+
+          // Para PENDING, definimos qué pasos permitimos
+          const instant =
+            (deliveryMethod === 'store' && paymentMethod === 'pos') ||
+            (deliveryMethod === 'home' && paymentMethod === 'cash');
+
+          // Siempre permitimos reviewOrder y deliveryInfo
+          const allowed = ['revieworder', 'deliveryinfo'];
+          // Si NO es instant (es decir, requiere paso de pago), añadimos paymentprocess
+          if (!instant) {
+            allowed.push('paymentprocess');
+          }
+
+          if (!allowed.includes(lowerStep)) {
+            router.replace('/checkout/revieworder');
+          }
+        })
+        .catch((err) => console.error('Error validando orden:', err));
+    }
+  }, [
+    cartItems,
+    token,
+    orderId,
+    lowerStep,
+    deliveryMethod,
+    paymentMethod,
+    router,
+    clearCart,
+    setOrderId,
+  ]);
 
   if (!token) return null;
 

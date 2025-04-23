@@ -11,13 +11,13 @@ import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 
 const ReviewOrder: React.FC = () => {
-  const { deliveryMethod, selectedBranchLabel } = useCheckout();
+  const { deliveryMethod, selectedBranchLabel, orderId } = useCheckout();
   const { user, token } = useAuth();
 
   //const { cartItems } = useCart();
+  const [orderNumber, setOrderNumber] = useState<string>(orderId || '');
 
   const [userName, setUserName] = useState<string>('Usuario'); // Estado local para almacenar el nombre del usuario
-  const orderNumber = 1;
   //const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const isStorePickup = deliveryMethod === 'store';
@@ -37,6 +37,15 @@ const ReviewOrder: React.FC = () => {
       fetchUserName(); // Llamar a la función para obtener el nombre
     }
   }, [user?.sub, token]); // Ejecutar cuando el `user.sub` o `token` cambien
+
+  useEffect(() => {
+    if (orderId && token) {
+      api.order
+        .getById(orderId, token)
+        .then((ord) => setOrderNumber(ord.id))
+        .catch(console.error);
+    }
+  }, [orderId, token]);
 
   return (
     <section className="space-y-8">
@@ -61,7 +70,7 @@ const ReviewOrder: React.FC = () => {
             className="sm:text-[14px] md:text-[28px]"
             style={{ color: Colors.textMain }}
           >
-            Orden #{orderNumber}
+            Orden #{orderNumber || '...'}
           </p>
           <p
             className="sm:text-[14px] md:text-[28px]"
