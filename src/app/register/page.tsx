@@ -1,7 +1,6 @@
 import RegisterForm from './RegisterForm';
 //import theme from "@/styles/styles";
 import Image from 'next/image';
-import { ToastContainer } from 'react-toastify';
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -37,8 +36,6 @@ export default function RegisterPage() {
           </Link>
         </p>
       </div>
-
-      <ToastContainer />
     </div>
   );
 }

@@ -4,7 +4,6 @@ import { useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import NavBar from '@/components/Navbar';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
-import { ToastContainer } from 'react-toastify';
 import { api } from '@/lib/sdkConfig';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
 
@@ -93,8 +92,6 @@ export default function UserProfileLayout({
         <Sidebar user={sidebarUser} onLogout={logout} />
         <div className="flex-1">{children({ userData })}</div>
       </div>
-
-      <ToastContainer />
     </div>
   );
 }

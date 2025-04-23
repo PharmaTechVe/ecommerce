@@ -21,8 +21,10 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <CartProvider>
-            <Suspense fallback={<Loading />}>{children}</Suspense>
-            <ToastContainer />
+            <Suspense fallback={<Loading />}>
+              {children}
+              <ToastContainer />
+            </Suspense>
           </CartProvider>
         </AuthProvider>
       </body>
