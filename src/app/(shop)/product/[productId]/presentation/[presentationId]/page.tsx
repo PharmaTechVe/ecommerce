@@ -1,15 +1,12 @@
 'use client';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import NavBar from '@/components/Navbar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Badge from '@/components/Badge';
 import Carousel, { Slide } from '@/components/Product/Carousel';
 import Dropdown from '@/components/Dropdown';
 import CardButton from '@/components/CardButton';
 import ProductBranch from '@/components/Product/ProductBranch';
-import Footer from '@/components/Footer';
-import CartOverlay from '@/components/Cart/CartOverlay';
 import ProductCarousel from '@/components/Product/ProductCarousel';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { Colors } from '@/styles/styles';
@@ -19,6 +16,7 @@ import {
   GenericProductResponse,
   ProductPresentationResponse,
 } from '@pharmatech/sdk';
+import Loading from '@/app/loading';
 
 interface ProductCard {
   id: number;
@@ -44,7 +42,6 @@ export default function ProductDetailPage() {
   const [genericProduct, setGenericProduct] =
     useState<GenericProductResponse | null>(null);
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [products, setProducts] = useState<ProductCard[]>([]);
   const [presentationList, setPresentationList] = useState<
     ProductPresentationResponse[]
@@ -147,7 +144,7 @@ export default function ProductDetailPage() {
     }
   }, [minWaitDone, presentation, genericProduct, router]);
 
-  if (loading) return <p className="p-4 text-lg">Cargando...</p>;
+  if (loading) return <Loading />;
   if (!presentation || !genericProduct) {
     return (
       <div className="p-4 text-lg">
@@ -180,12 +177,9 @@ export default function ProductDetailPage() {
 
   return (
     <>
-      <div className="fixed left-0 right-0 top-0 z-50 bg-white">
-        <NavBar onCartClick={() => setIsCartOpen(true)} />
-      </div>
-      <main className="mx-auto mt-12 max-w-7xl p-4 pt-[100px] md:mt-6">
+      <main className="mx-auto mb-12 max-w-7xl p-4">
         <Breadcrumb items={breadcrumbItems} />
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Carousel slides={slides} />
           <div className="flex flex-col space-y-4">
             <div>
@@ -226,24 +220,17 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        <div className="my-32">
+        <div className="my-10">
           <ProductBranch productPresentationId={presentation.id} />
         </div>
 
-        <div className="mt-12">
+        <div className="mt-3">
           <h3 className="mb-6 text-2xl font-semibold text-[#1C2143]">
             Productos de la marca {genericProduct.manufacturer.name}
           </h3>
           <ProductCarousel carouselType="regular" products={products} />
         </div>
       </main>
-      <Footer />
-      {isCartOpen && (
-        <CartOverlay
-          isOpen={isCartOpen}
-          closeCart={() => setIsCartOpen(false)}
-        />
-      )}
     </>
   );
 }

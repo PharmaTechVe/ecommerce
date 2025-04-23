@@ -4,6 +4,7 @@ import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import { Suspense } from 'react';
+import Loading from './loading';
 
 export const metadata: Metadata = {
   title: 'Pharmatech',
@@ -18,14 +19,12 @@ export default function RootLayout({
   return (
     <html lang="es" className={theme.poppins.variable}>
       <body>
-        <Suspense>
-          <AuthProvider>
-            <CartProvider>
-              {children}
-              <ToastContainer />
-            </CartProvider>
-          </AuthProvider>
-        </Suspense>
+        <AuthProvider>
+          <CartProvider>
+            <Suspense fallback={<Loading />}>{children}</Suspense>
+            <ToastContainer />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -13,6 +13,7 @@ import {
   OrderPaginationRequest,
 } from '@pharmatech/sdk';
 import { useAuth } from '@/context/AuthContext';
+import Loading from '@/app/loading';
 
 export default function OrdersPage() {
   const { token, user } = useAuth();
@@ -79,7 +80,7 @@ export default function OrdersPage() {
   return (
     <div className="mx-auto max-w-5xl px-6">
       {loading ? (
-        <p className="text-center text-gray-600">Cargando órdenes...</p>
+        <Loading />
       ) : (
         <OrderTable orders={orders} onViewDetails={handleViewDetails} />
       )}

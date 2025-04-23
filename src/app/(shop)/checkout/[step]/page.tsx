@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import NavBar from '@/components/Navbar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Stepper from '@/components/Stepper';
 import Button from '@/components/Button';
@@ -296,8 +295,7 @@ const CheckoutStepContent: React.FC = () => {
 
   return (
     <>
-      <NavBar />
-      <main className="mx-auto max-w-7xl px-4 py-6 text-left md:px-8">
+      <main className="mx-auto mb-36 max-w-7xl px-4 py-6 text-left md:px-8">
         <div className="flex flex-col gap-6 lg:flex-row">
           {/* IZQUIERDA */}
           <div className="lg:w-3/3 w-full">

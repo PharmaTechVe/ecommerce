@@ -2,12 +2,10 @@
 
 import { useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import NavBar from '@/components/Navbar';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
-import { ToastContainer } from 'react-toastify';
 import { api } from '@/lib/sdkConfig';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
-import CartOverlay from '@/components/Cart/CartOverlay';
+import Loading from '@/app/loading';
 
 enum UserGender {
   MALE = 'm',
@@ -36,7 +34,6 @@ export default function UserProfileLayout({
   children,
 }: UserProfileLayoutProps) {
   const { user, logout, token } = useAuth();
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
 
   useEffect(() => {
@@ -72,7 +69,7 @@ export default function UserProfileLayout({
     })();
   }, [user?.sub, token]);
 
-  if (!user?.sub || !userData) return <div className="p-6">Cargando...</div>;
+  if (!user?.sub || !userData) return <Loading />;
 
   const sidebarUser: SidebarUser = {
     name: `${userData.firstName} ${userData.lastName}`,
@@ -82,38 +79,21 @@ export default function UserProfileLayout({
 
   return (
     <div>
-      <div className="relative bg-white">
-        {/* Nav */}
-        <div className="relative z-50">
-          <NavBar onCartClick={() => setIsCartOpen(true)} />
-        </div>
-
-        {/* Breadcrumbs */}
-        <div className="mx-auto ml-[10%] max-w-[1440px] px-6 pt-6 sm:px-10 md:px-16 lg:px-24 xl:px-32">
-          <UserBreadcrumbs />
-        </div>
-
-        {/* Main layout */}
-        <div className="mx-auto flex max-w-[1440px] items-start gap-8 px-6 pt-8 sm:px-10 md:px-16 lg:px-24 xl:px-32">
-          {/* Sidebar con altura fija */}
-          <div className="h-[582px]">
-            <Sidebar user={sidebarUser} onLogout={logout} />
-          </div>
-
-          {/* Contenido */}
-          <div className="flex-1">{children}</div>
-        </div>
-
-        <ToastContainer />
+      {/* Breadcrumbs */}
+      <div className="mx-auto ml-[10%] max-w-[1440px] px-6 pt-6 sm:px-10 md:px-16 lg:px-24 xl:px-32">
+        <UserBreadcrumbs />
       </div>
 
-      {/* Cart Overlay */}
-      {isCartOpen && (
-        <CartOverlay
-          isOpen={isCartOpen}
-          closeCart={() => setIsCartOpen(false)}
-        />
-      )}
+      {/* Main layout */}
+      <div className="mx-auto flex max-w-[1440px] items-start gap-8 px-6 pt-8 sm:px-10 md:px-16 lg:px-24 xl:px-32">
+        {/* Sidebar con altura fija */}
+        <div className="h-[582px]">
+          <Sidebar user={sidebarUser} onLogout={logout} />
+        </div>
+
+        {/* Contenido */}
+        <div className="flex-1">{children}</div>
+      </div>
     </div>
   );
 }

@@ -93,7 +93,7 @@ export default function RecoverPasswordPage() {
     }
   };
 
-  if (!user) return <div className="p-6">Cargando...</div>;
+  if (!user) return;
 
   return (
     <div className="relative min-h-screen bg-white">
