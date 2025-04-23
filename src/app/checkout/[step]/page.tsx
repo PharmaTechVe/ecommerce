@@ -21,10 +21,12 @@ import { toast } from 'react-toastify';
 import { CreateOrder, OrderType } from '@pharmatech/sdk';
 
 const CheckoutStepContent: React.FC = () => {
-  const { step } = useParams<{ step: string }>();
+  const params = useParams<{ step: string }>();
+  const step = params?.step;
   const router = useRouter();
   const { token } = useAuth();
   const { cartItems } = useCart();
+  const { setOrderId } = useCheckout();
 
   const {
     deliveryMethod,
@@ -124,13 +126,17 @@ const CheckoutStepContent: React.FC = () => {
 
       try {
         const response = await api.order.create(payload, token!);
+        alert('Orden creada correctamente');
         notify.order(response.id);
+        setOrderId(response.id);
       } catch (err) {
         console.error('Error al crear la orden:', err);
         alert('Ocurrió un error al crear la orden');
         return;
       }
-      router.push('/checkout/revieworder');
+      setTimeout(() => {
+        router.push('/checkout/revieworder');
+      }, 800);
     } else {
       router.push('/checkout/paymentprocess');
     }
@@ -155,6 +161,7 @@ const CheckoutStepContent: React.FC = () => {
         paymentConfirmationData,
         token,
       );
+      console.log(confirmation.id);
       notify.payment(confirmation.id);
 
       // 2️⃣ Creación de la orden
@@ -171,9 +178,12 @@ const CheckoutStepContent: React.FC = () => {
       };
       const orderRes = await api.order.create(payload, token);
       notify.order(orderRes.id);
-
+      setOrderId(orderRes.id);
+      console.log(orderRes.id);
       // 3️⃣ Navegación final
-      router.push('/checkout/revieworder');
+      setTimeout(() => {
+        router.push('/checkout/revieworder');
+      }, 800);
     } catch (err) {
       console.error(err);
       alert('Ocurrió un error procesando pago u orden.');

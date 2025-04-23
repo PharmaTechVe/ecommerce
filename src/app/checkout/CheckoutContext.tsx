@@ -1,7 +1,7 @@
 // src/app/checkout/CheckoutContext.tsx
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { PaymentConfirmation } from '@pharmatech/sdk';
 
 interface CheckoutState {
@@ -17,22 +17,21 @@ interface CheckoutState {
   selectedBranchId: string;
   setSelectedBranchId: (id: string) => void;
 
-  stepSequence: string[] | null;
-  setStepSequence: (steps: string[]) => void;
-
   couponCode: string;
   setCouponCode: (code: string) => void;
   couponDiscount: number;
   setCouponDiscount: (amount: number) => void;
 
-  // ahora siempre es un objeto completo, nunca Partial ni null
   paymentConfirmationData: PaymentConfirmation;
   setPaymentConfirmationData: (data: PaymentConfirmation) => void;
+
+  orderId: string;
+  setOrderId: (id: string) => void;
 }
 
 const CheckoutContext = createContext<CheckoutState | null>(null);
 
-// Valores iniciales “vacíos” pero completos
+// Iniciales vacíos pero completos
 const INITIAL_PAYMENT_CONFIRMATION: PaymentConfirmation = {
   bank: '',
   reference: '',
@@ -40,25 +39,73 @@ const INITIAL_PAYMENT_CONFIRMATION: PaymentConfirmation = {
   phoneNumber: '',
 };
 
+// Helpers para leer del storage (siempre en cliente)
+const getLS = (key: string, fallback: string) => {
+  if (typeof window === 'undefined') return fallback;
+  return localStorage.getItem(key) ?? fallback;
+};
+
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [deliveryMethod, setDeliveryMethod] = useState<'store' | 'home'>(
-    'store',
+  // 1️⃣ Lee el deliveryMethod de storage, o 'store' si no existe
+  const [deliveryMethod, setDeliveryMethodState] = useState<'store' | 'home'>(
+    () => getLS('deliveryMethod', 'store') as 'store' | 'home',
   );
-  const [paymentMethod, setPaymentMethod] = useState<
+  // 2️⃣ Lee el paymentMethod o 'pos'
+  const [paymentMethod, setPaymentMethodState] = useState<
     'pos' | 'cash' | 'bank' | 'mobile'
-  >('pos');
-  const [selectedBranchLabel, setSelectedBranchLabel] = useState<string>('');
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
-  const [stepSequence, setStepSequence] = useState<string[] | null>(null);
+  >(() => getLS('paymentMethod', 'pos') as 'pos' | 'cash' | 'bank' | 'mobile');
+  // 3️⃣ Lee la sucursal/dirección seleccionada
+  const [selectedBranchLabel, setSelectedBranchLabelState] = useState<string>(
+    () => getLS('selectedBranchLabel', ''),
+  );
+  const [selectedBranchId, setSelectedBranchIdState] = useState<string>(() =>
+    getLS('selectedBranchId', ''),
+  );
+  // 4️⃣ Otros (cupón, confirmación, orderId)
+  const [couponCode, setCouponCode] = useState<string>(() =>
+    getLS('couponCode', ''),
+  );
+  const [couponDiscount, setCouponDiscount] = useState<number>(() => {
+    const v = getLS('couponDiscount', '0');
+    return parseFloat(v) || 0;
+  });
 
-  const [couponCode, setCouponCode] = useState<string>('');
-  const [couponDiscount, setCouponDiscount] = useState<number>(0);
-
-  // Estado ya tipado como completo
   const [paymentConfirmationData, setPaymentConfirmationData] =
     useState<PaymentConfirmation>(INITIAL_PAYMENT_CONFIRMATION);
+
+  const [orderId, setOrderId] = useState<string>(() => getLS('orderId', ''));
+
+  // 📌 Cada vez que cambie, guardamos en LS:
+  useEffect(() => {
+    localStorage.setItem('deliveryMethod', deliveryMethod);
+  }, [deliveryMethod]);
+  useEffect(() => {
+    localStorage.setItem('paymentMethod', paymentMethod);
+  }, [paymentMethod]);
+  useEffect(() => {
+    localStorage.setItem('selectedBranchLabel', selectedBranchLabel);
+  }, [selectedBranchLabel]);
+  useEffect(() => {
+    localStorage.setItem('selectedBranchId', selectedBranchId);
+  }, [selectedBranchId]);
+  useEffect(() => {
+    localStorage.setItem('couponCode', couponCode);
+  }, [couponCode]);
+  useEffect(() => {
+    localStorage.setItem('couponDiscount', couponDiscount.toString());
+  }, [couponDiscount]);
+  useEffect(() => {
+    localStorage.setItem('orderId', orderId);
+  }, [orderId]);
+
+  // Envuelve los setters para exponer en contexto:
+  const setDeliveryMethod = (m: 'store' | 'home') => setDeliveryMethodState(m);
+  const setPaymentMethod = (m: 'pos' | 'cash' | 'bank' | 'mobile') =>
+    setPaymentMethodState(m);
+  const setSelectedBranchLabel = (l: string) => setSelectedBranchLabelState(l);
+  const setSelectedBranchId = (id: string) => setSelectedBranchIdState(id);
 
   return (
     <CheckoutContext.Provider
@@ -71,14 +118,14 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedBranchLabel,
         selectedBranchId,
         setSelectedBranchId,
-        stepSequence,
-        setStepSequence,
         couponCode,
         setCouponCode,
         couponDiscount,
         setCouponDiscount,
         paymentConfirmationData,
         setPaymentConfirmationData,
+        orderId,
+        setOrderId,
       }}
     >
       {children}
