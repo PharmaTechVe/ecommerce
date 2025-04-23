@@ -17,10 +17,14 @@ const CheckoutPage = () => {
       return;
     }
 
-    // 2) Si el carrito está vacío, al Home
     if (cartItems.length === 0) {
-      router.replace('/');
-      return;
+      const timer = setTimeout(() => {
+        if (cartItems.length === 0) {
+          router.replace('/');
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
 
     // 3) En caso contrario, al primer paso de checkout

@@ -223,8 +223,13 @@ const CheckoutStepContent: React.FC = () => {
   };
   useEffect(() => {
     if (cartItems.length === 0) {
-      router.replace('/');
-      return;
+      const timer = setTimeout(() => {
+        if (cartItems.length === 0) {
+          router.replace('/');
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
 
     if (!token) return;
