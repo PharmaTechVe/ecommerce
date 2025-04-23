@@ -208,7 +208,7 @@ export default function SearchPage() {
           </aside>
 
           {/* Resultados */}
-          <section className="flex-1">
+          <section className="mb-12 flex-1">
             <button
               onClick={() => setShowMobileFilters(true)}
               className="mb-4 mt-6 block rounded bg-[#1C2143] px-4 py-2 text-white md:hidden"
