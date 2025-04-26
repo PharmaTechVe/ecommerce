@@ -1,4 +1,3 @@
-// src/app/search/page.tsx  (o donde tengas tu SearchPage)
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -35,6 +34,11 @@ interface ProductPaginationRequest {
   priceRange?: { min: number; max: number };
 }
 
+interface CategoryOption {
+  id: string;
+  name: string;
+}
+
 export default function SearchPage() {
   const params = useSearchParams();
   const query = params?.get('query') ?? '';
@@ -48,6 +52,8 @@ export default function SearchPage() {
   ]);
   const [loading, setLoading] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const [categoriesList, setCategoriesList] = useState<CategoryOption[]>([]);
   const [currentFilters, setCurrentFilters] = useState<Filters>({
     category: [],
     brand: [],
@@ -55,22 +61,49 @@ export default function SearchPage() {
     activeIngredient: [],
   });
 
-  interface APIProduct {
-    id: string;
-    product: {
-      id: string;
-      name: string;
-      manufacturer?: { name: string };
-      genericName?: string;
-      categories?: { name: string }[];
-      images?: { url: string }[];
-    };
-    presentation: { id: string; name: string; quantity: number };
-    price: number;
-  }
+  // 1️⃣ Traer lista de categorías (UID + name)
+  useEffect(() => {
+    api.category
+      .findAll({ page: 1, limit: 100 })
+      .then((resp) => {
+        const opts = resp.results.map((c) => ({ id: c.id, name: c.name }));
+        setCategoriesList(opts);
+      })
+      .catch((err) => console.error('Error cargando categorías:', err));
+  }, []);
+
+  useEffect(() => {
+    if (categoryName !== 'Categorías' && categoriesList.length > 0) {
+      const found = categoriesList.find((c) => c.name === categoryName);
+      setCurrentFilters((f) => ({
+        ...f,
+        category: found ? [found.id] : [],
+      }));
+    } else {
+      setCurrentFilters((f) => ({ ...f, category: [] }));
+    }
+  }, [categoryName, categoriesList]);
 
   const mapToUI = useCallback(
-    (results: APIProduct[]): UIProduct[] =>
+    (
+      results: Array<{
+        id: string;
+        product: {
+          id: string;
+          name: string;
+          images?: { url: string }[];
+          manufacturer?: { name: string };
+          genericName?: string;
+          categories?: { name: string }[];
+        };
+        presentation: {
+          id: string;
+          name: string;
+          quantity: number;
+        };
+        price: number;
+      }>,
+    ): UIProduct[] =>
       results.map((item) => ({
         id: item.id,
         productPresentationId: item.id,
@@ -83,18 +116,20 @@ export default function SearchPage() {
         brand: item.product.manufacturer?.name || '',
         presentation: item.presentation.name,
         activeIngredient: item.product.genericName || '',
-        categories: item.product.categories?.map((c) => c.name) || [],
+        categories:
+          item.product.categories?.map((c: { name: string }) => c.name) || [],
       })),
     [],
   );
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const req: ProductPaginationRequest = { page: 1, limit: 50 };
-        if (query.trim()) req.q = query.trim();
-        const resp = await api.product.getProducts(req);
+    setLoading(true);
+    const req: ProductPaginationRequest = { page: 1, limit: 50 };
+    if (query.trim()) req.q = query.trim();
+
+    api.product
+      .getProducts(req)
+      .then((resp) => {
         let ui = mapToUI(resp.results);
         if (categoryName !== 'Categorías') {
           ui = ui.filter((p) => p.categories.includes(categoryName));
@@ -108,12 +143,9 @@ export default function SearchPage() {
           setPriceRange([min, max]);
           setCurrentPriceRange([min, max]);
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    })();
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, [query, categoryName, mapToUI]);
 
   const handleApplyFilters = async (
@@ -122,21 +154,22 @@ export default function SearchPage() {
   ) => {
     setCurrentFilters(filters);
     setLoading(true);
+    const req: ProductPaginationRequest = {
+      page: 1,
+      limit: 50,
+      ...(query.trim() && { q: query.trim() }),
+      ...(filters.brand.length > 0 && { manufacturerId: filters.brand }),
+      ...(filters.category.length > 0 && { categoryId: filters.category }),
+      ...(filters.activeIngredient.length > 0 && {
+        branchId: filters.activeIngredient,
+      }),
+      ...(filters.presentation.length > 0 && {
+        presentationId: filters.presentation,
+      }),
+      priceRange: { min: price[0], max: price[1] },
+    };
+
     try {
-      const req: ProductPaginationRequest = {
-        page: 1,
-        limit: 50,
-        ...(query.trim() && { q: query.trim() }),
-        ...(filters.brand.length > 0 && { manufacturerId: filters.brand }),
-        ...(filters.category.length > 0 && { categoryId: filters.category }),
-        ...(filters.activeIngredient.length > 0 && {
-          branchId: filters.activeIngredient,
-        }),
-        ...(filters.presentation.length > 0 && {
-          presentationId: filters.presentation,
-        }),
-        priceRange: { min: price[0], max: price[1] },
-      };
       const resp = await api.product.getProducts(req);
       setDisplayProducts(mapToUI(resp.results));
       setCurrentPriceRange(price);
@@ -171,7 +204,7 @@ export default function SearchPage() {
           ]}
         />
 
-        {/* Filtros Móvil */}
+        {/* Móvil */}
         {showMobileFilters && (
           <div className="fixed inset-0 z-50 flex bg-black/50">
             <div className="w-full max-w-xs overflow-auto bg-white p-4">
@@ -193,7 +226,7 @@ export default function SearchPage() {
         )}
 
         <div className="flex flex-col gap-6 md:flex-row">
-          {/* Sidebar Desktop */}
+          {/* Desktop */}
           <aside className="hidden md:block md:w-64">
             <SidebarFilter
               initialFilters={currentFilters}
@@ -220,7 +253,8 @@ export default function SearchPage() {
 
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl">
-                  Resultados para: <span className="capitalize">{query}</span>
+                  Resultados para:{' '}
+                  <span className="capitalize">{categoryName}</span>
                 </h2>
                 <span className="text-sm text-gray-600">
                   {displayProducts.length} resultado
@@ -228,7 +262,7 @@ export default function SearchPage() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
                 {displayProducts.map((p) => (
                   <ProductCard
                     key={p.id}

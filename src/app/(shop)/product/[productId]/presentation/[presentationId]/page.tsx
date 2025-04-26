@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
     { label: 'Inicio', href: '/' },
     {
       label: genericProduct.categories?.[0]?.name ?? 'Categoría',
-      href: `/category/${genericProduct.categories?.[0]?.name}`,
+      href: `/search?category=${genericProduct.categories?.[0]?.name}`,
     },
     {
       label: presentation.presentation.name,
