@@ -7,6 +7,7 @@ import SidebarFilter, { Filters } from '@/components/SidebarFilter';
 import ProductCard from '@/components/Product/ProductCard';
 import { api } from '@/lib/sdkConfig';
 import Loading from '@/app/loading';
+import Breadcrumb from '@/components/Breadcrumb';
 
 interface UIProduct {
   id: string;
@@ -162,6 +163,14 @@ export default function SearchPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <main className="container mx-auto mt-10 flex-grow px-4 sm:px-6 lg:px-8">
+        <Breadcrumb
+          items={[
+            { label: 'Inicio', href: '/' },
+            { label: categoryName, href: `/search?category=${categoryName}` },
+            { label: query, href: `/search?query=${query}` },
+          ]}
+        />
+
         {/* Filtros Móvil */}
         {showMobileFilters && (
           <div className="fixed inset-0 z-50 flex bg-black/50">
