@@ -1,47 +1,23 @@
-// src/app/search/page.tsx  (o donde tengas tu SearchPage)
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SidebarFilter, { Filters } from '@/components/SidebarFilter';
 import ProductCard from '@/components/Product/ProductCard';
 import { api } from '@/lib/sdkConfig';
 import Loading from '@/app/loading';
-
-interface UIProduct {
-  id: string;
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
-  imageSrc: string;
-  brand: string;
-  presentation: string;
-  activeIngredient: string;
-  categories: string[];
-}
-
-interface ProductPaginationRequest {
-  page: number;
-  limit: number;
-  q?: string;
-  manufacturerId?: string[];
-  categoryId?: string[];
-  branchId?: string[];
-  presentationId?: string[];
-  priceRange?: { min: number; max: number };
-}
+import { ProductPaginationRequest, ProductPresentation } from '@pharmatech/sdk';
 
 export default function SearchPage() {
   const params = useSearchParams();
   const query = params?.get('query') ?? '';
-  const categoryName = params?.get('category') ?? 'Categorías';
+  const categoryId = params?.get('categoryId') ?? '';
 
-  const [allProducts, setAllProducts] = useState<UIProduct[]>([]);
-  const [displayProducts, setDisplayProducts] = useState<UIProduct[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
+  const [allProducts, setAllProducts] = useState<ProductPresentation[]>([]);
+  const [displayProducts, setDisplayProducts] = useState<ProductPresentation[]>(
+    [],
+  );
+  const priceRange = [0, 1000];
   const [currentPriceRange, setCurrentPriceRange] = useState<[number, number]>([
     0, 0,
   ]);
@@ -54,66 +30,23 @@ export default function SearchPage() {
     activeIngredient: [],
   });
 
-  interface APIProduct {
-    id: string;
-    product: {
-      id: string;
-      name: string;
-      manufacturer?: { name: string };
-      genericName?: string;
-      categories?: { name: string }[];
-      images?: { url: string }[];
-    };
-    presentation: { id: string; name: string; quantity: number };
-    price: number;
-  }
-
-  const mapToUI = useCallback(
-    (results: APIProduct[]): UIProduct[] =>
-      results.map((item) => ({
-        id: item.id,
-        productPresentationId: item.id,
-        productId: item.product.id,
-        presentationId: `${item.presentation.id}`,
-        productName: `${item.product.name} ${item.presentation.name}`,
-        stock: item.presentation.quantity,
-        currentPrice: item.price,
-        imageSrc: item.product.images?.[0]?.url || '',
-        brand: item.product.manufacturer?.name || '',
-        presentation: item.presentation.name,
-        activeIngredient: item.product.genericName || '',
-        categories: item.product.categories?.map((c) => c.name) || [],
-      })),
-    [],
-  );
-
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
         const req: ProductPaginationRequest = { page: 1, limit: 50 };
         if (query.trim()) req.q = query.trim();
-        const resp = await api.product.getProducts(req);
-        let ui = mapToUI(resp.results);
-        if (categoryName !== 'Categorías') {
-          ui = ui.filter((p) => p.categories.includes(categoryName));
-        }
-        setAllProducts(ui);
-        setDisplayProducts(ui);
-        const prices = ui.map((p) => p.currentPrice);
-        if (prices.length) {
-          const min = Math.min(...prices);
-          const max = Math.max(...prices);
-          setPriceRange([min, max]);
-          setCurrentPriceRange([min, max]);
-        }
+        if (categoryId) req.categoryId = [categoryId];
+        const data = await api.product.getProducts(req);
+        setAllProducts(data.results);
+        setDisplayProducts(data.results);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     })();
-  }, [query, categoryName, mapToUI]);
+  }, [query, categoryId]);
 
   const handleApplyFilters = async (
     filters: Filters,
@@ -137,7 +70,7 @@ export default function SearchPage() {
         priceRange: { min: price[0], max: price[1] },
       };
       const resp = await api.product.getProducts(req);
-      setDisplayProducts(mapToUI(resp.results));
+      setDisplayProducts(resp.results);
       setCurrentPriceRange(price);
     } catch (err) {
       console.error('Error aplicando filtros:', err);
@@ -155,7 +88,7 @@ export default function SearchPage() {
       activeIngredient: [],
     });
     setDisplayProducts(allProducts);
-    setCurrentPriceRange(priceRange);
+    setCurrentPriceRange([priceRange[0], priceRange[1]]);
     setShowMobileFilters(false);
   };
 
@@ -174,7 +107,7 @@ export default function SearchPage() {
               </button>
               <SidebarFilter
                 initialFilters={currentFilters}
-                initialPriceRange={priceRange}
+                initialPriceRange={[priceRange[0], priceRange[1]]}
                 initialCurrentPriceRange={currentPriceRange}
                 onApplyFilters={handleApplyFilters}
                 onClearFilters={handleClearFilters}
@@ -188,7 +121,7 @@ export default function SearchPage() {
           <aside className="hidden md:block md:w-64">
             <SidebarFilter
               initialFilters={currentFilters}
-              initialPriceRange={priceRange}
+              initialPriceRange={[priceRange[0], priceRange[1]]}
               initialCurrentPriceRange={currentPriceRange}
               onApplyFilters={handleApplyFilters}
               onClearFilters={handleClearFilters}
@@ -221,17 +154,7 @@ export default function SearchPage() {
 
               <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
                 {displayProducts.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    productPresentationId={p.productPresentationId}
-                    productId={p.productId}
-                    presentationId={p.presentationId}
-                    imageSrc={p.imageSrc}
-                    productName={p.productName}
-                    stock={p.stock}
-                    currentPrice={p.currentPrice}
-                    variant="regular"
-                  />
+                  <ProductCard key={p.id} product={p} variant="regular" />
                 ))}
               </div>
             </section>
