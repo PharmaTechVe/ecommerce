@@ -54,6 +54,7 @@ interface ProductApiResponse {
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const { token, user } = useAuth();
   const toastDisplayed = useRef(false);
@@ -105,6 +106,37 @@ export default function Home() {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (!token || !user?.sub) return;
+      try {
+        const data = await api.product.getRecommendations(token);
+
+        const backendProducts: Product[] = data.results.map(
+          (item: ProductApiResponse, index: number) => ({
+            id: index,
+            productPresentationId: item.id,
+            productId: item.product.id,
+            presentationId: item.presentation.id,
+            productName: ` ${item.product.name} ${item.presentation.name} ${item.presentation.quantity} ${item.presentation.measurementUnit} `,
+            stock: item.presentation.quantity,
+            currentPrice: item.price,
+            imageSrc:
+              Array.isArray(item.product.images) &&
+              item.product.images.length > 0
+                ? item.product.images[0].url
+                : '',
+          }),
+        );
+        setRecommendedProducts(backendProducts);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+
+    fetchProducts();
+  }, [token, user]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
       try {
         const data = await api.product.getProducts({ page: 1, limit: 20 });
 
@@ -147,6 +179,21 @@ export default function Home() {
             <ProductCarousel carouselType="regular" products={products} />
           </div>
         </div>
+        {recommendedProducts.length > 0 && (
+          <>
+            <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
+              Productos Recomendados para ti
+            </h3>
+            <div className="mt-8">
+              <div className="cursor-pointer">
+                <ProductCarousel
+                  carouselType="regular"
+                  products={recommendedProducts}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Modal para validar email */}
