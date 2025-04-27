@@ -15,18 +15,12 @@ import { api } from '@/lib/sdkConfig';
 import ModalConfirm from '@/components/ModalConfirm';
 import { toast } from 'react-toastify';
 import Loading from '@/app/loading';
-
-type UserAddressAPIResponse = {
-  id: string;
-  adress: string;
-  zipCode: string;
-  nameState: string;
-};
+import { UserAddressResponse } from '@pharmatech/sdk';
 
 export default function AddressPage() {
   const { user, token } = useAuth();
   const router = useRouter();
-  const [addresses, setAddresses] = useState<UserAddressAPIResponse[]>([]);
+  const [addresses, setAddresses] = useState<UserAddressResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -113,7 +107,7 @@ export default function AddressPage() {
                   <p
                     className={`flex-1 pr-4 text-[${FontSizes.b1.size}] text-[${Colors.textMain}]`}
                   >
-                    {addr.adress}, {addr.zipCode}, {addr.nameState}
+                    {addr.adress}, {addr.nameState}
                   </p>
                   <div className="flex gap-3">
                     <button

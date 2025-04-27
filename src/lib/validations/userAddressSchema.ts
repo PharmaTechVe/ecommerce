@@ -7,7 +7,6 @@ export const addressSchema = z.object({
     .string()
     .min(1, 'La dirección es obligatoria')
     .max(200, 'Máximo 200 caracteres'),
-  zipCode: z.string().regex(/^\d{4}$/, 'El código postal debe tener 4 dígitos'),
   additionalInfo: z
     .string()
     .max(100, 'Máximo 100 caracteres')
