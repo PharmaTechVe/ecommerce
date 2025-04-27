@@ -15,19 +15,9 @@ import {
   ProductPresentationDetailResponse,
   GenericProductResponse,
   ProductPresentationResponse,
+  ProductPresentation,
 } from '@pharmatech/sdk';
 import Loading from '@/app/loading';
-
-interface ProductCard {
-  id: number;
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
-  imageSrc: string;
-}
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -42,7 +32,7 @@ export default function ProductDetailPage() {
   const [genericProduct, setGenericProduct] =
     useState<GenericProductResponse | null>(null);
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [products, setProducts] = useState<ProductCard[]>([]);
+  const [products, setProducts] = useState<ProductPresentation[]>([]);
   const [presentationList, setPresentationList] = useState<
     ProductPresentationResponse[]
   >([]);
@@ -110,19 +100,13 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const q = genericProduct?.manufacturer.name ?? '';
-        const res = await api.product.getProducts({ page: 1, limit: 20, q });
-        const mapped = res.results.map((p, i) => ({
-          id: i,
-          productPresentationId: p.id,
-          productId: p.product.id,
-          presentationId: p.presentation.id,
-          productName: `${p.product.name} ${p.presentation.name}`,
-          stock: p.presentation.quantity,
-          currentPrice: p.price,
-          imageSrc: p.product.images?.[0]?.url ?? '',
-        }));
-        setProducts(mapped);
+        const manufacturerId = genericProduct?.manufacturer.id;
+        const data = await api.product.getProducts({
+          page: 1,
+          limit: 20,
+          manufacturerId: manufacturerId ? [manufacturerId] : undefined,
+        });
+        setProducts(data.results);
       } catch (err) {
         console.error(err);
       } finally {

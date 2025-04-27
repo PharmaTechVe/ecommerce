@@ -2,28 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import type { ImageType } from '@/components/Product/CardBase';
 import ProductCard from '@/components/Product/ProductCard';
 import { Colors } from '@/styles/styles';
-
-export type Product = {
-  id: number;
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
-  lastPrice?: number;
-  discountPercentage?: number;
-  ribbonText?: string;
-  imageSrc: ImageType;
-  label?: string;
-};
+import { ProductPresentation } from '@pharmatech/sdk';
 
 export type ProductSliderProps = {
   title?: string;
-  products: Product[];
+  products: ProductPresentation[];
   carouselType?: 'regular' | 'large';
 };
 
@@ -116,7 +101,7 @@ export default function ProductSlider({
                 maxWidth: `calc(100% / ${visibleProducts} - 1rem)`,
               }}
             >
-              <ProductCard {...product} variant={variant} />
+              <ProductCard product={product} variant={variant} />
             </div>
           ))}
         </div>
