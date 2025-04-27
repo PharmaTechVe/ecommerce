@@ -7,7 +7,6 @@ import theme from '@/styles/styles';
 import Image from 'next/image';
 import Head from 'next/head';
 import Stepper from '@/components/Stepper';
-import { ToastContainer } from 'react-toastify';
 import { ChevronLeftIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -145,7 +144,6 @@ export default function RecoverPasswordPage() {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </>
   );
 }
