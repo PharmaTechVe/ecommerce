@@ -137,7 +137,7 @@ export default function SearchBar({
         </button>
       </div>
 
-      {searchTerm.length > 0 && !disableDropdown && (
+      {searchTerm.length > 0 && (
         <SearchSuggestions query={searchTerm} category={selectedCategory} />
       )}
     </div>

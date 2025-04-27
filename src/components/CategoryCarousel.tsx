@@ -2,13 +2,14 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import type { Category } from '@pharmatech/sdk';
 import { Colors } from '@/styles/styles';
 
 interface CategoryCarouselProps {
-  categories: Category[];
+  categories: (Category & { imageUrl?: string })[]; // asumimos imageUrl en el endpoint
 }
 
 export default function CategoryCarousel({
@@ -54,13 +55,25 @@ export default function CategoryCarousel({
             style={{
               minWidth: `calc((100% - ${visibleCount - 1}rem) / ${visibleCount})`,
             }}
-            onClick={() => {
-              // Empuja la URL con ?category=<nombre>
-              router.push(`/search?category=${encodeURIComponent(cat.name)}`);
-            }}
+            onClick={() =>
+              router.push(`/search?category=${encodeURIComponent(cat.name)}`)
+            }
           >
-            <div className="rounded-lg border p-4 text-center shadow-sm hover:bg-gray-100">
-              {cat.name}
+            <div className="overflow-hidden rounded-lg shadow-sm hover:opacity-90">
+              {cat.imageUrl ? (
+                <Image
+                  src={cat.imageUrl}
+                  alt={cat.name}
+                  width={240}
+                  height={120}
+                  className="h-32 w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-32 w-full items-center justify-center bg-gray-200">
+                  <span className="text-gray-500">No image</span>
+                </div>
+              )}
+              <div className="p-2 text-center font-medium">{cat.name}</div>
             </div>
           </div>
         ))}

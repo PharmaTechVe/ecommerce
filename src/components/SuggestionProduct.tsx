@@ -129,6 +129,7 @@ export default function SearchSuggestions({
           const qEnc = encodeURIComponent(query.trim());
           const cEnc = encodeURIComponent(category.trim());
           router.push(`/search?query=${qEnc}&category=${cEnc}`);
+          setShowDropdown(false); // cierra el dropdown al buscar
         }}
       >
         <span>
