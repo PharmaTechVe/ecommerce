@@ -191,7 +191,7 @@ export default function ProductDetailPage() {
                   productPresentationId,
                   name: `${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name}`,
                   price: presentation.price,
-                  stock: presentation.presentation.quantity,
+                  stock: presentation.stock || 0,
                   image: slides?.[0]?.imageUrl ?? '',
                 }}
               />
