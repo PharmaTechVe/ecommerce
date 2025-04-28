@@ -18,6 +18,7 @@ import {
   ProductPresentation,
 } from '@pharmatech/sdk';
 import Loading from '@/app/loading';
+import ProductNotFound from '@/components/Product/NotFound';
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -37,8 +38,6 @@ export default function ProductDetailPage() {
     ProductPresentationResponse[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [minWaitDone, setMinWaitDone] = useState(false);
 
   useEffect(() => {
     const fetchPresentationDetail = async () => {
@@ -50,7 +49,7 @@ export default function ProductDetailPage() {
         setPresentation(data);
       } catch (err) {
         console.error(err);
-        setError('Error fetching presentation details');
+        setLoading(false);
       }
     };
     if (presentationId) fetchPresentationDetail();
@@ -66,7 +65,6 @@ export default function ProductDetailPage() {
         setPresentationList(list);
       } catch (err) {
         console.error(err);
-        setError('Error fetching product info');
       }
     };
     fetchGenericData();
@@ -116,25 +114,9 @@ export default function ProductDetailPage() {
     if (genericProduct) fetchProducts();
   }, [genericProduct]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setMinWaitDone(true), 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (minWaitDone && (!presentation || !genericProduct)) {
-      const timer = setTimeout(() => router.push('/'), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [minWaitDone, presentation, genericProduct, router]);
-
   if (loading) return <Loading />;
   if (!presentation || !genericProduct) {
-    return (
-      <div className="p-4 text-lg">
-        {error || 'Producto no encontrado. Redirigiendo al inicio...'}
-      </div>
-    );
+    return <ProductNotFound />;
   }
   const productPresentationId = presentation.id;
   const breadcrumbItems = [
