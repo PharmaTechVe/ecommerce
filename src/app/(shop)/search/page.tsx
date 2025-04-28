@@ -36,7 +36,7 @@ export default function SearchPage() {
       try {
         const req: ProductPaginationRequest = { page: 1, limit: 50 };
         if (query.trim()) req.q = query.trim();
-        if (categoryId) req.categoryId = [categoryId];
+        if (categoryId && categoryId !== '1') req.categoryId = [categoryId];
         const data = await api.product.getProducts(req);
         setAllProducts(data.results);
         setDisplayProducts(data.results);

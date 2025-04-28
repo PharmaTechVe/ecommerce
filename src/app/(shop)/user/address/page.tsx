@@ -14,7 +14,6 @@ import { FontSizes, Colors } from '@/styles/styles';
 import { api } from '@/lib/sdkConfig';
 import ModalConfirm from '@/components/ModalConfirm';
 import { toast } from 'react-toastify';
-import Loading from '@/app/loading';
 import { UserAddressResponse } from '@pharmatech/sdk';
 
 export default function AddressPage() {
@@ -62,7 +61,7 @@ export default function AddressPage() {
     }
   };
 
-  if (!user || loading) return <Loading />;
+  if (!user || loading) return; //<Loading />;
 
   return (
     <>
@@ -88,51 +87,41 @@ export default function AddressPage() {
               </Button>
             </div>
           </div>
-
-          {loading ? (
-            <p className="text-center text-sm text-gray-500">
-              Cargando direcciones...
-            </p>
-          ) : (
-            <div className="w-full space-y-4">
-              {addresses.map((addr, index) => (
-                <div
-                  key={addr.id}
-                  className={`flex w-full items-start justify-between rounded border px-4 py-3 md:w-[818px] ${
-                    index % 2 === 0
-                      ? 'border-gray-100 bg-gray-50'
-                      : 'border-gray-100 bg-white'
-                  }`}
+          <div className="w-full space-y-4">
+            {addresses.map((addr, index) => (
+              <div
+                key={addr.id}
+                className={`flex w-full items-start justify-between rounded border px-4 py-3 md:w-[818px] ${
+                  index % 2 === 0
+                    ? 'border-gray-100 bg-gray-50'
+                    : 'border-gray-100 bg-white'
+                }`}
+              >
+                <p
+                  className={`flex-1 pr-4 text-[${FontSizes.b1.size}] text-[${Colors.textMain}]`}
                 >
-                  <p
-                    className={`flex-1 pr-4 text-[${FontSizes.b1.size}] text-[${Colors.textMain}]`}
+                  {addr.adress}, {addr.nameState}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    className="text-gray-600 hover:text-primary"
+                    onClick={() => router.push(`/user/address/${addr.id}/edit`)}
                   >
-                    {addr.adress}, {addr.nameState}
-                  </p>
-                  <div className="flex gap-3">
-                    <button
-                      className="text-gray-600 hover:text-primary"
-                      onClick={() =>
-                        router.push(`/user/address/${addr.id}/edit`)
-                      }
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      className="text-gray-600 hover:text-red-500"
-                      onClick={() => {
-                        setAddressToDelete(addr.id);
-                        setShowConfirmModal(true);
-                      }}
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </div>
+                    <PencilIcon className="h-5 w-5" />
+                  </button>
+                  <button
+                    className="text-gray-600 hover:text-red-500"
+                    onClick={() => {
+                      setAddressToDelete(addr.id);
+                      setShowConfirmModal(true);
+                    }}
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-
+              </div>
+            ))}
+          </div>
           <div className="mt-4 block md:hidden">
             <Button
               className={`font-regular h-[48px] w-full bg-primary px-4 py-2 text-white text-[${FontSizes.b1.size}]`}

@@ -13,13 +13,11 @@ import {
   OrderPaginationRequest,
 } from '@pharmatech/sdk';
 import { useAuth } from '@/context/AuthContext';
-import Loading from '@/app/loading';
 
 export default function OrdersPage() {
   const { token, user } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const mapStatus = (statusFromAPI: string): OrderStatus => {
     switch (statusFromAPI) {
@@ -37,7 +35,6 @@ export default function OrdersPage() {
   const fetchOrders = React.useCallback(async () => {
     if (!token || !user?.sub) {
       console.error('Error de carga de ordenes');
-      setLoading(false);
       return;
     }
 
@@ -64,8 +61,6 @@ export default function OrdersPage() {
       setOrders(mapped);
     } catch (error) {
       console.error('Error al cargar las órdenes:', error);
-    } finally {
-      setLoading(false);
     }
   }, [token, user?.sub]);
 
@@ -79,11 +74,7 @@ export default function OrdersPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6">
-      {loading ? (
-        <Loading />
-      ) : (
-        <OrderTable orders={orders} onViewDetails={handleViewDetails} />
-      )}
+      <OrderTable orders={orders} onViewDetails={handleViewDetails} />
     </div>
   );
 }
