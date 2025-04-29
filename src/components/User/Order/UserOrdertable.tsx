@@ -4,21 +4,10 @@ import Badge from '@/components/Badge';
 import type { BadgeProps } from '@/components/Badge';
 import Button from '@/components/Button';
 import Pagination from '@/components/Pagination';
-//import { FontSizes } from '@/styles/styles';
-//import { api } from '@/lib/sdkConfig';
-
-export type OrderStatus = 'pendiente' | 'pagado' | 'entregado';
-
-export interface Order {
-  id: string;
-  orderNumber: string;
-  orderDate: string;
-  status: OrderStatus;
-  totalPrice: number;
-}
+import { OrderResponse, OrderStatus } from '@pharmatech/sdk';
 
 interface OrderTableProps {
-  orders: Order[];
+  orders: OrderResponse[];
   onViewDetails: (orderId: string) => void;
 }
 
@@ -28,13 +17,22 @@ const getBadgeProps = (
   label: string;
   color: BadgeProps['color'];
 } => {
-  const map = {
-    pendiente: { label: 'Pendiente', color: 'danger' },
-    pagado: { label: 'Pagado', color: 'tertiary' },
-    entregado: { label: 'Entregado', color: 'success' },
-  } as const;
-
-  return map[status];
+  switch (status) {
+    case OrderStatus.REQUESTED:
+      return { label: 'Pendiente', color: 'warning' };
+    case OrderStatus.APPROVED:
+      return { label: 'Aprobado', color: 'info' };
+    case OrderStatus.IN_PROGRESS:
+      return { label: 'En Progreso', color: 'primary' };
+    case OrderStatus.READY_FOR_PICKUP:
+      return { label: 'Listo para Retirar', color: 'info' };
+    case OrderStatus.CANCELED:
+      return { label: 'Cancelado', color: 'danger' };
+    case OrderStatus.COMPLETED:
+      return { label: 'Completado', color: 'success' };
+    default:
+      return { label: 'Desconocido', color: 'tertiary' };
+  }
 };
 
 const formatPrice = (price: number) => `$${price.toFixed(2)}`;
@@ -49,17 +47,21 @@ export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
     return orders.slice(start, start + itemsPerPage);
   }, [orders, currentPage]);
 
-  const renderRow = (order: Order, isMobile: boolean) => {
+  const renderRow = (order: OrderResponse, isMobile: boolean) => {
     const badge = getBadgeProps(order.status);
 
     if (isMobile) {
       return (
         <div key={order.id} className="border-b p-4">
           <div className="mb-1 flex items-start justify-between">
-            <div className="font-medium text-black">{order.orderNumber}</div>
+            <div className="font-medium text-black">
+              #{order.id.slice(0, 8)}
+            </div>
             <div className="text-black">{formatPrice(order.totalPrice)}</div>
           </div>
-          <div className="mb-2 text-gray-400">{order.orderDate}</div>
+          <div className="mb-2 text-gray-400">
+            {new Date(order.createdAt).toLocaleDateString('es-Es')}
+          </div>
           <div className="flex items-end justify-between">
             <Badge
               variant="filled"
@@ -84,8 +86,10 @@ export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
 
     return (
       <tr key={order.id} className="border-b">
-        <td className="px-4 py-4 text-black">{order.orderNumber}</td>
-        <td className="px-4 py-4 text-gray-400">{order.orderDate}</td>
+        <td className="px-4 py-4 text-black">#{order.id.slice(0, 8)}</td>
+        <td className="px-4 py-4 text-gray-400">
+          {new Date(order.createdAt).toLocaleDateString('es-Es')}
+        </td>
         <td className="px-4 py-4">
           <Badge
             variant="filled"

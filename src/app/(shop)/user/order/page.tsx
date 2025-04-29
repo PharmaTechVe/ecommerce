@@ -2,10 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import OrderTable, {
-  Order,
-  OrderStatus,
-} from '@/components/User/Order/UserOrdertable';
+import OrderTable from '@/components/User/Order/UserOrdertable';
 import { api } from '@/lib/sdkConfig';
 import {
   OrderResponse,
@@ -17,20 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 export default function OrdersPage() {
   const { token, user } = useAuth();
   const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
-
-  const mapStatus = (statusFromAPI: string): OrderStatus => {
-    switch (statusFromAPI) {
-      case 'requested':
-        return 'pendiente';
-      case 'paid':
-        return 'pagado';
-      case 'delivered':
-        return 'entregado';
-      default:
-        return 'pendiente';
-    }
-  };
+  const [orders, setOrders] = useState<OrderResponse[]>([]);
 
   const fetchOrders = React.useCallback(async () => {
     if (!token || !user?.sub) {
@@ -49,16 +33,7 @@ export default function OrdersPage() {
         params,
         token,
       );
-
-      const mapped: Order[] = response.results.map((order) => ({
-        id: order.id,
-        orderNumber: `#${order.id.slice(0, 8)}`,
-        orderDate: new Date(order.createdAt).toLocaleDateString('es-ES'),
-        status: mapStatus(order.status),
-        totalPrice: order.totalPrice ?? 0,
-      }));
-
-      setOrders(mapped);
+      setOrders(response.results);
     } catch (error) {
       console.error('Error al cargar las órdenes:', error);
     }
