@@ -16,6 +16,7 @@ import {
   GenericProductResponse,
   ProductPresentationResponse,
   ProductPresentation,
+  ProductPaginationRequest,
 } from '@pharmatech/sdk';
 import Loading from '@/app/loading';
 import ProductNotFound from '@/components/Product/NotFound';
@@ -99,11 +100,14 @@ export default function ProductDetailPage() {
     const fetchProducts = async () => {
       try {
         const manufacturerId = genericProduct?.manufacturer.id;
-        const data = await api.product.getProducts({
+        const productParams: ProductPaginationRequest = {
           page: 1,
           limit: 20,
-          manufacturerId: manufacturerId ? [manufacturerId] : undefined,
-        });
+        };
+        if (manufacturerId) {
+          productParams.manufacturerId = [manufacturerId];
+        }
+        const data = await api.product.getProducts(productParams);
         setProducts(data.results);
       } catch (err) {
         console.error(err);
