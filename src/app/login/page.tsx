@@ -4,7 +4,6 @@ import LoginForm from './LoginForm';
 import theme from '@/styles/styles';
 import Image from 'next/image';
 import Head from 'next/head';
-import { ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -118,8 +117,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-
-      <ToastContainer />
     </>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCartIcon, UserCircleIcon } from '@heroicons/react/24/outline';
@@ -13,6 +13,7 @@ import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
+import { CategoryResponse, Pagination } from '@pharmatech/sdk';
 
 interface UserProfile {
   firstName: string;
@@ -22,41 +23,26 @@ interface UserProfile {
   };
 }
 
-interface Category {
-  id: string;
-  name: string;
-  description: string;
-}
-
-interface CategoryFindAllResponse {
-  results: Category[];
-  count: number;
-  next: string | null;
-  previous: string | null;
-}
-
 type NavBarProps = {
   onCartClick?: () => void;
 };
 
 export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
-  const [categories, setCategories] = React.useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const { cartItems } = useCart();
   const { token, user } = useAuth();
 
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  const [userData, setUserData] = React.useState<UserProfile | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
 
-  // Obtener categorías
-  React.useEffect(() => {
+  useEffect(() => {
     api.category
       .findAll({ page: 1, limit: 20 })
-      .then((resp: CategoryFindAllResponse) => {
+      .then((resp: Pagination<CategoryResponse>) => {
         if (resp && resp.results) {
-          const catNames = resp.results.map((cat: Category) => cat.name);
-          setCategories(catNames);
+          setCategories(resp.results);
         }
       })
       .catch((err: unknown) => {
@@ -65,7 +51,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   }, []);
 
   // Obtener perfil si está logueado
-  React.useEffect(() => {
+  useEffect(() => {
     if (!token || !user?.sub) {
       setIsLoggedIn(false);
       setUserData(null);

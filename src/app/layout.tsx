@@ -3,8 +3,6 @@ import theme from '../styles/styles';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastContainer } from 'react-toastify';
-import { Suspense } from 'react';
-import Loading from './loading';
 
 export const metadata: Metadata = {
   title: 'Pharmatech',
@@ -21,10 +19,8 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <CartProvider>
-            <Suspense fallback={<Loading />}>
-              {children}
-              <ToastContainer />
-            </Suspense>
+            {children}
+            <ToastContainer />
           </CartProvider>
         </AuthProvider>
       </body>

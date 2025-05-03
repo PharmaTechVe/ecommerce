@@ -15,19 +15,11 @@ import {
   ProductPresentationDetailResponse,
   GenericProductResponse,
   ProductPresentationResponse,
+  ProductPresentation,
+  ProductPaginationRequest,
 } from '@pharmatech/sdk';
 import Loading from '@/app/loading';
-
-interface ProductCard {
-  id: number;
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
-  imageSrc: string;
-}
+import ProductNotFound from '@/components/Product/NotFound';
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -42,13 +34,11 @@ export default function ProductDetailPage() {
   const [genericProduct, setGenericProduct] =
     useState<GenericProductResponse | null>(null);
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [products, setProducts] = useState<ProductCard[]>([]);
+  const [products, setProducts] = useState<ProductPresentation[]>([]);
   const [presentationList, setPresentationList] = useState<
     ProductPresentationResponse[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [minWaitDone, setMinWaitDone] = useState(false);
 
   useEffect(() => {
     const fetchPresentationDetail = async () => {
@@ -60,7 +50,7 @@ export default function ProductDetailPage() {
         setPresentation(data);
       } catch (err) {
         console.error(err);
-        setError('Error fetching presentation details');
+        setLoading(false);
       }
     };
     if (presentationId) fetchPresentationDetail();
@@ -76,7 +66,6 @@ export default function ProductDetailPage() {
         setPresentationList(list);
       } catch (err) {
         console.error(err);
-        setError('Error fetching product info');
       }
     };
     fetchGenericData();
@@ -110,19 +99,16 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const q = genericProduct?.manufacturer.name ?? '';
-        const res = await api.product.getProducts({ page: 1, limit: 20, q });
-        const mapped = res.results.map((p, i) => ({
-          id: i,
-          productPresentationId: p.id,
-          productId: p.product.id,
-          presentationId: p.presentation.id,
-          productName: `${p.product.name} ${p.presentation.name}`,
-          stock: p.presentation.quantity,
-          currentPrice: p.price,
-          imageSrc: p.product.images?.[0]?.url ?? '',
-        }));
-        setProducts(mapped);
+        const manufacturerId = genericProduct?.manufacturer.id;
+        const productParams: ProductPaginationRequest = {
+          page: 1,
+          limit: 20,
+        };
+        if (manufacturerId) {
+          productParams.manufacturerId = [manufacturerId];
+        }
+        const data = await api.product.getProducts(productParams);
+        setProducts(data.results);
       } catch (err) {
         console.error(err);
       } finally {
@@ -132,25 +118,9 @@ export default function ProductDetailPage() {
     if (genericProduct) fetchProducts();
   }, [genericProduct]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setMinWaitDone(true), 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (minWaitDone && (!presentation || !genericProduct)) {
-      const timer = setTimeout(() => router.push('/'), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [minWaitDone, presentation, genericProduct, router]);
-
   if (loading) return <Loading />;
   if (!presentation || !genericProduct) {
-    return (
-      <div className="p-4 text-lg">
-        {error || 'Producto no encontrado. Redirigiendo al inicio...'}
-      </div>
-    );
+    return <ProductNotFound />;
   }
   const productPresentationId = presentation.id;
   const breadcrumbItems = [
@@ -207,7 +177,7 @@ export default function ProductDetailPage() {
                   productPresentationId,
                   name: `${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name}`,
                   price: presentation.price,
-                  stock: presentation.presentation.quantity,
+                  stock: presentation.stock || 0,
                   image: slides?.[0]?.imageUrl ?? '',
                 }}
               />
