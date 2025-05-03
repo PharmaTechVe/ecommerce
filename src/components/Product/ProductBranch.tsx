@@ -6,7 +6,6 @@ import {
   CountryResponse,
   StateResponse,
   BranchResponse,
-  ProductPresentation,
 } from '@pharmatech/sdk';
 import { TruckIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import Dropdown from '@/components/Dropdown';
@@ -64,18 +63,14 @@ export default function ProductBranch({ productPresentationId }: Props) {
         const results: (BranchResponse & { stock: number })[] = [];
 
         for (const branch of branchesRes.results) {
-          const productsRes = await api.product.getProducts({
+          const data = await api.inventory.findAll({
             page: 1,
             limit: 100,
-            branchId: [branch.id],
+            branchId: branch.id,
+            productPresentationId,
           });
-
-          const match = productsRes.results.find(
-            (p: ProductPresentation) => p.id === productPresentationId,
-          );
-
-          if (match && match.presentation.quantity > 0) {
-            results.push({ ...branch, stock: match.presentation.quantity });
+          if (data.results.length > 0 && data.results[0].stockQuantity > 0) {
+            results.push({ ...branch, stock: data.results[0].stockQuantity });
           }
         }
 

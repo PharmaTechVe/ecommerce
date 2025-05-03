@@ -6,25 +6,15 @@ import { toast } from 'react-toastify';
 import { useAuth } from '@/context/AuthContext';
 import EditAddressForm from '@/components/User/UserAddressForm';
 import { api } from '@/lib/sdkConfig';
-
-type AddressFormData = {
-  id: string;
-  address: string;
-  zipCode: string;
-  additionalInformation: string;
-  referencePoint: string;
-  nameCity: string;
-  nameState: string;
-  cityId: string;
-  latitude: number | null;
-  longitude: number | null;
-};
+import { UserAddressResponse } from '@pharmatech/sdk';
 
 export default function Page() {
   const { user, token } = useAuth();
   const params = useParams();
   const router = useRouter();
-  const [initialData, setInitialData] = useState<AddressFormData | null>(null);
+  const [initialData, setInitialData] = useState<UserAddressResponse | null>(
+    null,
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,18 +32,7 @@ export default function Page() {
           params.id as string,
           token ?? '',
         );
-        setInitialData({
-          id: response.id,
-          address: response.adress,
-          zipCode: response.zipCode,
-          additionalInformation: response.additionalInformation ?? '',
-          referencePoint: response.referencePoint ?? '',
-          nameCity: response.nameCity,
-          nameState: response.nameState,
-          cityId: response.cityId,
-          latitude: response.latitude,
-          longitude: response.longitude,
-        });
+        setInitialData(response);
       } catch (error) {
         console.error('Error al cargar los datos:', error);
         toast.error('No se pudo cargar la dirección.');
