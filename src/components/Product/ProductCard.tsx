@@ -1,55 +1,42 @@
 'use client';
 import React from 'react';
 import CardBase from './CardBase';
-import { ImageType } from './CardBase';
 import { Colors, FontSizes } from '@/styles/styles';
 import CardButton from '../CardButton';
 import Link from 'next/link';
+import { ProductPresentation } from '@pharmatech/sdk';
 
 export type ProductCardProps = {
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  imageSrc: ImageType;
+  product: ProductPresentation;
   ribbonText?: string;
   label?: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
   lastPrice?: number;
   discountPercentage?: number;
   variant?: 'regular' | 'minimal' | 'responsive';
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({
-  productPresentationId,
-  productId,
-  presentationId,
-  imageSrc,
+  product,
   ribbonText,
   label,
-  productName,
-  stock,
-  currentPrice,
   lastPrice,
   discountPercentage,
   variant,
 }) => {
-  // Definimos el objeto de la ruta para el detalle del producto
   const detailLink = {
-    pathname: `/product/${productId}/presentation/${presentationId}`,
-    query: { productPresentationId },
+    pathname: `/product/${product.product.id}/presentation/${product.presentation.id}`,
+    query: { productPresentationId: product.id },
   };
-
+  const imageSrc = product.product.images?.[0]?.url ?? '';
   return (
     <div className="flex items-center justify-center">
       <CardBase
         variant={variant}
         showRibbon={!!ribbonText}
         ribbonText={ribbonText}
-        imageSrc={imageSrc}
+        imageSrc={product.product.images?.[0]?.url ?? ''}
         label={label}
-        imageLink={detailLink} // PASAMOS LA RUTA: la imagen ahora es clickeable
+        imageLink={detailLink}
       >
         <div
           className={`flex flex-col px-[24px] ${
@@ -60,12 +47,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <div className="mb-[5px] flex justify-end">
               <CardButton
                 product={{
-                  productPresentationId: productPresentationId, // del API
-                  name: productName,
-                  price: lastPrice || currentPrice,
+                  productPresentationId: product.id, // del API
+                  name: product.product.name,
+                  price: product.price,
                   discount: discountPercentage,
-                  image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
-                  stock: stock,
+                  image: typeof imageSrc === 'string' ? imageSrc : '',
+                  stock: product.stock || 0,
                 }}
               />
             </div>
@@ -95,7 +82,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 WebkitBoxOrient: 'vertical',
               }}
             >
-              {productName}
+              {product.product.name}
             </p>
             <p
               className={`${
@@ -123,7 +110,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 color: Colors.textMain,
               }}
             >
-              Stock: {stock}
+              Stock: {product.stock || 0}
             </p>
           </Link>
 
@@ -201,19 +188,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
                   color: Colors.textHighContrast,
                 }}
               >
-                ${currentPrice.toFixed(2)}
+                ${product.price.toFixed(2)}
               </p>
             </div>
 
             {variant !== 'responsive' && (
               <CardButton
                 product={{
-                  productPresentationId: productPresentationId, // del API
-                  name: productName,
-                  price: lastPrice || currentPrice,
+                  productPresentationId: product.id, // del API
+                  name: product.product.name,
+                  price: lastPrice || product.price,
                   discount: discountPercentage,
-                  image: typeof imageSrc === 'string' ? imageSrc : imageSrc.src,
-                  stock: stock,
+                  image: typeof imageSrc === 'string' ? imageSrc : '',
+                  stock: product.stock || 0,
                 }}
               />
             )}
