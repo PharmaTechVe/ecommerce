@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext'; // ◀️ importa tu contexto de carrito
+import { toast } from 'react-toastify';
 
 const CheckoutPage = () => {
   const router = useRouter();
@@ -13,6 +14,7 @@ const CheckoutPage = () => {
   useEffect(() => {
     // 1) Si no está autenticado, al login
     if (!token) {
+      toast.error('Debes iniciar sesión para continuar con el checkout');
       router.replace('/login');
       return;
     }

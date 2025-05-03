@@ -80,17 +80,17 @@ const CheckoutStepContent: React.FC = () => {
 
   const handlePayClick = async () => {
     if (!deliveryMethod || !paymentMethod) {
-      alert('Debe seleccionar el método de retiro y el método de pago');
+      toast.error('Debe seleccionar el método de retiro y el método de pago');
       return;
     }
 
     if (deliveryMethod === 'store' && !selectedBranchId) {
-      alert('Por favor, selecciona una sucursal válida.');
+      toast.error('Por favor, selecciona una sucursal válida.');
       return;
     }
 
     if (deliveryMethod === 'home' && !isValidUUID(selectedUserAddressId)) {
-      alert('Por favor, selecciona una dirección válida.');
+      toast.error('Por favor, selecciona una dirección válida.');
       return;
     }
 

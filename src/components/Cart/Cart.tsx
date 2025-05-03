@@ -32,6 +32,7 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
   const total = subtotal - discount + tax;
 
   const handleCheckout = () => {
+    closeCart();
     router.push('/checkout');
   };
 

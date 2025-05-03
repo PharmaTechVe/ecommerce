@@ -23,12 +23,7 @@ export default function ShopLayout({ children }: ShopLayoutProps) {
       </div>
       <Footer />
       {/* Cart Overlay */}
-      {isCartOpen && (
-        <CartOverlay
-          isOpen={isCartOpen}
-          closeCart={() => setIsCartOpen(false)}
-        />
-      )}
+      <CartOverlay isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} />
     </div>
   );
 }

@@ -14,7 +14,6 @@ const CartOverlay: React.FC<CartOverlayProps> = ({ isOpen, closeCart }) => {
     if (isOpen) {
       setShouldRender(true);
     } else {
-      // Espera el tiempo de duración de la animación (500ms) para que finalice la transición
       const timer = setTimeout(() => setShouldRender(false), 500);
       return () => clearTimeout(timer);
     }
@@ -24,14 +23,12 @@ const CartOverlay: React.FC<CartOverlayProps> = ({ isOpen, closeCart }) => {
 
   return (
     <div className="fixed inset-0 z-50">
-      {/* Fondo oscuro con animación de opacidad */}
       <div
         className={`absolute inset-0 bg-black transition-opacity duration-500 ease-in-out ${
           isOpen ? 'opacity-30' : 'opacity-0'
         }`}
         onClick={closeCart}
       />
-      {/* Contenedor del carrito con animación personalizada */}
       <div
         className={`absolute right-0 h-full w-full transform bg-white shadow-xl md:w-[551px] ${
           isOpen ? 'animate-slideIn' : 'animate-slideOut'
