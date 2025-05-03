@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { useCheckout } from '../CheckoutContext';
 import Input from '@/components/Input/Input';
 import { api } from '@/lib/sdkConfig';
 import { PaymentInfoResponse, PaymentConfirmation } from '@pharmatech/sdk';
@@ -16,17 +15,21 @@ type Errors = {
 };
 
 type Props = {
-  onValidSubmit: (isValid: boolean) => void; // Callback para pasar la validación
+  onValidSubmit: (isValid: boolean) => void;
+  paymentMethod: 'bank' | 'mobile';
+  couponDiscount: number;
+  setPaymentConfirmationData: (data: PaymentConfirmation) => void;
 };
 
-const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
-  const { paymentMethod, couponDiscount, setPaymentConfirmationData } =
-    useCheckout();
+const PaymentProcess: React.FC<Props> = ({
+  onValidSubmit,
+  paymentMethod,
+  couponDiscount,
+  setPaymentConfirmationData,
+}) => {
   const { cartItems } = useCart();
-
   const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Calculations for displaying total amount
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
@@ -41,7 +44,6 @@ const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
   const totalAmount =
     subtotal - itemDiscount - couponDiscount + (tax > 0 ? tax : 0);
 
-  // Form state
   const [bank, setBank] = useState('');
   const [reference, setReference] = useState('');
   const [documentNumber, setDocumentNumber] = useState('');
@@ -59,26 +61,22 @@ const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
 
   const validateForm = React.useCallback(() => {
     const data = { bank, reference, documentNumber, phone };
-
-    // Validación con Zod
     const result = checkoutPaymentProcessSchema.safeParse(data);
 
     if (result.success) {
-      onValidSubmit(true); // Pasamos la validación exitosa al componente padre
+      onValidSubmit(true);
     } else {
       const errorMessages: Errors = {};
       result.error.errors.forEach((error) => {
         errorMessages[error.path[0] as keyof Errors] = error.message;
       });
       setErrors(errorMessages);
-      onValidSubmit(false); // Pasamos validación fallida al componente padre
+      onValidSubmit(false);
     }
-  }, [bank, reference, documentNumber, phone, onValidSubmit, setErrors]);
+  }, [bank, reference, documentNumber, phone, onValidSubmit]);
 
-  // Determine form type
   const isBank = paymentMethod === 'bank';
 
-  // Dynamic description
   const description = isBank
     ? 'Debes hacer el pago del monto exacto, la orden se creará cuando se confirme el pago'
     : 'Debes hacer el pago del monto exacto, de lo contrario no se creará la orden';
@@ -89,21 +87,15 @@ const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
   useEffect(() => {
     const fetchPaymentMethodDetails = async () => {
       try {
-        let response: PaymentInfoResponse | undefined;
-        let id: string | undefined;
-
-        //El design contempla una sola info para transferencia y una para pago movil por lo que hardcodee el id
-        if (paymentMethod === 'bank') {
-          id = '7c9eb7fb-1c4f-417c-a878-37c266f9f6ce';
-        } else if (paymentMethod === 'mobile') {
-          id = '2f09bf3d-bdd9-49be-9d6c-27230a96ffe5';
-        }
+        const id =
+          paymentMethod === 'bank'
+            ? '7c9eb7fb-1c4f-417c-a878-37c266f9f6ce'
+            : paymentMethod === 'mobile'
+              ? '2f09bf3d-bdd9-49be-9d6c-27230a96ffe5'
+              : undefined;
 
         if (id) {
-          response = await api.paymentInformation.getById(id);
-        }
-
-        if (response) {
+          const response = await api.paymentInformation.getById(id);
           setPaymentDetails(response);
         }
       } catch (error) {
@@ -120,7 +112,6 @@ const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
 
   return (
     <section className="space-y-8">
-      {/* Header */}
       <div className="space-y-2">
         <h2 className="text-2xl text-gray-800">
           {isBank ? 'Transferencia Bancaria' : 'Pago Móvil'}
@@ -134,7 +125,6 @@ const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
         <p className="text-base text-gray-500">{description}</p>
       </div>
 
-      {/* Fixed account data */}
       <div className="grid grid-cols-4 gap-4">
         <div>
           <p className="text-base text-gray-500">Banco Asociado</p>
@@ -171,7 +161,6 @@ const PaymentProcess: React.FC<Props> = ({ onValidSubmit }) => {
         </div>
       </div>
 
-      {/* Validation form */}
       <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
         <p className="font-medium text-gray-700">
           Ingrese los datos para validar el pago

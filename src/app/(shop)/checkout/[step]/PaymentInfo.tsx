@@ -1,11 +1,16 @@
 'use client';
 
 import React from 'react';
-import { useCheckout } from '../CheckoutContext';
 
-const PaymentInfo: React.FC = () => {
-  const { paymentMethod, setPaymentMethod } = useCheckout();
+interface PaymentInfoProps {
+  paymentMethod: 'cash' | 'pos' | 'bank' | 'mobile' | null;
+  setPaymentMethod: (method: 'cash' | 'pos' | 'bank' | 'mobile') => void;
+}
 
+const PaymentInfo: React.FC<PaymentInfoProps> = ({
+  paymentMethod,
+  setPaymentMethod,
+}) => {
   return (
     <section className="space-y-8">
       <h2 className="text-2xl font-semibold text-gray-800">Datos de Pago</h2>
@@ -36,6 +41,14 @@ const PaymentInfo: React.FC = () => {
           onClick={() => setPaymentMethod('mobile')}
         >
           Pago Móvil
+        </button>
+        <button
+          className={`rounded px-4 py-2 ${
+            paymentMethod === 'cash' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+          }`}
+          onClick={() => setPaymentMethod('cash')}
+        >
+          Efectivo
         </button>
       </div>
     </section>

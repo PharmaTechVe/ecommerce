@@ -1,7 +1,7 @@
-// app/checkout/[step]/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 import Stepper from '@/components/Stepper';
 import Button from '@/components/Button';
@@ -11,67 +11,50 @@ import ReviewOrder from './ReviewOrder';
 import DeliveryInfo from './DeliveryInfo';
 import RejectedOrder from './RejectedOrder';
 import OrderSummary from '../OrderSummary';
-import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useCheckout } from '../CheckoutContext';
 import { useCart } from '@/context/CartContext';
 import { api } from '@/lib/sdkConfig';
 import { toast } from 'react-toastify';
-import { CreateOrder, OrderType } from '@pharmatech/sdk';
+import { CreateOrder, OrderType, PaymentConfirmation } from '@pharmatech/sdk';
 
 const CheckoutStepContent: React.FC = () => {
   const params = useParams<{ step: string }>();
   const step = params?.step;
   const router = useRouter();
   const { token } = useAuth();
-  const { cartItems } = useCart();
-  const { orderId, setOrderId } = useCheckout();
-  const { clearCart } = useCart();
+  const { cartItems, clearCart } = useCart();
 
-  const {
-    deliveryMethod,
-    paymentMethod,
-    selectedBranchLabel,
-    selectedBranchId, // <-- ID de sucursal o dirección
-    paymentConfirmationData,
-  } = useCheckout();
-
+  const [orderId, setOrderId] = useState<string>('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'store' | 'home' | null>(
+    null,
+  );
+  const [paymentMethod, setPaymentMethod] = useState<
+    'cash' | 'pos' | 'bank' | 'mobile' | null
+  >(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>(''); // para sucursal
+  const [selectedUserAddressId, setSelectedUserAddressId] =
+    useState<string>(''); // para dirección
+  const [paymentConfirmationData, setPaymentConfirmationData] =
+    useState<PaymentConfirmation>({} as PaymentConfirmation);
   const [isFormValid, setIsFormValid] = useState(false);
+
   const notify = {
     payment: (id: string) => toast.success(`Pago confirmado: ${id}`),
     order: (id: string) => toast.success(`Orden creada: ${id}`),
   };
 
-  // 1. Construcción de los títulos del stepper según método de entrega y pago
-  let stepsState: string[] = [];
-  if (deliveryMethod === 'store') {
-    if (paymentMethod === 'pos') {
-      stepsState = ['Opciones de Compra', 'Confirmación de Orden'];
-    } else {
-      stepsState = [
-        'Opciones de Compra',
-        'Visualización de Datos',
-        'Confirmación de Orden',
-      ];
-    }
-  } else if (deliveryMethod === 'home') {
-    if (paymentMethod === 'cash') {
-      stepsState = [
-        'Opciones de Compra',
-        'Confirmación de Orden',
-        'Información del Repartidor',
-      ];
-    } else {
-      stepsState = [
-        'Opciones de Compra',
-        'Visualización de Datos',
-        'Confirmación de Orden',
-        'Información del Repartidor',
-      ];
-    }
-  }
+  const isValidUUID = (id: string) =>
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+      id,
+    );
 
-  // 2. Helper para normalizar el paso (minúsculas, trim)
+  const stepsState = [
+    'Opciones de Compra',
+    'Confirmación de Orden',
+    'Visualización de Datos',
+    'Información del Repartidor',
+  ];
+
   const getLowerStep = (): string => {
     if (!step) return '';
     return Array.isArray(step)
@@ -80,30 +63,34 @@ const CheckoutStepContent: React.FC = () => {
   };
   const lowerStep = getLowerStep();
 
-  // 3. Índice actual para el Stepper
   const currentStepNumber = (): number => {
-    if (deliveryMethod === 'store') {
-      if (lowerStep === 'shippinginfo') return 1;
-      if (lowerStep === 'paymentprocess') return 2;
-      if (lowerStep === 'revieworder')
-        return paymentMethod === 'bank' || paymentMethod === 'mobile' ? 3 : 2;
-      return 0;
+    switch (lowerStep) {
+      case 'shippinginfo':
+        return 1;
+      case 'paymentprocess':
+        return 2;
+      case 'revieworder':
+        return 3;
+      case 'deliveryinfo':
+        return 4;
+      default:
+        return 0;
     }
-    if (deliveryMethod === 'home') {
-      if (lowerStep === 'shippinginfo') return 1;
-      if (lowerStep === 'paymentprocess') return 2;
-      if (lowerStep === 'revieworder') return paymentMethod === 'cash' ? 2 : 3;
-      if (lowerStep === 'deliveryinfo') return paymentMethod === 'cash' ? 3 : 4;
-      return 0;
-    }
-    return 0;
   };
-  // 4. Handler de “Realizar pago” con creación de orden para pickup+pos o delivery+cash
+
   const handlePayClick = async () => {
-    if (!deliveryMethod || !paymentMethod || !selectedBranchLabel) {
-      alert(
-        'Debe seleccionar el método de retiro, la sucursal/dirección y el método de pago',
-      );
+    if (!deliveryMethod || !paymentMethod) {
+      alert('Debe seleccionar el método de retiro y el método de pago');
+      return;
+    }
+
+    if (deliveryMethod === 'store' && !selectedBranchId) {
+      alert('Por favor, selecciona una sucursal válida.');
+      return;
+    }
+
+    if (deliveryMethod === 'home' && !isValidUUID(selectedUserAddressId)) {
+      alert('Por favor, selecciona una dirección válida.');
       return;
     }
 
@@ -121,29 +108,21 @@ const CheckoutStepContent: React.FC = () => {
         })),
         ...(deliveryMethod === 'store'
           ? { branchId: selectedBranchId }
-          : { userAddressId: selectedBranchId }),
+          : { userAddressId: selectedUserAddressId }),
       };
 
       try {
         const response = await api.order.create(payload, token!);
-        alert('Orden creada correctamente');
         notify.order(response.id);
         setOrderId(response.id);
+        router.push('/checkout/revieworder');
       } catch (err) {
         console.error('Error al crear la orden:', err);
         alert('Ocurrió un error al crear la orden');
-        return;
       }
-      setTimeout(() => {
-        router.push('/checkout/revieworder');
-      }, 800);
     } else {
       router.push('/checkout/paymentprocess');
     }
-  };
-
-  const handleValidSubmit = (isValid: boolean) => {
-    setIsFormValid(isValid); // Guardamos si el formulario es válido
   };
 
   const handleConfirmPayment = async () => {
@@ -151,20 +130,14 @@ const CheckoutStepContent: React.FC = () => {
       alert('Por favor, corrige los errores antes de continuar.');
       return;
     }
-    if (!token) {
-      alert('Debes iniciar sesión para continuar.');
-      return;
-    }
+
     try {
-      // 1️⃣ Confirmación de pago
       const confirmation = await api.paymentConfirmation.create(
         paymentConfirmationData,
-        token,
+        token!,
       );
-      console.log(confirmation.id);
       notify.payment(confirmation.id);
 
-      // 2️⃣ Creación de la orden
       const payload: CreateOrder = {
         type:
           deliveryMethod === 'store' ? OrderType.PICKUP : OrderType.DELIVERY,
@@ -174,52 +147,71 @@ const CheckoutStepContent: React.FC = () => {
         })),
         ...(deliveryMethod === 'store'
           ? { branchId: selectedBranchId }
-          : { userAddressId: selectedBranchId }),
+          : { userAddressId: selectedUserAddressId }),
       };
-      const orderRes = await api.order.create(payload, token);
+
+      const orderRes = await api.order.create(payload, token!);
       notify.order(orderRes.id);
       setOrderId(orderRes.id);
-      console.log(orderRes.id);
-      // 3️⃣ Navegación final
-      setTimeout(() => {
-        router.push('/checkout/revieworder');
-      }, 800);
+      router.push('/checkout/revieworder');
     } catch (err) {
       console.error(err);
       alert('Ocurrió un error procesando pago u orden.');
     }
   };
 
-  const handleAssignDelivery = () => router.push('/checkout/deliveryinfo');
-
-  // 5. Renderizado de cada paso
   const renderStep = () => {
     switch (lowerStep) {
       case 'shippinginfo':
-        return <ShippingInfo />;
-      case 'paymentprocess':
-        return <PaymentProcess onValidSubmit={handleValidSubmit} />;
-      case 'revieworder':
         return (
-          <>
-            <ReviewOrder />
-            {deliveryMethod === 'home' && (
-              <div className="mt-6 flex justify-end">
-                <Button onClick={handleAssignDelivery}>
-                  Ver datos del Repartidor
-                </Button>
-              </div>
-            )}
-          </>
+          <ShippingInfo
+            deliveryMethod={deliveryMethod}
+            paymentMethod={
+              paymentMethod === 'bank' || paymentMethod === 'mobile'
+                ? paymentMethod
+                : 'bank'
+            }
+            selectedBranchId={selectedBranchId}
+            selectedBranchLabel=""
+            setDeliveryMethod={setDeliveryMethod}
+            setPaymentMethod={setPaymentMethod}
+            setSelectedBranchId={setSelectedBranchId}
+            setSelectedBranchLabel={() => {}}
+            setSelectedUserAddressId={setSelectedUserAddressId}
+          />
+        );
+      case 'paymentprocess':
+        return (
+          <PaymentProcess
+            onValidSubmit={setIsFormValid}
+            setPaymentConfirmationData={setPaymentConfirmationData}
+            paymentMethod={
+              paymentMethod === 'bank' || paymentMethod === 'mobile'
+                ? paymentMethod
+                : 'bank'
+            }
+            couponDiscount={0}
+          />
+        );
+      case 'revieworder':
+        return deliveryMethod ? (
+          <ReviewOrder
+            orderId={orderId}
+            deliveryMethod={deliveryMethod}
+            selectedBranchLabel=""
+          />
+        ) : (
+          <div>Error: Método de entrega no seleccionado.</div>
         );
       case 'deliveryinfo':
-        return <DeliveryInfo />;
+        return <DeliveryInfo orderId={orderId} />;
       case 'rejected':
-        return <RejectedOrder deliveryMethod={deliveryMethod} />;
+        return <RejectedOrder deliveryMethod={deliveryMethod || 'store'} />;
       default:
         return <div>El paso &quot;{step}&quot; no existe.</div>;
     }
   };
+
   useEffect(() => {
     if (cartItems.length === 0) {
       const timer = setTimeout(() => {
@@ -227,118 +219,90 @@ const CheckoutStepContent: React.FC = () => {
           router.replace('/');
         }
       }, 1000);
-
       return () => clearTimeout(timer);
     }
 
     if (!token) return;
 
-    // Si no hay orden y no estamos en ShippingInfo, volvemos
-    if (!orderId && !['shippinginfo', 'paymentprocess'].includes(lowerStep)) {
+    if (
+      (lowerStep === 'revieworder' || lowerStep === 'deliveryinfo') &&
+      !orderId
+    ) {
       router.replace('/checkout/shippinginfo');
       return;
     }
 
-    // Si ya hay orderId, chequeamos su estado
     if (orderId) {
       api.order
         .getById(orderId, token)
         .then((order) => {
           const status = order.status.toUpperCase();
-
           if (status === 'CANCELED') {
             router.replace('/checkout/rejected');
             return;
           }
-
           if (status === 'COMPLETED') {
             clearCart();
             setOrderId('');
             router.replace('/');
-            return;
-          }
-
-          // Para PENDING, definimos qué pasos permitimos
-          const instant =
-            (deliveryMethod === 'store' && paymentMethod === 'pos') ||
-            (deliveryMethod === 'home' && paymentMethod === 'cash');
-
-          // Siempre permitimos reviewOrder y deliveryInfo
-          const allowed = ['revieworder', 'deliveryinfo'];
-          // Si NO es instant (es decir, requiere paso de pago), añadimos paymentprocess
-          if (!instant) {
-            allowed.push('paymentprocess');
-          }
-
-          if (!allowed.includes(lowerStep)) {
-            router.replace('/checkout/revieworder');
           }
         })
         .catch((err) => console.error('Error validando orden:', err));
     }
-  }, [
-    cartItems,
-    token,
-    orderId,
-    lowerStep,
-    deliveryMethod,
-    paymentMethod,
-    router,
-    clearCart,
-    setOrderId,
-  ]);
+  }, [cartItems, clearCart, token, orderId, lowerStep, router]);
 
   if (!token) return null;
 
-  // 6. Decide si ocultar el cupón
   const hideCoupon = lowerStep !== 'shippinginfo';
 
   return (
-    <>
-      <main className="mx-auto mb-36 max-w-7xl px-4 py-6 text-left md:px-8">
-        <div className="flex flex-col gap-6 lg:flex-row">
-          {/* IZQUIERDA */}
-          <div className="lg:w-3/3 w-full">
-            <div className="max-w-4xl">
-              <Breadcrumb
-                items={[
-                  { label: 'Home', href: '/' },
-                  { label: 'Carrito de Compra', href: '' },
-                  { label: 'Checkout', href: '/checkout' },
-                ]}
+    <main className="mx-auto mb-36 max-w-7xl px-4 py-6 text-left md:px-8">
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="lg:w-3/3 w-full">
+          <div className="max-w-4xl">
+            <Breadcrumb
+              items={[
+                { label: 'Home', href: '/' },
+                { label: 'Carrito de Compra', href: '' },
+                { label: 'Checkout', href: '/checkout' },
+              ]}
+            />
+            <div className="stepper-container mb-6">
+              <Stepper
+                steps={stepsState}
+                currentStep={currentStepNumber()}
+                stepSize={50}
+                clickable
               />
-              <div className="stepper-container mb-6">
-                <Stepper
-                  steps={stepsState}
-                  currentStep={currentStepNumber()}
-                  stepSize={50}
-                  clickable
-                />
-              </div>
             </div>
-            {renderStep()}
           </div>
-
-          {/* DERECHA */}
-          <div className="w-full lg:w-1/3">
-            <OrderSummary hideCoupon={hideCoupon} />
-
-            {lowerStep === 'shippinginfo' && (
-              <div className="mt-6 flex justify-end">
-                <Button onClick={handlePayClick}>Realizar pago</Button>
-              </div>
-            )}
-            {lowerStep === 'paymentprocess' && (
-              <div className="mt-6 flex justify-end">
-                <Button onClick={handleConfirmPayment} disabled={!isFormValid}>
-                  Confirmar pago
-                </Button>
-              </div>
-            )}
-          </div>
+          {renderStep()}
         </div>
-      </main>
-    </>
+
+        <div className="w-full lg:w-1/3">
+          <OrderSummary
+            hideCoupon={hideCoupon}
+            couponCode=""
+            setCouponCode={() => {}}
+            couponDiscount={0}
+            setCouponDiscount={() => {}}
+          />
+
+          {lowerStep === 'shippinginfo' && (
+            <div className="mt-6 flex justify-end">
+              <Button onClick={handlePayClick}>Realizar pago</Button>
+            </div>
+          )}
+          {lowerStep === 'paymentprocess' && (
+            <div className="mt-6 flex justify-end">
+              <Button onClick={handleConfirmPayment} disabled={!isFormValid}>
+                Confirmar pago
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
   );
 };
 

@@ -1,4 +1,3 @@
-// app/checkout/[step]/ShippingInfo.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -6,92 +5,97 @@ import { useRouter } from 'next/navigation';
 import { TruckIcon, CubeIcon } from '@heroicons/react/24/outline';
 import Dropdown from '@/components/Dropdown';
 import RadioButton from '@/components/RadioButton';
+import { BranchResponse, UserAddressResponse } from '@pharmatech/sdk';
 import { api } from '@/lib/sdkConfig';
-import { useCheckout } from '../CheckoutContext';
 import { useAuth } from '@/context/AuthContext';
 import { Colors } from '@/styles/styles';
 import { useCart } from '@/context/CartContext';
-interface Branch {
-  id: string;
-  name: string;
-  city: { name: string; state: { name: string } };
-}
-interface UserAddressResponse {
-  id: string;
-  adress: string;
+
+interface ShippingInfoProps {
+  deliveryMethod: 'store' | 'home' | null;
+  paymentMethod: 'cash' | 'pos' | 'bank' | 'mobile' | null;
+  selectedBranchLabel: string;
+  selectedBranchId: string;
+  setDeliveryMethod: (v: 'store' | 'home') => void;
+  setPaymentMethod: (v: 'cash' | 'pos' | 'bank' | 'mobile') => void;
+  setSelectedBranchLabel: (v: string) => void;
+  setSelectedBranchId: (v: string) => void;
+  setSelectedUserAddressId: (v: string) => void;
+  setCouponCode?: (v: string) => void;
+  setCouponDiscount?: (v: number) => void;
 }
 
-const ShippingInfo: React.FC = () => {
+const ShippingInfo: React.FC<ShippingInfoProps> = ({
+  deliveryMethod,
+  paymentMethod,
+  selectedBranchLabel,
+  setDeliveryMethod,
+  setPaymentMethod,
+  setSelectedBranchId,
+  setSelectedBranchLabel,
+  setSelectedUserAddressId,
+  setCouponCode = () => {},
+  setCouponDiscount = () => {},
+}) => {
   const router = useRouter();
   const { token, user } = useAuth();
   const { cartItems } = useCart();
   const userId = user?.sub ?? '';
-  const {
-    deliveryMethod,
-    setDeliveryMethod,
-    paymentMethod,
-    setPaymentMethod,
-    selectedBranchLabel,
-    setSelectedBranchLabel,
-    setSelectedBranchId,
-    // Cupón
-    setCouponCode,
-    setCouponDiscount,
-  } = useCheckout();
 
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const [branches, setBranches] = useState<BranchResponse[]>([]);
   const [addresses, setAddresses] = useState<UserAddressResponse[]>([]);
   const [localBranch, setLocalBranch] = useState<string>(selectedBranchLabel);
   const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Reset cupón a montar
   useEffect(() => {
     setCouponCode('');
     setCouponDiscount(0);
   }, [setCouponCode, setCouponDiscount]);
 
-  // Cambio de método de entrega
   const handleDeliverySelection = (delivery: 'store' | 'home') => {
     setDeliveryMethod(delivery);
     setLocalBranch('');
     setSelectedBranchLabel('');
     setSelectedBranchId('');
+    setSelectedUserAddressId('');
     setPaymentMethod(delivery === 'home' ? 'cash' : 'pos');
   };
 
-  // Carga sucursales
   useEffect(() => {
-    if (deliveryMethod !== 'store') return;
-    api.branch
-      .findAll({ page: 1, limit: 50 })
-      .then((res) => setBranches(res.results || []))
-      .catch(console.error);
+    if (deliveryMethod === 'store') {
+      api.branch
+        .findAll({ page: 1, limit: 50 })
+        .then((res) => setBranches(res.results || []))
+        .catch(console.error);
+    }
   }, [deliveryMethod]);
 
-  // Carga direcciones
   useEffect(() => {
-    if (deliveryMethod !== 'home' || !token || !userId) return;
-    api.userAdress
-      .getListAddresses(userId, token)
-      .then(setAddresses)
-      .catch(console.error);
+    if (deliveryMethod === 'home' && token && userId) {
+      api.userAdress
+        .getListAddresses(userId, token)
+        .then(setAddresses)
+        .catch(console.error);
+    }
   }, [deliveryMethod, token, userId]);
 
   const formattedBranches = branches.map((b) => ({
     id: b.id,
     label: `${b.name} - ${b.city.name}, ${b.city.state.name}`,
   }));
+
   const formattedAddresses = addresses.map((a) => ({
     id: a.id,
     label: a.adress,
   }));
+
   const items =
     deliveryMethod === 'home' ? formattedAddresses : formattedBranches;
-
   const sectionLabel =
     deliveryMethod === 'home'
       ? 'Seleccione la dirección de entrega'
       : 'Seleccione la sucursal';
+
   const dropdownPlaceholder =
     deliveryMethod === 'home'
       ? 'Seleccione dirección'
@@ -108,7 +112,7 @@ const ShippingInfo: React.FC = () => {
       <p className="text-base text-gray-600">
         Hay {totalProducts} productos seleccionados
       </p>
-      {/* Método de entrega */}
+
       <div className="space-y-3">
         <p className="font-medium text-gray-700">{sectionLabel}</p>
         <div className="flex flex-col gap-4">
@@ -155,7 +159,6 @@ const ShippingInfo: React.FC = () => {
         </div>
       </div>
 
-      {/* Dropdown */}
       <div>
         <p className="relative mb-2 font-medium text-gray-700">
           {sectionLabel}
@@ -168,7 +171,11 @@ const ShippingInfo: React.FC = () => {
             onSelect={(value) => {
               setLocalBranch(value);
               const found = items.find((i) => i.label === value);
-              setSelectedBranchId(found?.id || '');
+              if (deliveryMethod === 'home') {
+                setSelectedUserAddressId(found?.id || '');
+              } else {
+                setSelectedBranchId(found?.id || '');
+              }
               setSelectedBranchLabel(value);
             }}
           />
@@ -184,7 +191,6 @@ const ShippingInfo: React.FC = () => {
         )}
       </div>
 
-      {/* Método de pago */}
       <div className="space-y-3">
         <p className="font-medium text-gray-700">
           Seleccione el método de pago
@@ -229,6 +235,7 @@ const ShippingInfo: React.FC = () => {
           )}
         </div>
       </div>
+
       <div>
         {deliveryMethod === 'store' && paymentMethod === 'pos' && (
           <p className="text-[#6E6D6C]">

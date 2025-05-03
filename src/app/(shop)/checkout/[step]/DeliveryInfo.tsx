@@ -1,18 +1,17 @@
-// src/app/checkout/[step]/DeliveryInfo.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
-//import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useCheckout } from '../CheckoutContext';
 import { api } from '@/lib/sdkConfig';
 import { Colors } from '@/styles/styles';
 import { OrderDetailedResponse } from '@pharmatech/sdk';
 
-const DeliveryInfo: React.FC = () => {
-  const { token } = useAuth();
-  const { orderId } = useCheckout();
+interface Props {
+  orderId: string;
+}
 
+const DeliveryInfo: React.FC<Props> = ({ orderId }) => {
+  const { token } = useAuth();
   const [orderDetail, setOrderDetail] = useState<OrderDetailedResponse | null>(
     null,
   );
@@ -24,7 +23,6 @@ const DeliveryInfo: React.FC = () => {
 
   const orderNumber = orderDetail?.id || 'No asignado';
 
-  // Si es delivery, la dirección viene de orderDetail.branch.address o address en detalles
   const deliveryAddress =
     orderDetail?.branch?.address ||
     orderDetail?.details?.[0]?.productPresentation.product.name ||
@@ -34,6 +32,7 @@ const DeliveryInfo: React.FC = () => {
   const deliveryPersonName = deliveryRecord?.employee
     ? `${deliveryRecord.employee.firstName} ${deliveryRecord.employee.lastName}`
     : 'No asignado';
+
   const contactPhone = deliveryRecord?.employee?.phoneNumber || 'No asignado';
 
   return (
