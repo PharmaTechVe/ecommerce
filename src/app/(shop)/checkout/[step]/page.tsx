@@ -17,7 +17,9 @@ import { useCheckout } from '../CheckoutContext';
 import { useCart } from '@/context/CartContext';
 import { api } from '@/lib/sdkConfig';
 import { toast } from 'react-toastify';
-import { CreateOrder, OrderType } from '@pharmatech/sdk';
+import { CreateOrder, OrderDetailedResponse, OrderType } from '@pharmatech/sdk';
+import io from 'socket.io-client';
+import { SOCKET_URL } from '@/lib/socket-url';
 
 const CheckoutStepContent: React.FC = () => {
   const params = useParams<{ step: string }>();
@@ -26,6 +28,7 @@ const CheckoutStepContent: React.FC = () => {
   const { token } = useAuth();
   const { cartItems } = useCart();
   const { orderId, setOrderId } = useCheckout();
+  const [isConnected, setIsConnected] = useState(false);
   const { clearCart } = useCart();
 
   const {
@@ -161,7 +164,6 @@ const CheckoutStepContent: React.FC = () => {
         paymentConfirmationData,
         token,
       );
-      console.log(confirmation.id);
       notify.payment(confirmation.id);
 
       // 2️⃣ Creación de la orden
@@ -179,7 +181,6 @@ const CheckoutStepContent: React.FC = () => {
       const orderRes = await api.order.create(payload, token);
       notify.order(orderRes.id);
       setOrderId(orderRes.id);
-      console.log(orderRes.id);
       // 3️⃣ Navegación final
       setTimeout(() => {
         router.push('/checkout/revieworder');
@@ -232,61 +233,91 @@ const CheckoutStepContent: React.FC = () => {
     }
 
     if (!token) return;
+  }, [cartItems, token]);
 
+  useEffect(() => {
     // Si no hay orden y no estamos en ShippingInfo, volvemos
     if (!orderId && !['shippinginfo', 'paymentprocess'].includes(lowerStep)) {
       router.replace('/checkout/shippinginfo');
       return;
     }
-
+    const socket = io(SOCKET_URL, {
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            authorization: `Bearer ${token}`,
+          },
+        },
+      },
+    });
     // Si ya hay orderId, chequeamos su estado
     if (orderId) {
-      api.order
-        .getById(orderId, token)
-        .then((order) => {
-          const status = order.status.toUpperCase();
+      fetchOrder(orderId, token!);
+      if (socket.connected) {
+        onConnect();
+      }
 
-          if (status === 'CANCELED') {
-            router.replace('/checkout/rejected');
-            return;
-          }
+      function handleOrderStatus(order: OrderDetailedResponse) {
+        const status = order.status.toUpperCase();
 
-          if (status === 'COMPLETED') {
-            clearCart();
-            setOrderId('');
-            router.replace('/');
-            return;
-          }
+        if (status === 'CANCELED') {
+          router.replace('/checkout/rejected');
+          return;
+        }
 
-          // Para PENDING, definimos qué pasos permitimos
-          const instant =
-            (deliveryMethod === 'store' && paymentMethod === 'pos') ||
-            (deliveryMethod === 'home' && paymentMethod === 'cash');
+        if (status === 'COMPLETED') {
+          clearCart();
+          setOrderId('');
+          router.replace('/');
+          return;
+        }
 
-          // Siempre permitimos reviewOrder y deliveryInfo
-          const allowed = ['revieworder', 'deliveryinfo'];
-          // Si NO es instant (es decir, requiere paso de pago), añadimos paymentprocess
-          if (!instant) {
-            allowed.push('paymentprocess');
-          }
+        // Para PENDING, definimos qué pasos permitimos
+        const instant =
+          (deliveryMethod === 'store' && paymentMethod === 'pos') ||
+          (deliveryMethod === 'home' && paymentMethod === 'cash');
 
-          if (!allowed.includes(lowerStep)) {
-            router.replace('/checkout/revieworder');
-          }
-        })
-        .catch((err) => console.error('Error validando orden:', err));
+        // Siempre permitimos reviewOrder y deliveryInfo
+        const allowed = ['revieworder', 'deliveryinfo'];
+        // Si NO es instant (es decir, requiere paso de pago), añadimos paymentprocess
+        if (!instant) {
+          allowed.push('paymentprocess');
+        }
+
+        if (!allowed.includes(lowerStep)) {
+          router.replace('/checkout/revieworder');
+        }
+      }
+
+      async function fetchOrder(orderId: string, token: string) {
+        try {
+          const order = await api.order.getById(orderId, token);
+          handleOrderStatus(order);
+        } catch (error) {
+          console.error('Error fetching order:', error);
+        }
+      }
+
+      function onConnect() {
+        setIsConnected(true);
+        console.log('Connected to socket: ', isConnected);
+        socket.on('order', (order: OrderDetailedResponse) => {
+          handleOrderStatus(order);
+        });
+      }
+
+      function onDisconnect() {
+        setIsConnected(false);
+      }
+
+      socket.on('connect', onConnect);
+      socket.on('disconnect', onDisconnect);
+      return () => {
+        socket.off('connect', onConnect);
+        socket.off('disconnect', onDisconnect);
+      };
     }
-  }, [
-    cartItems,
-    token,
-    orderId,
-    lowerStep,
-    deliveryMethod,
-    paymentMethod,
-    router,
-    clearCart,
-    setOrderId,
-  ]);
+  }, []);
 
   if (!token) return null;
 
