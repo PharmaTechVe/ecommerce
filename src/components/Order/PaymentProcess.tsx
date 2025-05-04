@@ -1,81 +1,102 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useCart } from '@/context/CartContext';
+import React, { useCallback, useEffect, useState } from 'react';
 import Input from '@/components/Input/Input';
 import { api } from '@/lib/sdkConfig';
-import { PaymentInfoResponse, PaymentConfirmation } from '@pharmatech/sdk';
+import {
+  PaymentInfoResponse,
+  PaymentConfirmation,
+  OrderDetailedResponse,
+  PaymentMethod,
+} from '@pharmatech/sdk';
 import { checkoutPaymentProcessSchema } from '@/lib/validations/checkoutPaymentProcessSchema';
+import Button from '@/components/Button';
+import { useAuth } from '@/context/AuthContext';
+import Dropdown from '../Dropdown';
 
 type Errors = {
   bank?: string;
   reference?: string;
-  documentNumber?: string;
-  phone?: string;
+  documentId?: string;
+  phoneNumber?: string;
 };
 
 type Props = {
-  onValidSubmit: (isValid: boolean) => void;
-  paymentMethod: 'bank' | 'mobile';
+  order: OrderDetailedResponse;
   couponDiscount: number;
-  setPaymentConfirmationData: (data: PaymentConfirmation) => void;
 };
 
-const PaymentProcess: React.FC<Props> = ({
-  onValidSubmit,
-  paymentMethod,
-  couponDiscount,
-  setPaymentConfirmationData,
-}) => {
-  const { cartItems } = useCart();
-  const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
+  const { token } = useAuth();
+  const totalProducts = order.details.reduce(
+    (acc, item) => acc + item.quantity,
     0,
   );
-  const itemDiscount = cartItems.reduce(
+
+  const subtotal = order.details.reduce(
+    (acc, item) => acc + item.productPresentation.price * item.quantity,
+    0,
+  );
+  const itemDiscount = order.details.reduce(
     (acc, item) =>
       acc +
-      (item.discount ? item.price * item.quantity * (item.discount / 100) : 0),
+      (item.productPresentation.promo?.discount
+        ? item.productPresentation.price *
+          item.quantity *
+          (item.productPresentation.promo.discount / 100)
+        : 0),
     0,
   );
   const tax = (subtotal - itemDiscount - couponDiscount) * 0.16;
   const totalAmount =
     subtotal - itemDiscount - couponDiscount + (tax > 0 ? tax : 0);
-
-  const [bank, setBank] = useState('');
-  const [reference, setReference] = useState('');
-  const [documentNumber, setDocumentNumber] = useState('');
-  const [phone, setPhone] = useState('');
+  const [banks, setBanks] = useState<string[]>([]);
+  const [selectedBank, setSelectedBank] = useState<string>('');
+  const [paymentConfirmation, setPaymentConfirmationData] =
+    useState<PaymentConfirmation>({
+      bank: selectedBank,
+      reference: '',
+      documentId: '',
+      phoneNumber: '',
+    });
   const [errors, setErrors] = useState<Errors>({});
 
-  useEffect(() => {
-    setPaymentConfirmationData({
-      bank,
-      reference,
-      documentId: documentNumber,
-      phoneNumber: phone,
-    } as PaymentConfirmation);
-  }, [bank, reference, documentNumber, phone, setPaymentConfirmationData]);
-
-  const validateForm = React.useCallback(() => {
-    const data = { bank, reference, documentNumber, phone };
-    const result = checkoutPaymentProcessSchema.safeParse(data);
-
-    if (result.success) {
-      onValidSubmit(true);
-    } else {
-      const errorMessages: Errors = {};
-      result.error.errors.forEach((error) => {
-        errorMessages[error.path[0] as keyof Errors] = error.message;
+  const handleOnChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPaymentConfirmationData({
+        ...paymentConfirmation,
+        [field]: e.target.value,
       });
-      setErrors(errorMessages);
-      onValidSubmit(false);
-    }
-  }, [bank, reference, documentNumber, phone, onValidSubmit]);
+      setErrors({ ...errors, [field]: '' });
+    };
 
-  const isBank = paymentMethod === 'bank';
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setErrors({});
+
+      const result =
+        checkoutPaymentProcessSchema.safeParse(paymentConfirmation);
+
+      if (result.success) {
+        try {
+          await api.paymentConfirmation.create(paymentConfirmation, token!);
+        } catch (error) {
+          console.error('Error confirming payment:', error);
+        }
+      } else {
+        setErrors({
+          bank: result.error.formErrors.fieldErrors.bank?.[0],
+          reference: result.error.formErrors.fieldErrors.reference?.[0],
+          documentId: result.error.formErrors.fieldErrors.documentId?.[0],
+          phoneNumber: result.error.formErrors.fieldErrors.phoneNumber?.[0],
+        });
+      }
+    },
+    [paymentConfirmation],
+  );
+
+  const isBank = false; //paymentMethod === 'bank';
 
   const description = isBank
     ? 'Debes hacer el pago del monto exacto, la orden se creará cuando se confirme el pago'
@@ -87,28 +108,25 @@ const PaymentProcess: React.FC<Props> = ({
   useEffect(() => {
     const fetchPaymentMethodDetails = async () => {
       try {
-        const id =
-          paymentMethod === 'bank'
-            ? '7c9eb7fb-1c4f-417c-a878-37c266f9f6ce'
-            : paymentMethod === 'mobile'
-              ? '2f09bf3d-bdd9-49be-9d6c-27230a96ffe5'
-              : undefined;
-
-        if (id) {
-          const response = await api.paymentInformation.getById(id);
-          setPaymentDetails(response);
-        }
+        const response = await api.paymentInformation.findAll(
+          PaymentMethod.MOBILE_PAYMENT,
+        );
+        setPaymentDetails(response[0]);
       } catch (error) {
         console.error('Error fetching payment method details:', error);
       }
     };
-
+    const fetchBanks = async () => {
+      try {
+        const response = await api.bank.findAll();
+        setBanks(response);
+      } catch (error) {
+        console.error('Error fetching banks:', error);
+      }
+    };
+    fetchBanks();
     fetchPaymentMethodDetails();
-  }, [paymentMethod]);
-
-  useEffect(() => {
-    validateForm();
-  }, [bank, reference, documentNumber, phone, validateForm]);
+  }, []);
 
   return (
     <section className="space-y-8">
@@ -161,24 +179,23 @@ const PaymentProcess: React.FC<Props> = ({
         </div>
       </div>
 
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <p className="font-medium text-gray-700">
           Ingrese los datos para validar el pago
         </p>
-
-        <Input
-          value={bank}
-          onChange={(e) => setBank(e.target.value)}
+        <Dropdown
           label="Banco"
-          placeholder="Ingrese el banco"
-          borderSize="1px"
-          borderColor="#E7E7E6"
+          items={banks.map((i) => i)}
+          onSelect={(value) => {
+            setSelectedBank(value);
+            setPaymentConfirmationData({ ...paymentConfirmation, bank: value });
+          }}
         />
         {errors.bank && <p className="text-xs text-red-500">{errors.bank}</p>}
 
         <Input
-          value={reference}
-          onChange={(e) => setReference(e.target.value)}
+          value={paymentConfirmation.reference}
+          onChange={handleOnChange('reference')}
           label="Referencia"
           placeholder="Ingrese la referencia"
           borderSize="1px"
@@ -189,26 +206,34 @@ const PaymentProcess: React.FC<Props> = ({
         )}
 
         <Input
-          value={documentNumber}
-          onChange={(e) => setDocumentNumber(e.target.value)}
+          value={paymentConfirmation.documentId}
+          onChange={handleOnChange('documentId')}
           label="Número de documento"
           placeholder="Ingrese su número de documento"
           borderSize="1px"
           borderColor="#E7E7E6"
         />
-        {errors.documentNumber && (
-          <p className="text-xs text-red-500">{errors.documentNumber}</p>
+        {errors.documentId && (
+          <p className="text-xs text-red-500">{errors.documentId}</p>
         )}
 
         <Input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          value={paymentConfirmation.phoneNumber}
+          onChange={handleOnChange('phoneNumber')}
           label="Teléfono"
           placeholder="Ingrese su número de teléfono"
           borderSize="1px"
           borderColor="#E7E7E6"
         />
-        {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+        {errors.phoneNumber && (
+          <p className="text-xs text-red-500">{errors.phoneNumber}</p>
+        )}
+        <Button
+          variant="submit"
+          className="w-full rounded-md bg-[#1C2143] px-7 py-2 text-[16px] text-white hover:opacity-60"
+        >
+          Confirmar
+        </Button>
       </form>
     </section>
   );

@@ -12,22 +12,18 @@ interface OrderSummaryProps {
   hideCoupon?: boolean;
   couponCode: string;
   setCouponCode: (value: string) => void;
-  couponDiscount: number;
-  setCouponDiscount: (value: number) => void;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
   hideCoupon,
   couponCode,
   setCouponCode,
-  couponDiscount,
-  setCouponDiscount,
 }) => {
   const { cartItems } = useCart();
   const { token } = useAuth();
-
   const [couponError, setCouponError] = React.useState<string>('');
   const [couponSuccess, setCouponSuccess] = React.useState(false);
+  const [couponDiscount, setCouponDiscount] = React.useState<number>(0);
 
   useEffect(() => {
     if (!hideCoupon) {
@@ -36,7 +32,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       setCouponError('');
       setCouponSuccess(false);
     }
-  }, [hideCoupon, setCouponCode, setCouponDiscount]);
+  }, [hideCoupon]);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,

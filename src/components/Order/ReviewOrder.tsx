@@ -6,23 +6,17 @@ import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
+import { OrderDetailedResponse, OrderType } from '@pharmatech/sdk';
 
 interface Props {
-  deliveryMethod: 'store' | 'home';
-  selectedBranchLabel: string;
-  orderId: string;
+  order: OrderDetailedResponse;
 }
 
-const ReviewOrder: React.FC<Props> = ({
-  deliveryMethod,
-  selectedBranchLabel,
-  orderId,
-}) => {
+const ReviewOrder: React.FC<Props> = ({ order }) => {
   const { user, token } = useAuth();
-  const [orderNumber, setOrderNumber] = useState<string>(orderId || '');
   const [userName, setUserName] = useState<string>('Usuario');
 
-  const isStorePickup = deliveryMethod === 'store';
+  const isStorePickup = order.type === OrderType.PICKUP;
 
   useEffect(() => {
     if (user?.sub && token) {
@@ -38,15 +32,6 @@ const ReviewOrder: React.FC<Props> = ({
       fetchUserName();
     }
   }, [user?.sub, token]);
-
-  useEffect(() => {
-    if (orderId && token) {
-      api.order
-        .getById(orderId, token)
-        .then((ord) => setOrderNumber(ord.id))
-        .catch(console.error);
-    }
-  }, [orderId, token]);
 
   return (
     <section className="space-y-8">
@@ -66,7 +51,7 @@ const ReviewOrder: React.FC<Props> = ({
             className="sm:text-[14px] md:text-[28px]"
             style={{ color: Colors.textMain }}
           >
-            Orden #{orderNumber || '...'}
+            Orden #{order.id.slice(0, 8)}
           </p>
           <p
             className="sm:text-[14px] md:text-[28px]"
@@ -92,7 +77,7 @@ const ReviewOrder: React.FC<Props> = ({
               className="mb-2 mt-2 sm:text-[8px] md:text-[16px]"
               style={{ color: Colors.textMain }}
             >
-              Sucursal de retiro: {selectedBranchLabel}
+              Sucursal de retiro: {order.branch?.name}
             </p>
             <Image
               src="/images/mapa.jpg"
