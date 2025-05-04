@@ -90,8 +90,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     setCouponDiscount(0);
   };
 
-  const tax = (subtotal - itemDiscount - couponDiscount) * 0.16;
-  const total = subtotal - itemDiscount - couponDiscount + (tax > 0 ? tax : 0);
+  const total = subtotal - itemDiscount - couponDiscount;
 
   return (
     <aside className="w-full max-w-[412px] space-y-6 p-6 font-['Poppins']">
@@ -193,10 +192,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             <span>${couponDiscount.toFixed(2)}</span>
           </div>
         )}
-        <div className="flex justify-between text-[#6E6D6C]">
-          <span>IVA (16%)</span>
-          <span>${tax.toFixed(2)}</span>
-        </div>
         <div className="flex justify-between pt-2 text-[24px] font-semibold leading-[36px] text-[#393938]">
           <span>Total</span>
           <span>${total.toFixed(2)}</span>

@@ -15,7 +15,6 @@ interface OrderDetailProps {
   products: OrderDetailResponse[];
   subtotal: number;
   discount: number;
-  tax: number;
   total: number;
 }
 
@@ -24,7 +23,6 @@ export default function UserOrderDetail({
   products,
   subtotal,
   discount,
-  tax,
   total,
 }: OrderDetailProps) {
   return (
@@ -197,11 +195,6 @@ export default function UserOrderDetail({
           <div className="flex items-center justify-between">
             <div className="text-[#2ECC71]">Descuentos</div>
             <div className="text-[#2ECC71]">-${discount.toFixed(2)}</div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="text-gray-700">IVA</div>
-            <div className="text-gray-700">${tax.toFixed(2)}</div>
           </div>
 
           <div className="my-2 border-t border-gray-300" />
