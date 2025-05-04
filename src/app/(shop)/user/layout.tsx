@@ -5,7 +5,6 @@ import { useAuth } from '@/context/AuthContext';
 import { Sidebar, SidebarUser } from '@/components/SideBar';
 import { api } from '@/lib/sdkConfig';
 import UserBreadcrumbs from '@/components/User/UserBreadCrumbs';
-import Loading from '@/app/loading';
 
 enum UserGender {
   MALE = 'm',
@@ -69,7 +68,7 @@ export default function UserProfileLayout({
     })();
   }, [user?.sub, token]);
 
-  if (!user?.sub || !userData) return <Loading />;
+  if (!user?.sub || !userData) return; //<Loading />;
 
   const sidebarUser: SidebarUser = {
     name: `${userData.firstName} ${userData.lastName}`,

@@ -1,38 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SidebarFilter, { Filters } from '@/components/SidebarFilter';
 import ProductCard from '@/components/Product/ProductCard';
 import { api } from '@/lib/sdkConfig';
-import Loading from '@/app/loading';
 import Breadcrumb from '@/components/Breadcrumb';
-
-interface UIProduct {
-  id: string;
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
-  imageSrc: string;
-  brand: string;
-  presentation: string;
-  activeIngredient: string;
-  categories: string[];
-}
-
-interface ProductPaginationRequest {
-  page: number;
-  limit: number;
-  q?: string;
-  manufacturerId?: string[];
-  categoryId?: string[];
-  branchId?: string[];
-  presentationId?: string[];
-  priceRange?: { min: number; max: number };
-}
+import Loading from '@/app/loading';
+import { ProductPaginationRequest, ProductPresentation } from '@pharmatech/sdk';
 
 interface CategoryOption {
   id: string;
@@ -42,11 +17,13 @@ interface CategoryOption {
 export default function SearchPage() {
   const params = useSearchParams();
   const query = params?.get('query') ?? '';
-  const categoryName = params?.get('category') ?? 'Categorías';
+  const categoryId = params?.get('categoryId') ?? '';
 
-  const [allProducts, setAllProducts] = useState<UIProduct[]>([]);
-  const [displayProducts, setDisplayProducts] = useState<UIProduct[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
+  const [allProducts, setAllProducts] = useState<ProductPresentation[]>([]);
+  const [displayProducts, setDisplayProducts] = useState<ProductPresentation[]>(
+    [],
+  );
+  const priceRange = [0, 1000];
   const [currentPriceRange, setCurrentPriceRange] = useState<[number, number]>([
     0, 0,
   ]);
@@ -60,8 +37,6 @@ export default function SearchPage() {
     presentation: [],
     activeIngredient: [],
   });
-
-  // 1️⃣ Traer lista de categorías (UID + name)
   useEffect(() => {
     api.category
       .findAll({ page: 1, limit: 100 })
@@ -73,6 +48,8 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
+    const categoryName =
+      categoriesList.find((c) => c.id === categoryId)?.name || 'Categorías';
     if (categoryName !== 'Categorías' && categoriesList.length > 0) {
       const found = categoriesList.find((c) => c.name === categoryName);
       setCurrentFilters((f) => ({
@@ -82,71 +59,25 @@ export default function SearchPage() {
     } else {
       setCurrentFilters((f) => ({ ...f, category: [] }));
     }
-  }, [categoryName, categoriesList]);
-
-  const mapToUI = useCallback(
-    (
-      results: Array<{
-        id: string;
-        product: {
-          id: string;
-          name: string;
-          images?: { url: string }[];
-          manufacturer?: { name: string };
-          genericName?: string;
-          categories?: { name: string }[];
-        };
-        presentation: {
-          id: string;
-          name: string;
-          quantity: number;
-        };
-        price: number;
-      }>,
-    ): UIProduct[] =>
-      results.map((item) => ({
-        id: item.id,
-        productPresentationId: item.id,
-        productId: item.product.id,
-        presentationId: `${item.presentation.id}`,
-        productName: `${item.product.name} ${item.presentation.name}`,
-        stock: item.presentation.quantity,
-        currentPrice: item.price,
-        imageSrc: item.product.images?.[0]?.url || '',
-        brand: item.product.manufacturer?.name || '',
-        presentation: item.presentation.name,
-        activeIngredient: item.product.genericName || '',
-        categories:
-          item.product.categories?.map((c: { name: string }) => c.name) || [],
-      })),
-    [],
-  );
+  }, [categoryId, categoriesList]);
 
   useEffect(() => {
-    setLoading(true);
-    const req: ProductPaginationRequest = { page: 1, limit: 50 };
-    if (query.trim()) req.q = query.trim();
-
-    api.product
-      .getProducts(req)
-      .then((resp) => {
-        let ui = mapToUI(resp.results);
-        if (categoryName !== 'Categorías') {
-          ui = ui.filter((p) => p.categories.includes(categoryName));
-        }
-        setAllProducts(ui);
-        setDisplayProducts(ui);
-        const prices = ui.map((p) => p.currentPrice);
-        if (prices.length) {
-          const min = Math.min(...prices);
-          const max = Math.max(...prices);
-          setPriceRange([min, max]);
-          setCurrentPriceRange([min, max]);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, [query, categoryName, mapToUI]);
+    (async () => {
+      setLoading(true);
+      try {
+        const req: ProductPaginationRequest = { page: 1, limit: 50 };
+        if (query.trim()) req.q = query.trim();
+        if (categoryId && categoryId !== '1') req.categoryId = [categoryId];
+        const data = await api.product.getProducts(req);
+        setAllProducts(data.results);
+        setDisplayProducts(data.results);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [query, categoryId]);
 
   const handleApplyFilters = async (
     filters: Filters,
@@ -171,7 +102,7 @@ export default function SearchPage() {
 
     try {
       const resp = await api.product.getProducts(req);
-      setDisplayProducts(mapToUI(resp.results));
+      setDisplayProducts(resp.results);
       setCurrentPriceRange(price);
     } catch (err) {
       console.error('Error aplicando filtros:', err);
@@ -189,9 +120,12 @@ export default function SearchPage() {
       activeIngredient: [],
     });
     setDisplayProducts(allProducts);
-    setCurrentPriceRange(priceRange);
+    setCurrentPriceRange([priceRange[0], priceRange[1]]);
     setShowMobileFilters(false);
   };
+
+  const categoryName =
+    categoriesList.find((c) => c.id === categoryId)?.name || 'Categorías';
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -216,7 +150,7 @@ export default function SearchPage() {
               </button>
               <SidebarFilter
                 initialFilters={currentFilters}
-                initialPriceRange={priceRange}
+                initialPriceRange={[priceRange[0], priceRange[1]]}
                 initialCurrentPriceRange={currentPriceRange}
                 onApplyFilters={handleApplyFilters}
                 onClearFilters={handleClearFilters}
@@ -230,7 +164,7 @@ export default function SearchPage() {
           <aside className="hidden md:block md:w-64">
             <SidebarFilter
               initialFilters={currentFilters}
-              initialPriceRange={priceRange}
+              initialPriceRange={[priceRange[0], priceRange[1]]}
               initialCurrentPriceRange={currentPriceRange}
               onApplyFilters={handleApplyFilters}
               onClearFilters={handleClearFilters}
@@ -264,17 +198,7 @@ export default function SearchPage() {
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
                 {displayProducts.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    productPresentationId={p.productPresentationId}
-                    productId={p.productId}
-                    presentationId={p.presentationId}
-                    imageSrc={p.imageSrc}
-                    productName={p.productName}
-                    stock={p.stock}
-                    currentPrice={p.currentPrice}
-                    variant="regular"
-                  />
+                  <ProductCard key={p.id} product={p} variant="regular" />
                 ))}
               </div>
             </section>

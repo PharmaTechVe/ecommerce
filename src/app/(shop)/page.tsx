@@ -3,59 +3,22 @@ import { useEffect, useRef, useState } from 'react';
 import Carousel from '@/components/Carousel';
 import ProductCarousel from '@/components/Product/ProductCarousel';
 import { api } from '@/lib/sdkConfig';
-import { ImageType } from '@/components/Product/CardBase';
 import Banner1 from '@/lib/utils/images/banner-v2.jpg';
 import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Category } from '@pharmatech/sdk'; // Adjust the import path if necessary
+import CategoryCarousel from '@/components/CategoryCarousel';
 import EnterCodeFormModal from '@/components/EmailValidation';
 import { useAuth } from '@/context/AuthContext';
-import { Category } from '@pharmatech/sdk';
-import CategoryCarousel from '@/components/CategoryCarousel';
-
-export type Product = {
-  id: number;
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
-  lastPrice?: number;
-  discountPercentage?: number;
-  ribbonText?: string;
-  imageSrc: ImageType;
-  label?: string;
-};
-
-interface ImageResponse {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  url: string;
-}
-
-interface ProductApiResponse {
-  id: string;
-  price: number;
-  presentation: {
-    id: string;
-    name: string;
-    quantity: number;
-    measurementUnit: string;
-  };
-  product: {
-    id: string;
-    name: string;
-    genericName: string;
-    images: ImageResponse[];
-  };
-}
+import { ProductPresentation } from '@pharmatech/sdk';
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductPresentation[]>([]);
+  const [recommendedProducts, setRecommendedProducts] = useState<
+    ProductPresentation[]
+  >([]);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const { token, user } = useAuth();
   const toastDisplayed = useRef(false);
@@ -109,24 +72,7 @@ export default function Home() {
     const fetchProducts = async () => {
       try {
         const data = await api.product.getProducts({ page: 1, limit: 20 });
-
-        const backendProducts: Product[] = data.results.map(
-          (item: ProductApiResponse, index: number) => ({
-            id: index,
-            productPresentationId: item.id,
-            productId: item.product.id,
-            presentationId: item.presentation.id,
-            productName: ` ${item.product.name} ${item.presentation.name} ${item.presentation.quantity} ${item.presentation.measurementUnit} `,
-            stock: item.presentation.quantity,
-            currentPrice: item.price,
-            imageSrc:
-              Array.isArray(item.product.images) &&
-              item.product.images.length > 0
-                ? item.product.images[0].url
-                : '',
-          }),
-        );
-        setProducts(backendProducts);
+        setProducts(data.results);
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -146,6 +92,20 @@ export default function Home() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!token || !user?.sub) return;
+      try {
+        const data = await api.product.getProducts({ page: 1, limit: 10 });
+        setRecommendedProducts(data.results);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+
+    fetchProducts();
+  }, [token, user]);
 
   return (
     <div>
@@ -169,6 +129,21 @@ export default function Home() {
             <ProductCarousel carouselType="regular" products={products} />
           </div>
         </div>
+        {recommendedProducts && recommendedProducts.length > 0 && (
+          <>
+            <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
+              Productos Recomendados para ti
+            </h3>
+            <div className="mt-8">
+              <div className="cursor-pointer">
+                <ProductCarousel
+                  carouselType="regular"
+                  products={recommendedProducts}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Modal para validar email */}

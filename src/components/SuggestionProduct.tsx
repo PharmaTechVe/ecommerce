@@ -5,13 +5,17 @@ import Image from 'next/image';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/sdkConfig';
-import type { ProductPresentation } from '@pharmatech/sdk';
+import type {
+  CategoryResponse,
+  ProductPaginationRequest,
+  ProductPresentation,
+} from '@pharmatech/sdk';
 
 export type SuggestionProduct = ProductPresentation;
 
 interface SearchSuggestionsProps {
   query: string;
-  category: string;
+  category: CategoryResponse;
 }
 
 export default function SearchSuggestions({
@@ -34,19 +38,16 @@ export default function SearchSuggestions({
       setLoading(true);
       setError(null);
       try {
-        const { results } = await api.product.getProducts({
-          q: query.trim(),
+        const params: ProductPaginationRequest = {
           page: 1,
           limit: 10,
-        });
-        const filtered: SuggestionProduct[] =
-          category !== 'Categorías'
-            ? results.filter((item) =>
-                item.product.categories.some((c) => c.name === category),
-              )
-            : results;
-        setProducts(filtered);
-        setShowDropdown(filtered.length > 0);
+          ...(query.trim() && { q: query.trim() }),
+          ...(category.id &&
+            category.id !== '1' && { categoryId: [category.id] }),
+        };
+        const data = await api.product.getProducts(params);
+        setProducts(data.results);
+        setShowDropdown(data.results.length > 0);
       } catch {
         setError('Error al cargar los productos');
         setShowDropdown(false);
@@ -82,7 +83,7 @@ export default function SearchSuggestions({
           <h4 className="mb-2 border-b pb-2 font-semibold text-gray-500">
             Categoría
           </h4>
-          <p className="text-gray-700">{category}</p>
+          <p className="text-gray-700">{category.name}</p>
         </div>
         <div className="w-2/3 text-sm">
           <h4 className="px-4 pt-4 font-semibold text-gray-500">
@@ -95,11 +96,12 @@ export default function SearchSuggestions({
               <div
                 key={item.id}
                 className="mb-3 flex cursor-pointer gap-3 p-2 hover:bg-gray-100"
-                onClick={() =>
+                onClick={() => {
                   router.push(
                     `/product/${item.product.id}/presentation/${item.presentation.id}?productPresentationId=${item.id}`,
-                  )
-                }
+                  );
+                  setShowDropdown(false);
+                }}
               >
                 <div className="relative h-20 w-20 flex-shrink-0">
                   <Image
@@ -127,13 +129,13 @@ export default function SearchSuggestions({
         className="flex w-full items-center justify-between border-t px-4 py-3 hover:bg-gray-100"
         onClick={() => {
           const qEnc = encodeURIComponent(query.trim());
-          const cEnc = encodeURIComponent(category.trim());
-          router.push(`/search?query=${qEnc}&category=${cEnc}`);
-          setShowDropdown(false); // cierra el dropdown al buscar
+          const cEnc = encodeURIComponent(category.id.trim());
+          router.push(`/search?query=${qEnc}&categoryId=${cEnc}`);
+          setShowDropdown(false);
         }}
       >
         <span>
-          Buscar “{query}” en “{category}”
+          Buscar “{query}” en “{category.name}”
         </span>
         <ArrowRightIcon className="h-5 w-5" />
       </button>
