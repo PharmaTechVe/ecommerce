@@ -8,6 +8,7 @@ import {
   OrderDetailResponse,
   OrderDetailProductPresentationResponse,
 } from '@pharmatech/sdk';
+import Button from '@/components/Button';
 
 interface OrderDetailProps {
   orderNumber: string;
@@ -29,8 +30,20 @@ export default function UserOrderDetail({
   return (
     <div className="mx-auto w-full max-w-[954px] bg-white px-2 py-6 sm:px-6">
       {/* Encabezado */}
-      <div className="mb-4">
-        <h2 className="font-medium text-gray-500">Pedido {orderNumber}</h2>
+
+      <div className="space-around mb-4 flex items-center justify-between">
+        <h2 className="font-medium text-gray-500">
+          Pedido #{orderNumber.slice(0, 8)}
+        </h2>
+        <Link href={`/order/${orderNumber}`}>
+          <Button
+            className="rounded-md px-4 py-2 text-sm font-medium text-[#1C2143]"
+            width="auto"
+            height="auto"
+          >
+            Tracking
+          </Button>
+        </Link>
       </div>
       <div className="my-4 border-t border-gray-200" />
 
