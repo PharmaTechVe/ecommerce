@@ -85,8 +85,11 @@ export default function OrderInProgress() {
             <Breadcrumb
               items={[
                 { label: 'Home', href: '/' },
-                { label: 'Carrito de Compra', href: '' },
-                { label: 'Checkout', href: '/checkout' },
+                { label: 'Mis Pedidos', href: '/user/order' },
+                {
+                  label: `#${order?.id.slice(0, 8)}`,
+                  href: `/order/${order?.id}`,
+                },
               ]}
             />
             <div className="stepper-container mb-6">
