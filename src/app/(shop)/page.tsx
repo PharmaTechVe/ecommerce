@@ -113,9 +113,7 @@ export default function Home() {
       <div className="md:max-w-8xl mx-auto mb-12 w-full max-w-[75vw] md:p-2">
         {' '}
         <Carousel slides={slides} />
-        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
-          Productos en Oferta Exclusiva
-        </h3>
+        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">Categorias</h3>
         <div className="mt-8">
           <div className="cursor-pointer">
             <CategoryCarousel categories={categories} />
