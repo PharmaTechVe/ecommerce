@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 import { OrderDetailedResponse, OrderType } from '@pharmatech/sdk';
+import GoogleMaps, { BranchMarker } from '../GoogleMap/GoogleMap';
 
 interface Props {
   order: OrderDetailedResponse;
@@ -32,6 +32,21 @@ const ReviewOrder: React.FC<Props> = ({ order }) => {
       fetchUserName();
     }
   }, [user?.sub, token]);
+
+  const mapCenter = useMemo(() => {
+    const { latitude, longitude } = order.branch!;
+    return { lat: latitude ?? 10.0653, lng: longitude ?? -69.3235 };
+  }, [order]);
+
+  const markers: BranchMarker[] = [
+    {
+      id: order.branch?.id || '',
+      name: order.branch?.name || '',
+      latitude: order.branch?.latitude || 0,
+      longitude: order.branch?.longitude || 0,
+      address: order.branch?.address || '',
+    },
+  ];
 
   return (
     <section className="space-y-8">
@@ -79,12 +94,12 @@ const ReviewOrder: React.FC<Props> = ({ order }) => {
             >
               Sucursal de retiro: {order.branch?.name}
             </p>
-            <Image
-              src="/images/mapa.jpg"
-              alt="Mapa"
-              width={600}
-              height={400}
-              className="rounded-md border"
+            <GoogleMaps
+              markers={markers}
+              center={mapCenter}
+              mapWidth="100%"
+              mapHeight="600px"
+              zoom={16}
             />
           </div>
         </div>
