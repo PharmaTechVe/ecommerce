@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import type { Category } from '@pharmatech/sdk';
 
@@ -14,14 +14,6 @@ export default function CategoryCarousel({
   categories,
 }: CategoryCarouselProps) {
   const router = useRouter();
-
-  let searchParams: URLSearchParams;
-  const params = useSearchParams();
-  if (params) {
-    searchParams = params;
-  } else {
-    searchParams = new URLSearchParams('');
-  }
 
   const sliderRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(3);
@@ -45,8 +37,6 @@ export default function CategoryCarousel({
     });
   };
 
-  const q = searchParams.get('query') || '';
-
   return (
     <div className="relative flex items-center overflow-visible">
       {/* Flecha izquierda */}
@@ -67,6 +57,8 @@ export default function CategoryCarousel({
             key={cat.id}
             onClick={() => {
               const params = new URLSearchParams();
+
+              const q = '';
               if (q) params.set('query', q);
               params.set('categoryId', cat.id);
               router.push(`/search?${params.toString()}`);
