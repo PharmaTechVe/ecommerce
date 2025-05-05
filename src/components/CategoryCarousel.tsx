@@ -1,21 +1,20 @@
-// components/CategoryCarousel.tsx
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import type { Category } from '@pharmatech/sdk';
-import { Colors } from '@/styles/styles';
 
 interface CategoryCarouselProps {
-  categories: (Category & { imageUrl?: string })[]; // asumimos imageUrl en el endpoint
+  categories: (Category & { id: string; imageUrl?: string })[];
 }
 
 export default function CategoryCarousel({
   categories,
 }: CategoryCarouselProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const sliderRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(3);
 
@@ -39,59 +38,73 @@ export default function CategoryCarousel({
   };
 
   return (
-    <div className="flex items-center">
-      <button onClick={() => scroll('left')} className="p-2">
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: Colors.neuter }} />
+    <div className="relative flex items-center overflow-visible">
+      {/* Flecha izquierda, desplazada hacia afuera */}
+      <button
+        onClick={() => scroll('left')}
+        className="absolute -left-10 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white"
+      >
+        <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
       </button>
 
+      {/* Carrusel de categorías */}
       <div
         ref={sliderRef}
-        className="hide-scrollbar flex gap-4 overflow-x-auto px-2"
+        className="scrollbar-none flex gap-6 overflow-x-auto px-12 py-4"
       >
-        {categories.map((cat) => (
-          <div
-            key={cat.name}
-            className="flex-shrink-0 cursor-pointer"
-            style={{
-              minWidth: `calc((100% - ${visibleCount - 1}rem) / ${visibleCount})`,
-            }}
-            onClick={() =>
-              router.push(`/search?category=${encodeURIComponent(cat.name)}`)
-            }
-          >
-            <div className="overflow-hidden rounded-lg shadow-sm hover:opacity-90">
+        {categories.map((cat) => {
+          const q = searchParams?.get('query') || '';
+          return (
+            <div
+              key={cat.id}
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (q) params.set('query', q);
+                params.set('categoryId', cat.id);
+                router.push(`/search?${params.toString()}`);
+              }}
+              className="w-64 flex-shrink-0 rounded-xl border border-gray-200 bg-white p-4 shadow transition hover:shadow-lg"
+            >
+              {/* Imagen o fallback */}
               {cat.imageUrl ? (
                 <Image
                   src={cat.imageUrl}
                   alt={cat.name}
                   width={240}
-                  height={120}
-                  className="h-32 w-full object-cover"
+                  height={160}
+                  className="mx-auto h-40 w-full rounded-md object-cover"
                 />
               ) : (
-                <div className="flex h-32 w-full items-center justify-center bg-gray-200">
-                  <span className="text-gray-500">No image</span>
+                <div className="flex h-40 w-full items-center justify-center rounded-md bg-gray-100">
+                  <span className="text-gray-500">{cat.name}</span>
                 </div>
               )}
-              <div className="p-2 text-center font-medium">{cat.name}</div>
+
+              {/* Nombre de la categoría */}
+              <div className="mt-4 text-center">
+                <span className="block text-lg font-medium text-gray-800">
+                  {cat.name}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <button onClick={() => scroll('right')} className="p-2">
-        <ChevronRightIcon
-          className="h-6 w-6"
-          style={{ color: Colors.neuter }}
-        />
+      {/* Flecha derecha, desplazada hacia afuera */}
+      <button
+        onClick={() => scroll('right')}
+        className="absolute -right-10 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white"
+      >
+        <ChevronRightIcon className="h-6 w-6 text-gray-600" />
       </button>
 
       <style jsx>{`
-        .hide-scrollbar {
+        .scrollbar-none {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-        .hide-scrollbar::-webkit-scrollbar {
+        .scrollbar-none::-webkit-scrollbar {
           display: none;
         }
       `}</style>

@@ -8,7 +8,7 @@ import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Category } from '@pharmatech/sdk'; // Adjust the import path if necessary
+import { Category } from '@pharmatech/sdk';
 import CategoryCarousel from '@/components/CategoryCarousel';
 import EnterCodeFormModal from '@/components/EmailValidation';
 import { useAuth } from '@/context/AuthContext';
