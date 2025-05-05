@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
@@ -14,7 +14,15 @@ export default function CategoryCarousel({
   categories,
 }: CategoryCarouselProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+
+  let searchParams: URLSearchParams;
+  const params = useSearchParams();
+  if (params) {
+    searchParams = params;
+  } else {
+    searchParams = new URLSearchParams('');
+  }
+
   const sliderRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(3);
 
@@ -37,9 +45,11 @@ export default function CategoryCarousel({
     });
   };
 
+  const q = searchParams.get('query') || '';
+
   return (
     <div className="relative flex items-center overflow-visible">
-      {/* Flecha izquierda, desplazada hacia afuera */}
+      {/* Flecha izquierda */}
       <button
         onClick={() => scroll('left')}
         className="absolute -left-10 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white"
@@ -52,46 +62,40 @@ export default function CategoryCarousel({
         ref={sliderRef}
         className="scrollbar-none flex gap-6 overflow-x-auto px-12 py-4"
       >
-        {categories.map((cat) => {
-          const q = searchParams?.get('query') || '';
-          return (
-            <div
-              key={cat.id}
-              onClick={() => {
-                const params = new URLSearchParams();
-                if (q) params.set('query', q);
-                params.set('categoryId', cat.id);
-                router.push(`/search?${params.toString()}`);
-              }}
-              className="w-64 flex-shrink-0 rounded-xl border border-gray-200 bg-white p-4 shadow transition hover:shadow-lg"
-            >
-              {/* Imagen o fallback */}
-              {cat.imageUrl ? (
-                <Image
-                  src={cat.imageUrl}
-                  alt={cat.name}
-                  width={240}
-                  height={160}
-                  className="mx-auto h-40 w-full rounded-md object-cover"
-                />
-              ) : (
-                <div className="flex h-40 w-full items-center justify-center rounded-md bg-gray-100">
-                  <span className="text-gray-500">{cat.name}</span>
-                </div>
-              )}
-
-              {/* Nombre de la categoría */}
-              <div className="mt-4 text-center">
-                <span className="block text-lg font-medium text-gray-800">
-                  {cat.name}
-                </span>
+        {categories.map((cat) => (
+          <div
+            key={cat.id}
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (q) params.set('query', q);
+              params.set('categoryId', cat.id);
+              router.push(`/search?${params.toString()}`);
+            }}
+            className="w-64 flex-shrink-0 rounded-xl border border-gray-200 bg-white p-4 shadow transition hover:shadow-lg"
+          >
+            {cat.imageUrl ? (
+              <Image
+                src={cat.imageUrl}
+                alt={cat.name}
+                width={240}
+                height={160}
+                className="mx-auto h-40 w-full rounded-md object-cover"
+              />
+            ) : (
+              <div className="flex h-40 w-full items-center justify-center rounded-md bg-gray-100">
+                <span className="text-gray-500">{cat.name}</span>
               </div>
+            )}
+            <div className="mt-4 text-center">
+              <span className="block text-lg font-medium text-gray-800">
+                {cat.name}
+              </span>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
-      {/* Flecha derecha, desplazada hacia afuera */}
+      {/* Flecha derecha */}
       <button
         onClick={() => scroll('right')}
         className="absolute -right-10 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white"
