@@ -110,7 +110,7 @@ export default function Home() {
     const fetchRecommended = async () => {
       if (!token || !user?.sub) return;
       try {
-        const data = await api.product.getProducts({ page: 1, limit: 10 });
+        const data = await api.product.getRecommendations(token);
         setRecommendedProducts(data.results);
       } catch (err) {
         console.error('Error fetching recommended products:', err);
@@ -126,12 +126,6 @@ export default function Home() {
       {/* Carrusel principal */}
       <div className="md:max-w-8xl mx-auto mb-12 max-w-[75vw] md:p-2">
         <Carousel slides={slides} />
-
-        {/* Sección categorías */}
-        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">Categorías</h3>
-        <div className="mt-8 cursor-pointer">
-          <CategoryCarousel categories={categories} />
-        </div>
 
         {/* Sección ofertas */}
         <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
@@ -155,6 +149,12 @@ export default function Home() {
             </div>
           </>
         )}
+
+        {/* Sección categorías */}
+        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">Categorías</h3>
+        <div className="mt-8 cursor-pointer">
+          <CategoryCarousel categories={categories} />
+        </div>
       </div>
 
       {/* Modal de verificación de email */}
