@@ -8,21 +8,33 @@ import Banner2 from '@/lib/utils/images/banner-v1.jpg';
 import Banner3 from '@/lib/utils/images/banner_final.jpg';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Category } from '@pharmatech/sdk';
+import ProductDetailImg from '@/lib/utils/images/Antibioticos.png';
+
+import type {
+  Category as SDKCategory,
+  ProductPresentation,
+} from '@pharmatech/sdk';
+
 import CategoryCarousel from '@/components/CategoryCarousel';
 import EnterCodeFormModal from '@/components/EmailValidation';
 import { useAuth } from '@/context/AuthContext';
-import { ProductPresentation } from '@pharmatech/sdk';
+
+type CategoryForCarousel = SDKCategory & {
+  id: string;
+  imageUrl?: string;
+};
 
 export default function Home() {
+  const { token, user } = useAuth();
+  const toastDisplayed = useRef(false);
+  const toastId = useRef<number | string | null>(null);
+
   const [products, setProducts] = useState<ProductPresentation[]>([]);
   const [recommendedProducts, setRecommendedProducts] = useState<
     ProductPresentation[]
   >([]);
+  const [categories, setCategories] = useState<CategoryForCarousel[]>([]);
   const [showEmailModal, setShowEmailModal] = useState(false);
-  const { token, user } = useAuth();
-  const toastDisplayed = useRef(false);
-  const toastId = useRef<number | string | null>(null);
 
   const slides = [
     { id: 1, imageUrl: Banner1 },
@@ -33,11 +45,9 @@ export default function Home() {
   useEffect(() => {
     const checkUserValidation = async () => {
       if (!token || !user?.sub) return;
-
       try {
-        const userProfile = await api.user.getProfile(user.sub, token);
-
-        if (!userProfile.isValidated && !toastDisplayed.current) {
+        const profile = await api.user.getProfile(user.sub, token);
+        if (!profile.isValidated && !toastDisplayed.current) {
           toastId.current = toast.info(
             <div>
               Verifica tu correo electrónico.{' '}
@@ -64,7 +74,6 @@ export default function Home() {
         console.error('Error verificando validación del usuario:', err);
       }
     };
-
     checkUserValidation();
   }, [token, user]);
 
@@ -73,78 +82,82 @@ export default function Home() {
       try {
         const data = await api.product.getProducts({ page: 1, limit: 20 });
         setProducts(data.results);
-      } catch (error) {
-        console.error('Error fetching products:', error);
+      } catch (err) {
+        console.error('Error fetching products:', err);
       }
     };
-
     fetchProducts();
   }, []);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const fetchCategories = async () => {
-    try {
-      const categories = await api.category.findAll({ page: 1, limit: 20 });
-      setCategories(categories.results);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
+
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const resp = await api.category.findAll({ page: 1, limit: 20 });
+        const formatted: CategoryForCarousel[] = resp.results.map((c) => ({
+          ...c,
+          id: String(c.id),
+          imageUrl: ProductDetailImg.src,
+        }));
+        setCategories(formatted);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
     fetchCategories();
   }, []);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchRecommended = async () => {
       if (!token || !user?.sub) return;
       try {
         const data = await api.product.getProducts({ page: 1, limit: 10 });
         setRecommendedProducts(data.results);
-      } catch (error) {
-        console.error('Error fetching products:', error);
+      } catch (err) {
+        console.error('Error fetching recommended products:', err);
       }
     };
-
-    fetchProducts();
+    fetchRecommended();
   }, [token, user]);
 
   return (
-    <div>
+    <div className="px-4">
       <h1 className="mb-12 text-2xl font-bold text-white">Pharmatech</h1>
-      <div className="md:max-w-8xl mx-auto mb-12 w-full max-w-[75vw] md:p-2">
-        {' '}
+
+      {/* Carrusel principal */}
+      <div className="md:max-w-8xl mx-auto mb-12 max-w-[75vw] md:p-2">
         <Carousel slides={slides} />
-        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">Categorias</h3>
-        <div className="mt-8">
-          <div className="cursor-pointer">
-            <CategoryCarousel categories={categories} />
-          </div>
+
+        {/* Sección categorías */}
+        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">Categorías</h3>
+        <div className="mt-8 cursor-pointer">
+          <CategoryCarousel categories={categories} />
         </div>
+
+        {/* Sección ofertas */}
         <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
           Productos en Oferta Exclusiva
         </h3>
-        <div className="mt-8">
-          <div className="cursor-pointer">
-            <ProductCarousel carouselType="regular" products={products} />
-          </div>
+        <div className="mt-8 cursor-pointer">
+          <ProductCarousel carouselType="regular" products={products} />
         </div>
-        {recommendedProducts && recommendedProducts.length > 0 && (
+
+        {/* Sección recomendados */}
+        {recommendedProducts.length > 0 && (
           <>
             <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
               Productos Recomendados para ti
             </h3>
-            <div className="mt-8">
-              <div className="cursor-pointer">
-                <ProductCarousel
-                  carouselType="regular"
-                  products={recommendedProducts}
-                />
-              </div>
+            <div className="mt-8 cursor-pointer">
+              <ProductCarousel
+                carouselType="regular"
+                products={recommendedProducts}
+              />
             </div>
           </>
         )}
       </div>
 
-      {/* Modal para validar email */}
+      {/* Modal de verificación de email */}
       {token && user?.sub && (
         <EnterCodeFormModal
           show={showEmailModal}
