@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import io from 'socket.io-client';
+import { SOCKET_URL } from '@/lib/socket-url';
 import Breadcrumb from '@/components/Breadcrumb';
 import Stepper from '@/components/Stepper';
 import PaymentProcess from '@/components/Order/PaymentProcess';
@@ -26,6 +28,40 @@ export default function OrderInProgress() {
   const router = useRouter();
   const { token } = useAuth();
   const [order, setOrder] = useState<OrderDetailedResponse>();
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const socket = io(SOCKET_URL, {
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            authorization: `Bearer ${token}`,
+          },
+        },
+      },
+    });
+
+    function onConnect() {
+      setIsConnected(true);
+      console.log('Connected to socket: ', isConnected);
+      socket.on('order', (order: OrderDetailedResponse) => {
+        setOrder(order);
+      });
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    if (id && token) {
+      socket.on('connect', onConnect);
+      socket.on('disconnect', onDisconnect);
+      return () => {
+        socket.off('connect', onConnect);
+        socket.off('disconnect', onDisconnect);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     if (id && token) {
