@@ -8,25 +8,19 @@ import Dropdown from '@/components/Dropdown';
 import Button from '@/components/Button';
 import { Colors } from '@/styles/styles';
 import { addressSchema } from '@/lib/validations/userAddressSchema';
-import { CountryResponse, StateResponse, CityResponse } from '@pharmatech/sdk';
+import {
+  CountryResponse,
+  StateResponse,
+  CityResponse,
+  UserAddressResponse,
+} from '@pharmatech/sdk';
 import { api } from '@/lib/sdkConfig';
 import LocationPopup from '@/components/GoogleMap/UserAddressPopup';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 
 interface EditFormProps {
-  initialData?: {
-    address: string;
-    zipCode: string;
-    additionalInformation?: string;
-    referencePoint?: string;
-    nameCity: string;
-    nameState: string;
-    cityId: string;
-    latitude: number | null;
-    longitude: number | null;
-    id: string;
-  };
+  initialData?: UserAddressResponse;
   mode?: 'edit' | 'create';
   onAdd?: () => void;
 }
@@ -43,7 +37,6 @@ export default function EditAddressForm({
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
   const [address, setAddress] = useState('');
-  const [zipCode, setZipCode] = useState('');
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [referencePoint, setReferencePoint] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -105,8 +98,7 @@ export default function EditAddressForm({
 
   useEffect(() => {
     if (initialData) {
-      setAddress(initialData.address);
-      setZipCode(initialData.zipCode);
+      setAddress(initialData.adress);
       setAdditionalInfo(initialData.additionalInformation ?? '');
       setReferencePoint(initialData.referencePoint ?? '');
       setSelectedCity(initialData.nameCity);
@@ -128,7 +120,6 @@ export default function EditAddressForm({
       state: selectedState,
       city: selectedCity,
       address,
-      zipCode,
       additionalInfo,
       referencePoint,
     });
@@ -139,7 +130,6 @@ export default function EditAddressForm({
         state: fieldErrors.state?.[0] ?? '',
         city: fieldErrors.city?.[0] ?? '',
         address: fieldErrors.address?.[0] ?? '',
-        zipCode: fieldErrors.zipCode?.[0] ?? '',
         additionalInfo: fieldErrors.additionalInfo?.[0] ?? '',
         referencePoint: fieldErrors.referencePoint?.[0] ?? '',
       });
@@ -158,7 +148,6 @@ export default function EditAddressForm({
 
     const addressData = {
       adress: address,
-      zipCode: zipCode,
       additionalInformation: additionalInfo,
       referencePoint: referencePoint,
       latitude: latitude,
@@ -251,16 +240,7 @@ export default function EditAddressForm({
         />
       </div>
 
-      <div className="mt-[33px] grid grid-cols-1 gap-y-[33px] md:grid-cols-2 md:gap-x-[48px]">
-        <Input
-          label="Código postal"
-          value={zipCode}
-          onChange={(e) => setZipCode(e.target.value)}
-          helperText={errors.zipCode}
-          borderColor="#f3f4f6"
-          helperTextColor="red-500"
-          placeholder="Ej. 1010"
-        />
+      <div className="mt-[33px]">
         <Input
           label="Información adicional"
           value={additionalInfo}

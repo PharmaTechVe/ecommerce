@@ -1,6 +1,6 @@
 'use client';
-import { useRouter, useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 import Badge from '@/components/Badge';
 import Carousel, { Slide } from '@/components/Product/Carousel';
@@ -15,154 +15,110 @@ import {
   ProductPresentationDetailResponse,
   GenericProductResponse,
   ProductPresentationResponse,
+  ProductPresentation,
+  ProductPaginationRequest,
 } from '@pharmatech/sdk';
 import Loading from '@/app/loading';
-
-interface ProductCard {
-  id: number;
-  productPresentationId: string;
-  productId: string;
-  presentationId: string;
-  productName: string;
-  stock: number;
-  currentPrice: number;
-  imageSrc: string;
-}
+import ProductNotFound from '@/components/Product/NotFound';
 
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const productId =
-    typeof params?.productId === 'string' ? params.productId : '';
-  const presentationId =
-    typeof params?.presentationId === 'string' ? params.presentationId : '';
+  const searchParams = useSearchParams();
+
+  // Detect if we came from a filtered search
+  const queryString = searchParams?.toString() || '';
+  const isCustomSearch = queryString.length > 0;
+
+  const productId = String(params?.productId || '');
+  const presentationId = String(params?.presentationId || '');
 
   const [presentation, setPresentation] =
     useState<ProductPresentationDetailResponse | null>(null);
   const [genericProduct, setGenericProduct] =
     useState<GenericProductResponse | null>(null);
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [products, setProducts] = useState<ProductCard[]>([]);
+  const [products, setProducts] = useState<ProductPresentation[]>([]);
   const [presentationList, setPresentationList] = useState<
     ProductPresentationResponse[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [minWaitDone, setMinWaitDone] = useState(false);
 
+  // 1) Load presentation detail
   useEffect(() => {
-    const fetchPresentationDetail = async () => {
-      try {
-        const data = await api.productPresentation.getByPresentationId(
-          productId,
-          presentationId,
-        );
-        setPresentation(data);
-      } catch (err) {
-        console.error(err);
-        setError('Error fetching presentation details');
-      }
-    };
-    if (presentationId) fetchPresentationDetail();
+    if (!presentationId) return;
+    api.productPresentation
+      .getByPresentationId(productId, presentationId)
+      .then((data) => setPresentation(data))
+      .catch((err) => console.error(err));
   }, [productId, presentationId]);
 
+  // 2) Load generic product info & variants
   useEffect(() => {
-    const fetchGenericData = async () => {
-      if (!presentation) return;
-      try {
-        const data = await api.genericProduct.getById(productId);
+    if (!presentation) return;
+    api.genericProduct
+      .getById(productId)
+      .then((data) => {
         setGenericProduct(data);
-        const list = await api.productPresentation.getByProductId(productId);
-        setPresentationList(list);
-      } catch (err) {
-        console.error(err);
-        setError('Error fetching product info');
-      }
-    };
-    fetchGenericData();
+        return api.productPresentation.getByProductId(productId);
+      })
+      .then((list) => setPresentationList(list))
+      .catch((err) => console.error(err));
   }, [presentation, productId]);
 
+  // 3) Load images
   useEffect(() => {
-    const fetchImages = async () => {
-      if (!genericProduct) return;
-      try {
-        const images = await api.productImage.getByProductId(genericProduct.id);
-        if (images.length) {
-          const mapped = images.map((img, i) => ({ id: i, imageUrl: img.url }));
-          setSlides(mapped);
+    if (!genericProduct) return;
+    api.productImage
+      .getByProductId(genericProduct.id)
+      .then((imgs) => {
+        if (imgs.length) {
+          setSlides(imgs.map((img, i) => ({ id: i, imageUrl: img.url })));
         } else {
           setSlides([
             { id: 1, imageUrl: '/images/product-detail.jpg' },
             { id: 2, imageUrl: '/images/product-detail-2.jpg' },
           ]);
         }
-      } catch (err) {
-        console.error(err);
+      })
+      .catch(() =>
         setSlides([
           { id: 1, imageUrl: '/images/product-detail.jpg' },
           { id: 2, imageUrl: '/images/product-detail-2.jpg' },
-        ]);
-      }
-    };
-    fetchImages();
+        ]),
+      );
   }, [genericProduct]);
 
+  // 4) Fetch related products
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const q = genericProduct?.manufacturer.name ?? '';
-        const res = await api.product.getProducts({ page: 1, limit: 20, q });
-        const mapped = res.results.map((p, i) => ({
-          id: i,
-          productPresentationId: p.id,
-          productId: p.product.id,
-          presentationId: p.presentation.id,
-          productName: `${p.product.name} ${p.presentation.name}`,
-          stock: p.presentation.quantity,
-          currentPrice: p.price,
-          imageSrc: p.product.images?.[0]?.url ?? '',
-        }));
-        setProducts(mapped);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    if (!genericProduct) return;
+    const req: ProductPaginationRequest = {
+      page: 1,
+      limit: 20,
+      ...(genericProduct.manufacturer.id && {
+        manufacturerId: [genericProduct.manufacturer.id],
+      }),
     };
-    if (genericProduct) fetchProducts();
+    api.product
+      .getProducts(req)
+      .then((res) => setProducts(res.results))
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, [genericProduct]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMinWaitDone(true), 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (minWaitDone && (!presentation || !genericProduct)) {
-      const timer = setTimeout(() => router.push('/'), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [minWaitDone, presentation, genericProduct, router]);
 
   if (loading) return <Loading />;
-  if (!presentation || !genericProduct) {
-    return (
-      <div className="p-4 text-lg">
-        {error || 'Producto no encontrado. Redirigiendo al inicio...'}
-      </div>
-    );
-  }
-  const productPresentationId = presentation.id;
+  if (!presentation || !genericProduct) return <ProductNotFound />;
+
+  // Breadcrumb con acción de "volver" si es búsqueda personalizada
   const breadcrumbItems = [
     { label: 'Inicio', href: '/' },
-    {
-      label: genericProduct.categories?.[0]?.name ?? 'Categoría',
-      href: `/category/${genericProduct.categories?.[0]?.name}`,
-    },
-    {
-      label: presentation.presentation.name,
-      href: `/product/${productId}/presentation/${presentationId}`,
-    },
+    isCustomSearch
+      ? { label: 'Búsqueda personalizada', onClick: () => router.back() }
+      : {
+          label: genericProduct.categories?.[0]?.name ?? 'Categoría',
+          href: `/search?category=${genericProduct.categories?.[0]?.name}`,
+        },
+    { label: presentation.presentation.name },
   ];
 
   const variantOptions = presentationList.map((item) => ({
@@ -176,61 +132,60 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <>
-      <main className="mx-auto mb-12 max-w-7xl p-4">
-        <Breadcrumb items={breadcrumbItems} />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Carousel slides={slides} />
-          <div className="flex flex-col space-y-4">
-            <div>
-              <Badge variant="filled" color="info" size="medium">
-                {genericProduct.manufacturer.name}
-              </Badge>
-            </div>
-            <h1 className="text-3xl" style={{ color: Colors.textMain }}>
-              {`${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name} ${presentation.presentation.quantity} ${presentation.presentation.measurementUnit}`}
-            </h1>
-            <div className="flex gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
-              ))}
-            </div>
-            <p className="text-gray-600">
-              {presentation.presentation.description}
+    <main className="mx-auto mb-12 max-w-7xl p-4">
+      <Breadcrumb items={breadcrumbItems} />
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Carousel slides={slides} />
+        <div className="flex flex-col space-y-4">
+          <div>
+            <Badge variant="filled" color="info" size="medium">
+              {genericProduct.manufacturer.name}
+            </Badge>
+          </div>
+          <h1 className="text-3xl" style={{ color: Colors.textMain }}>
+            {`${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name} ${presentation.presentation.quantity} ${presentation.presentation.measurementUnit}`}
+          </h1>
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
+            ))}
+          </div>
+          <p className="text-gray-600">
+            {presentation.presentation.description}
+          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-lg text-gray-900">
+              ${presentation.price.toFixed(2)}
             </p>
-            <div className="flex items-center justify-between">
-              <p className="text-lg text-gray-900">
-                ${presentation.price.toFixed(2)}
-              </p>
-              <CardButton
-                product={{
-                  productPresentationId,
-                  name: `${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name}`,
-                  price: presentation.price,
-                  stock: presentation.presentation.quantity,
-                  image: slides?.[0]?.imageUrl ?? '',
-                }}
-              />
-            </div>
-            <Dropdown
-              label="Selecciona una presentación"
-              items={variantOptions.map((v) => v.display)}
-              onSelect={handlePresentationSelect}
+            <CardButton
+              product={{
+                productPresentationId: presentation.id,
+                name: `${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name}`,
+                price: presentation.price,
+                stock: presentation.stock || 0,
+                image: slides[0]?.imageUrl || '',
+              }}
             />
           </div>
+          <Dropdown
+            label="Selecciona una presentación"
+            items={variantOptions.map((v) => v.display)}
+            onSelect={handlePresentationSelect}
+          />
         </div>
+      </div>
 
-        <div className="my-10">
-          <ProductBranch productPresentationId={presentation.id} />
-        </div>
+      <div className="my-10">
+        <ProductBranch productPresentationId={presentation.id} />
+      </div>
 
-        <div className="mt-3">
-          <h3 className="mb-6 text-2xl font-semibold text-[#1C2143]">
-            Productos de la marca {genericProduct.manufacturer.name}
-          </h3>
-          <ProductCarousel carouselType="regular" products={products} />
-        </div>
-      </main>
-    </>
+      <div className="mt-3">
+        <h3 className="mb-6 text-2xl font-semibold text-[#1C2143]">
+          Productos de la marca {genericProduct.manufacturer.name}
+        </h3>
+        <ProductCarousel carouselType="regular" products={products} />
+      </div>
+    </main>
   );
 }

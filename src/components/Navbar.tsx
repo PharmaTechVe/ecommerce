@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCartIcon, UserCircleIcon } from '@heroicons/react/24/outline';
@@ -13,6 +13,8 @@ import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
+import { CategoryResponse, Pagination } from '@pharmatech/sdk';
+import CartOverlay from './Cart/CartOverlay';
 
 interface UserProfile {
   firstName: string;
@@ -22,41 +24,27 @@ interface UserProfile {
   };
 }
 
-interface Category {
-  id: string;
-  name: string;
-  description: string;
-}
-
-interface CategoryFindAllResponse {
-  results: Category[];
-  count: number;
-  next: string | null;
-  previous: string | null;
-}
-
 type NavBarProps = {
   onCartClick?: () => void;
 };
 
 export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
-  const [categories, setCategories] = React.useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const { cartItems } = useCart();
   const { token, user } = useAuth();
 
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  const [userData, setUserData] = React.useState<UserProfile | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
-  // Obtener categorías
-  React.useEffect(() => {
+  useEffect(() => {
     api.category
       .findAll({ page: 1, limit: 20 })
-      .then((resp: CategoryFindAllResponse) => {
+      .then((resp: Pagination<CategoryResponse>) => {
         if (resp && resp.results) {
-          const catNames = resp.results.map((cat: Category) => cat.name);
-          setCategories(catNames);
+          setCategories(resp.results);
         }
       })
       .catch((err: unknown) => {
@@ -65,7 +53,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   }, []);
 
   // Obtener perfil si está logueado
-  React.useEffect(() => {
+  useEffect(() => {
     if (!token || !user?.sub) {
       setIsLoggedIn(false);
       setUserData(null);
@@ -96,6 +84,8 @@ export default function NavBar({ onCartClick }: NavBarProps) {
 
   return (
     <>
+      {/* Cart Overlay */}
+      <CartOverlay isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} />
       {/* Versión Desktop */}
       <nav className="mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
@@ -122,7 +112,10 @@ export default function NavBar({ onCartClick }: NavBarProps) {
           />
           <div className="flex items-center gap-8">
             {/* Carrito */}
-            <div className="relative cursor-pointer" onClick={onCartClick}>
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setIsCartOpen(true)}
+            >
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
               <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
                 {totalCount}

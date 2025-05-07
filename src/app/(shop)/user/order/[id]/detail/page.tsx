@@ -55,7 +55,7 @@ export default function OrderDetailPage() {
         const total = order.totalPrice;
 
         setOrderData({
-          orderNumber: `#${order.id.slice(0, 8)}`,
+          orderNumber: order.id,
           products,
           subtotal,
           discount,

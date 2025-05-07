@@ -2,6 +2,7 @@
 import React from 'react';
 import { Colors, FontSizes } from '@/styles/styles';
 import { useCart } from '@/context/CartContext';
+import { toast } from 'react-toastify';
 
 export type ProductInfo = {
   productPresentationId: string;
@@ -54,7 +55,7 @@ const CardButton: React.FC<CardButtonProps> = (props) => {
             stock: product.stock,
           });
         } else {
-          alert('Este producto no tiene stock.');
+          toast.error('Este producto no tiene stock.');
         }
       }
     };

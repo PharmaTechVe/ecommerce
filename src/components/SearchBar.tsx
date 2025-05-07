@@ -8,9 +8,10 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import SearchSuggestions from './SuggestionProduct';
+import { CategoryResponse } from '@pharmatech/sdk';
 
 type SearchBarProps = {
-  categories: string[];
+  categories: CategoryResponse[];
   onSearch?: (query: string, category: string) => void;
   width?: string;
   height?: string;
@@ -37,7 +38,11 @@ export default function SearchBar({
   disableDropdown = false,
 }: SearchBarProps) {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState('Categorías');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryResponse>({
+    name: 'Categorías',
+    id: '1',
+    description: '',
+  });
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -45,11 +50,11 @@ export default function SearchBar({
     const term = searchTerm.trim();
     if (!term) return;
 
-    onSearch?.(term, selectedCategory);
+    onSearch?.(term, selectedCategory.name);
 
-    const qEnc = encodeURIComponent(term);
-    const cEnc = encodeURIComponent(selectedCategory.trim());
-    router.push(`/search?query=${qEnc}&category=${cEnc}`);
+    const q = encodeURIComponent(term);
+    const categoryId = encodeURIComponent(selectedCategory.id.trim());
+    router.push(`/search?query=${q}&categoryId=${categoryId}`);
   };
 
   return (
@@ -70,7 +75,7 @@ export default function SearchBar({
                 borderBottomLeftRadius: borderRadius,
               }}
             >
-              <span className="font-medium">{selectedCategory}</span>
+              <span className="font-medium">{selectedCategory.name}</span>
               {isOpen ? (
                 <ChevronUpIcon className="h-4 w-4 transition duration-200" />
               ) : (
@@ -84,7 +89,7 @@ export default function SearchBar({
               >
                 {categories.map((category) => (
                   <li
-                    key={category}
+                    key={category.id}
                     onClick={() => {
                       setSelectedCategory(category);
                       setIsOpen(false);
@@ -101,7 +106,7 @@ export default function SearchBar({
                           : textColorDrop,
                     }}
                   >
-                    {category}
+                    {category.name}
                   </li>
                 ))}
               </ul>
@@ -137,7 +142,7 @@ export default function SearchBar({
         </button>
       </div>
 
-      {searchTerm.length > 0 && !disableDropdown && (
+      {searchTerm.length > 0 && (
         <SearchSuggestions query={searchTerm} category={selectedCategory} />
       )}
     </div>

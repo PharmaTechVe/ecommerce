@@ -20,7 +20,7 @@ export const checkoutPaymentProcessSchema = z.object({
       'La referencia no puede estar vacía',
     ), // Refine para asegurar que no esté vacío
 
-  documentNumber: z
+  documentId: z
     .string()
     .nonempty('El número de documento es obligatorio')
     .regex(/^\d+$/, 'El número de documento debe contener solo números')
@@ -29,7 +29,7 @@ export const checkoutPaymentProcessSchema = z.object({
       'El número de documento no puede estar vacío',
     ), // Refine para asegurar que no esté vacío
 
-  phone: z
+  phoneNumber: z
     .string()
     .trim() // Elimina espacios en blanco al inicio y al final
     .refine(

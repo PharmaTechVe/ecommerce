@@ -1,24 +1,21 @@
-// app/checkout/[step]/RejectedOrder.tsx
 'use client';
 
 import React from 'react';
-//import OrderSummary from '../OrderSummary';
 import { XCircleIcon } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
+import { OrderType } from '@pharmatech/sdk';
 
 interface RejectedOrderProps {
-  deliveryMethod: 'store' | 'home'; // Recibe el método de entrega como prop
+  deliveryMethod: OrderType;
 }
 
 const RejectedOrder: React.FC<RejectedOrderProps> = ({ deliveryMethod }) => {
   const message =
-    deliveryMethod === 'store'
+    deliveryMethod === OrderType.PICKUP
       ? 'Lamentablemente hubo un problema al generar tu pedido para retiro en sucursal. Intente nuevamente y verifique los datos.'
       : 'Lamentamos informarte que hubo un problema al generar tu pedido. Intente nuevamente y verifique los datos.';
   return (
     <section className="space-y-8">
-      {/* Columna Izquierda: Información de la Orden Rechazada */}
-
       <h2
         className="sm:text-[20px] md:text-[40px]"
         style={{ color: Colors.textMain }}
@@ -55,11 +52,6 @@ const RejectedOrder: React.FC<RejectedOrderProps> = ({ deliveryMethod }) => {
       >
         {message}
       </p>
-
-      {/* Columna Derecha: Resumen del Pedido */}
-      {/* <div className="w-full lg:w-1/3">
-        <OrderSummary hideCoupon />
-      </div> */}
     </section>
   );
 };

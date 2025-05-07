@@ -8,13 +8,13 @@ import {
   OrderDetailResponse,
   OrderDetailProductPresentationResponse,
 } from '@pharmatech/sdk';
+import Button from '@/components/Button';
 
 interface OrderDetailProps {
   orderNumber: string;
   products: OrderDetailResponse[];
   subtotal: number;
   discount: number;
-  tax: number;
   total: number;
 }
 
@@ -23,14 +23,25 @@ export default function UserOrderDetail({
   products,
   subtotal,
   discount,
-  tax,
   total,
 }: OrderDetailProps) {
   return (
     <div className="mx-auto w-full max-w-[954px] bg-white px-2 py-6 sm:px-6">
       {/* Encabezado */}
-      <div className="mb-4">
-        <h2 className="font-medium text-gray-500">Pedido {orderNumber}</h2>
+
+      <div className="space-around mb-4 flex items-center justify-between">
+        <h2 className="font-medium text-gray-500">
+          Pedido #{orderNumber.slice(0, 8)}
+        </h2>
+        <Link href={`/order/${orderNumber}`}>
+          <Button
+            className="rounded-md px-4 py-2 text-sm font-medium text-[#1C2143]"
+            width="auto"
+            height="auto"
+          >
+            Tracking
+          </Button>
+        </Link>
       </div>
       <div className="my-4 border-t border-gray-200" />
 
@@ -184,11 +195,6 @@ export default function UserOrderDetail({
           <div className="flex items-center justify-between">
             <div className="text-[#2ECC71]">Descuentos</div>
             <div className="text-[#2ECC71]">-${discount.toFixed(2)}</div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="text-gray-700">IVA</div>
-            <div className="text-gray-700">${tax.toFixed(2)}</div>
           </div>
 
           <div className="my-2 border-t border-gray-300" />

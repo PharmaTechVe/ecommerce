@@ -1,4 +1,3 @@
-// Cart.tsx
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CartItemComponent from './CartItem';
@@ -28,10 +27,10 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
     return acc;
   }, 0);
 
-  const tax = (subtotal - discount) * 0.16;
-  const total = subtotal - discount + tax;
+  const total = subtotal - discount;
 
   const handleCheckout = () => {
+    closeCart();
     router.push('/checkout');
   };
 
@@ -94,7 +93,6 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
                 <CartSummary
                   subtotal={subtotal}
                   discount={discount}
-                  tax={tax}
                   total={total}
                   onCheckout={handleCheckout}
                 />
