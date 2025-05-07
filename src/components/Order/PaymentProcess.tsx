@@ -13,6 +13,7 @@ import { checkoutPaymentProcessSchema } from '@/lib/validations/checkoutPaymentP
 import Button from '@/components/Button';
 import { useAuth } from '@/context/AuthContext';
 import Dropdown from '../Dropdown';
+import { toast } from 'react-toastify';
 
 type Errors = {
   bank?: string;
@@ -58,6 +59,7 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
       reference: '',
       documentId: '',
       phoneNumber: '',
+      orderId: order.id,
     });
   const [errors, setErrors] = useState<Errors>({});
 
@@ -81,6 +83,9 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
       if (result.success) {
         try {
           await api.paymentConfirmation.create(paymentConfirmation, token!);
+          toast.success(
+            'El pago ha sido confirmado, por favor espera a que se procese la orden',
+          );
         } catch (error) {
           console.error('Error confirming payment:', error);
         }
