@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 import Stepper from '@/components/Stepper';
@@ -8,11 +8,16 @@ import PaymentProcess from '@/components/Order/PaymentProcess';
 import ReviewOrder from '@/components/Order/ReviewOrder';
 import DeliveryInfo from '@/components/Order/DeliveryInfo';
 import RejectedOrder from '@/components/Order/RejectedOrder';
-import OrderSummary from '@/components/Order/OrderSummary';
+import ProductOrderSummary from '@/components/Order/ProductOrderSummary';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 import { toast } from 'react-toastify';
-import { OrderDetailedResponse, OrderStatus, OrderType } from '@pharmatech/sdk';
+import {
+  OrderDetailedResponse,
+  OrderStatus,
+  OrderType,
+  PaymentMethod,
+} from '@pharmatech/sdk';
 import WaitingApproval from '@/components/Order/WaitingApproval';
 
 export default function OrderInProgress() {
@@ -21,53 +26,98 @@ export default function OrderInProgress() {
   const router = useRouter();
   const { token } = useAuth();
   const [order, setOrder] = useState<OrderDetailedResponse>();
-  const stepsState = [
-    'Opciones de Compra',
-    'Confirmación de Orden',
-    'Visualización de Datos',
-    'Información del Repartidor',
-  ];
 
   useEffect(() => {
     if (id && token) {
-      const fetchOrder = async () => {
-        try {
-          const orderData = await api.order.getById(id, token);
-          setOrder(orderData);
-        } catch (error) {
+      api.order
+        .getById(id, token)
+        .then((data) => setOrder(data))
+        .catch((error) => {
           console.error('Error fetching order:', error);
-          toast.error('Order no encontrada');
+          toast.error('Orden no encontrada');
           router.push('/checkout');
-        }
-      };
-      fetchOrder();
+        });
     }
-  }, [id, token]);
+  }, [id, token, router]);
 
-  const currentStepNumber = (): number => {
-    switch (order?.status) {
-      case OrderStatus.APPROVED:
-        return 2;
-      case OrderStatus.IN_PROGRESS:
-        if (order.type == OrderType.PICKUP) return 3;
-        return 4;
-      default:
-        return 0;
+  const steps = useMemo<string[]>(() => {
+    if (!order) return ['Opciones de Compra'];
+
+    // PICKUP
+    if (order.type === OrderType.PICKUP) {
+      if (order.paymentMethod === PaymentMethod.CARD) {
+        return ['Opciones de Compra', 'Confirmación de Orden'];
+      }
+      if (
+        order.paymentMethod === PaymentMethod.BANK_TRANSFER ||
+        order.paymentMethod === PaymentMethod.MOBILE_PAYMENT
+      ) {
+        return [
+          'Opciones de Compra',
+          'Visualización de Datos',
+          'Confirmación de Orden',
+        ];
+      }
     }
-  };
+
+    // DELIVERY
+    if (order.type === OrderType.DELIVERY) {
+      if (order.paymentMethod === PaymentMethod.CASH) {
+        return [
+          'Opciones de Compra',
+          'Confirmación de Orden',
+          'Información del Repartidor',
+        ];
+      }
+      if (
+        order.paymentMethod === PaymentMethod.BANK_TRANSFER ||
+        order.paymentMethod === PaymentMethod.MOBILE_PAYMENT
+      ) {
+        return [
+          'Opciones de Compra',
+          'Visualización de Datos',
+          'Confirmación de Orden',
+          'Información del Repartidor',
+        ];
+      }
+    }
+
+    return ['Opciones de Compra'];
+  }, [order]);
+
+  const currentStep = useMemo<number>(() => {
+    if (!order) return 1;
+    switch (order.status) {
+      case OrderStatus.REQUESTED:
+        return steps.indexOf('Confirmación de Orden') + 1;
+      case OrderStatus.APPROVED:
+        return steps.includes('Visualización de Datos')
+          ? steps.indexOf('Visualización de Datos') + 1
+          : steps.indexOf('Confirmación de Orden') + 1;
+      case OrderStatus.IN_PROGRESS:
+        return order.type === OrderType.PICKUP
+          ? steps.indexOf('Confirmación de Orden') + 1
+          : steps.indexOf('Información del Repartidor') + 1;
+      case OrderStatus.CANCELED:
+        return steps.indexOf('Confirmación de Orden') + 1;
+      default:
+        return 1;
+    }
+  }, [order, steps]);
 
   const renderStep = () => {
-    switch (order?.status) {
+    if (!order) return null;
+    switch (order.status) {
       case OrderStatus.REQUESTED:
         return <WaitingApproval />;
       case OrderStatus.APPROVED:
         return <PaymentProcess order={order} couponDiscount={0} />;
       case OrderStatus.IN_PROGRESS:
-        if (order?.type == OrderType.PICKUP) {
-          return <ReviewOrder order={order} />;
-        } else {
-          return <DeliveryInfo order={order} />;
-        }
+        return order.type === OrderType.PICKUP ? (
+          <ReviewOrder order={order} />
+        ) : (
+          <DeliveryInfo order={order} />
+        );
       case OrderStatus.CANCELED:
         return <RejectedOrder deliveryMethod={order.type} />;
       default:
@@ -94,8 +144,8 @@ export default function OrderInProgress() {
             />
             <div className="stepper-container mb-6">
               <Stepper
-                steps={stepsState}
-                currentStep={currentStepNumber()}
+                steps={steps}
+                currentStep={currentStep}
                 stepSize={50}
                 clickable
               />
@@ -105,11 +155,7 @@ export default function OrderInProgress() {
         </div>
 
         <div className="w-full lg:w-1/3">
-          <OrderSummary
-            hideCoupon={true}
-            couponCode={''}
-            setCouponCode={() => {}}
-          />
+          {order && <ProductOrderSummary order={order} />}
         </div>
       </div>
     </div>

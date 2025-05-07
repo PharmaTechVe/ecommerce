@@ -50,19 +50,25 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
   const tax = (subtotal - itemDiscount - couponDiscount) * 0.16;
   const totalAmount =
     subtotal - itemDiscount - couponDiscount + (tax > 0 ? tax : 0);
+
   const [banks, setBanks] = useState<string[]>([]);
   const [selectedBank, setSelectedBank] = useState<string>('');
-  const [paymentConfirmation, setPaymentConfirmationData] =
-    useState<PaymentConfirmation>({
-      bank: selectedBank,
-      reference: '',
-      documentId: '',
-      phoneNumber: '',
-    });
+
+  // Ahora guardamos solo los campos que el usuario rellena, sin orderId
+  const [paymentConfirmation, setPaymentConfirmationData] = useState<
+    Omit<PaymentConfirmation, 'orderId'>
+  >({
+    bank: selectedBank,
+    reference: '',
+    documentId: '',
+    phoneNumber: '',
+  });
+
   const [errors, setErrors] = useState<Errors>({});
 
   const handleOnChange =
-    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (field: keyof Omit<PaymentConfirmation, 'orderId'>) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setPaymentConfirmationData({
         ...paymentConfirmation,
         [field]: e.target.value,
@@ -75,14 +81,19 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
       e.preventDefault();
       setErrors({});
 
-      const result =
-        checkoutPaymentProcessSchema.safeParse(paymentConfirmation);
+      // Construimos el payload incluyendo orderId aquí
+      const payload: PaymentConfirmation = {
+        ...paymentConfirmation,
+        orderId: order.id,
+      };
+
+      const result = checkoutPaymentProcessSchema.safeParse(payload);
 
       if (result.success) {
         try {
-          await api.paymentConfirmation.create(paymentConfirmation, token!);
+          await api.paymentConfirmation.create(payload, token!);
         } catch (error) {
-          console.error('Error confirming payment:', error);
+          console.error('Error al confirmar pago:', error);
         }
       } else {
         setErrors({
@@ -93,7 +104,7 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
         });
       }
     },
-    [paymentConfirmation],
+    [paymentConfirmation, order.id, token],
   );
 
   const isBank = false; //paymentMethod === 'bank';
@@ -185,10 +196,13 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
         </p>
         <Dropdown
           label="Banco"
-          items={banks.map((i) => i)}
+          items={banks}
           onSelect={(value) => {
             setSelectedBank(value);
-            setPaymentConfirmationData({ ...paymentConfirmation, bank: value });
+            setPaymentConfirmationData({
+              ...paymentConfirmation,
+              bank: value,
+            });
           }}
         />
         {errors.bank && <p className="text-xs text-red-500">{errors.bank}</p>}
@@ -228,6 +242,7 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
         {errors.phoneNumber && (
           <p className="text-xs text-red-500">{errors.phoneNumber}</p>
         )}
+
         <Button
           variant="submit"
           className="w-full rounded-md bg-[#1C2143] px-7 py-2 text-[16px] text-white hover:opacity-60"

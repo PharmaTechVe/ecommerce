@@ -32,7 +32,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       setCouponError('');
       setCouponSuccess(false);
     }
-  }, [hideCoupon]);
+  }, [hideCoupon, setCouponCode]);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
