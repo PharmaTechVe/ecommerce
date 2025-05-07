@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/sdkConfig';
 import CheckButton from '@/components/CheckButton';
 import {
@@ -37,28 +38,56 @@ export default function SidebarFilter({
   onApplyFilters,
   onClearFilters,
 }: SidebarFilterProps) {
+  const router = useRouter();
+  const pathname = usePathname() || '/';
+  const searchParams = useSearchParams();
+
   const [localFilters, setLocalFilters] = useState<Filters>(initialFilters);
   const [localPrice, setLocalPrice] = useState<[number, number]>(
     initialCurrentPriceRange,
   );
-
   const [categoriesList, setCategoriesList] = useState<Option[]>([]);
   const [brandsList, setBrandsList] = useState<Option[]>([]);
   const [presentationsList, setPresentationsList] = useState<Option[]>([]);
 
+  const initialSyncRef = useRef(true);
+
   useEffect(() => {
-    setLocalFilters(initialFilters);
-    setLocalPrice(initialCurrentPriceRange);
-  }, [initialFilters, initialCurrentPriceRange]);
+    if (initialSyncRef.current) {
+      const params = searchParams;
+      const rawCategory =
+        params?.get('category') || params?.get('categoryId') || '';
+      const category = rawCategory ? rawCategory.split(',') : [];
+      const brand = params?.get('brand')?.split(',') || [];
+      const presentation = params?.get('presentation')?.split(',') || [];
+      const activeIngredient =
+        params?.get('activeIngredient')?.split(',') || [];
+      const priceMin = parseFloat(
+        params?.get('priceMin') || String(initialPriceRange[0]),
+      );
+      const priceMax = parseFloat(
+        params?.get('priceMax') || String(initialPriceRange[1]),
+      );
+
+      setLocalFilters({ category, brand, presentation, activeIngredient });
+      setLocalPrice([priceMin, priceMax]);
+      // Trigger parent to reload results on refresh
+      onApplyFilters({ category, brand, presentation, activeIngredient }, [
+        priceMin,
+        priceMax,
+      ]);
+      initialSyncRef.current = false;
+    }
+  }, [searchParams, initialPriceRange, onApplyFilters]);
 
   const fetchOptions = async (
-    serviceFn: (req: { page: number; limit: number }) => Promise<{
-      results: {
+    serviceFn: (opts: { page: number; limit: number }) => Promise<{
+      results: Array<{
         id: string;
         name: string;
         quantity?: number;
         measurementUnit?: string;
-      }[];
+      }>;
     }>,
     mapFn: (item: {
       id: string;
@@ -72,7 +101,7 @@ export default function SidebarFilter({
       const { results } = await serviceFn({ page: 1, limit: 100 });
       const opts = results
         .map(mapFn)
-        .filter((opt, i, arr) => arr.findIndex((x) => x.id === opt.id) === i);
+        .filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
       setter(opts);
     } catch {
       console.error('Error fetching options');
@@ -82,12 +111,12 @@ export default function SidebarFilter({
   useEffect(() => {
     fetchOptions(
       api.category.findAll,
-      (p) => ({ id: p.id, name: p.name }),
+      (c) => ({ id: c.id, name: c.name }),
       setCategoriesList,
     );
     fetchOptions(
       api.manufacturer.findAll,
-      (p) => ({ id: p.id, name: p.name }),
+      (m) => ({ id: m.id, name: m.name }),
       setBrandsList,
     );
     fetchOptions(
@@ -100,13 +129,53 @@ export default function SidebarFilter({
     );
   }, []);
 
+  const handleApply = () => {
+    const params = new URLSearchParams(
+      Array.from(searchParams?.entries() || []),
+    );
+
+    // Preserve initial category if none selected locally
+    const rawCat = params.get('category') || params.get('categoryId') || '';
+    const initialCats = rawCat ? rawCat.split(',') : [];
+    const selectedCategories =
+      localFilters.category.length > 0 ? localFilters.category : initialCats;
+
+    if (localFilters.category.length)
+      params.set('categoryId', localFilters.category.join(','));
+    else params.delete('categoryId');
+
+    if (localFilters.brand.length > 0)
+      params.set('brand', localFilters.brand.join(','));
+    else params.delete('brand');
+
+    if (localFilters.presentation.length > 0)
+      params.set('presentation', localFilters.presentation.join(','));
+    else params.delete('presentation');
+
+    if (localFilters.activeIngredient.length > 0)
+      params.set('activeIngredient', localFilters.activeIngredient.join(','));
+    else params.delete('activeIngredient');
+
+    params.set('priceMin', String(localPrice[0]));
+    params.set('priceMax', String(localPrice[1]));
+
+    router.push(`${pathname}?${params.toString()}`);
+    onApplyFilters(
+      {
+        ...localFilters,
+        category: selectedCategories,
+      },
+      localPrice,
+    );
+  };
+
   const toggleSelection = (key: keyof Filters, id: string) => {
-    setLocalFilters((f) => {
-      const arr = f[key];
-      return {
-        ...f,
-        [key]: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id],
-      } as Filters;
+    setLocalFilters((prev) => {
+      const arr = prev[key];
+      const updated = arr.includes(id)
+        ? arr.filter((x) => x !== id)
+        : [...arr, id];
+      return { ...prev, [key]: updated } as Filters;
     });
   };
 
@@ -119,9 +188,8 @@ export default function SidebarFilter({
     });
     setLocalPrice(initialPriceRange);
     onClearFilters();
+    router.push(pathname);
   };
-
-  const handleApply = () => onApplyFilters(localFilters, localPrice);
 
   const scrollClass =
     'max-h-32 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-white bg-white';
@@ -138,7 +206,6 @@ export default function SidebarFilter({
         </button>
       </div>
 
-      {/* Categoría */}
       <section className="mb-6">
         <h4 className="mb-2 font-medium">Categoría</h4>
         <div className={scrollClass}>
@@ -154,7 +221,6 @@ export default function SidebarFilter({
         </div>
       </section>
 
-      {/* Marca */}
       <section className="mb-6">
         <h4 className="mb-2 font-medium">Marca</h4>
         <div className={scrollClass}>
@@ -170,7 +236,6 @@ export default function SidebarFilter({
         </div>
       </section>
 
-      {/* Presentación */}
       <section className="mb-6">
         <h4 className="mb-2 font-medium">Presentación</h4>
         <div className={scrollClass}>
@@ -186,7 +251,6 @@ export default function SidebarFilter({
         </div>
       </section>
 
-      {/* Precio */}
       <section className="mb-6">
         <h4 className="mb-2 font-medium">Precio</h4>
         <SliderRoot
@@ -194,7 +258,7 @@ export default function SidebarFilter({
           min={initialPriceRange[0]}
           max={initialPriceRange[1]}
           value={localPrice}
-          onValueChange={(vals) => setLocalPrice(vals as [number, number])}
+          onValueChange={(value) => setLocalPrice([value[0], value[1]])}
         >
           <SliderTrack className="relative h-2 flex-1 rounded bg-gray-200">
             <SliderRange className="absolute h-full rounded bg-[#1C2143]" />

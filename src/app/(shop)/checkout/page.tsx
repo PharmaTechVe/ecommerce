@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { TruckIcon, CubeIcon } from '@heroicons/react/24/outline';
 import Dropdown from '@/components/Dropdown';
@@ -10,6 +10,7 @@ import {
   CreateOrder,
   OrderType,
   UserAddressResponse,
+  PaymentMethod,
 } from '@pharmatech/sdk';
 import { api } from '@/lib/sdkConfig';
 import { useAuth } from '@/context/AuthContext';
@@ -40,12 +41,46 @@ const ShippingInfo: React.FC = () => {
   const [addresses, setAddresses] = useState<UserAddressResponse[]>([]);
   const [localBranch, setLocalBranch] = useState<string>('');
   const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const stepsState = [
-    'Opciones de Compra',
-    'Confirmación de Orden',
-    'Visualización de Datos',
-    'Información del Repartidor',
-  ];
+
+  const steps = useMemo(() => {
+    if (!deliveryMethod) {
+      return ['Opciones de Compra'];
+    }
+    if (deliveryMethod === 'store') {
+      if (paymentMethod === 'pos') {
+        return ['Opciones de Compra', 'Confirmación de Orden'];
+      }
+      return [
+        'Opciones de Compra',
+        'Visualización de Datos',
+        'Confirmación de Orden',
+      ];
+    }
+    // home delivery
+    if (paymentMethod === 'cash') {
+      return [
+        'Opciones de Compra',
+        'Confirmación de Orden',
+        'Información del Repartidor',
+      ];
+    }
+    return [
+      'Opciones de Compra',
+      'Visualización de Datos',
+      'Confirmación de Orden',
+      'Información del Repartidor',
+    ];
+  }, [deliveryMethod, paymentMethod]);
+
+  const paymentMethodMap: Record<
+    'cash' | 'pos' | 'bank' | 'mobile',
+    PaymentMethod
+  > = {
+    cash: PaymentMethod.CASH,
+    pos: PaymentMethod.CARD,
+    bank: PaymentMethod.BANK_TRANSFER,
+    mobile: PaymentMethod.MOBILE_PAYMENT,
+  };
 
   const handleDeliverySelection = (delivery: 'store' | 'home') => {
     setDeliveryMethod(delivery);
@@ -120,9 +155,11 @@ const ShippingInfo: React.FC = () => {
         productPresentationId: item.id,
         quantity: item.quantity,
       })),
+      paymentMethod: paymentMethodMap[paymentMethod],
       ...(deliveryMethod === 'store'
         ? { branchId: selectedBranchId }
         : { userAddressId: selectedUserAddressId }),
+      ...(couponCode ? { couponCode } : {}),
     };
 
     try {
@@ -135,6 +172,8 @@ const ShippingInfo: React.FC = () => {
       toast.error('Ocurrió un error al crear la orden');
     }
   };
+
+  if (!token) return null;
 
   return (
     <div className="mx-auto mb-36 max-w-7xl px-4 py-6 text-left md:px-8">
@@ -149,12 +188,7 @@ const ShippingInfo: React.FC = () => {
               ]}
             />
             <div className="stepper-container mb-6">
-              <Stepper
-                steps={stepsState}
-                currentStep={1}
-                stepSize={50}
-                clickable
-              />
+              <Stepper steps={steps} currentStep={1} stepSize={50} clickable />
             </div>
           </div>
           <section className="space-y-8">
