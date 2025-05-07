@@ -1,51 +1,52 @@
-// app/checkout/[step]/ReviewOrder.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { useCheckout } from '../CheckoutContext';
-//import { useCart } from '@/context/CartContext';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
+import { OrderDetailedResponse, OrderType } from '@pharmatech/sdk';
+import GoogleMaps, { BranchMarker } from '../GoogleMap/GoogleMap';
 
-const ReviewOrder: React.FC = () => {
-  const { deliveryMethod, selectedBranchLabel, orderId } = useCheckout();
+interface Props {
+  order: OrderDetailedResponse;
+}
+
+const ReviewOrder: React.FC<Props> = ({ order }) => {
   const { user, token } = useAuth();
+  const [userName, setUserName] = useState<string>('Usuario');
 
-  //const { cartItems } = useCart();
-  const [orderNumber, setOrderNumber] = useState<string>(orderId || '');
-
-  const [userName, setUserName] = useState<string>('Usuario'); // Estado local para almacenar el nombre del usuario
-  //const totalProducts = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
-  const isStorePickup = deliveryMethod === 'store';
+  const isStorePickup = order.type === OrderType.PICKUP;
 
   useEffect(() => {
     if (user?.sub && token) {
       const fetchUserName = async () => {
         try {
-          // Solicitar el nombre del usuario desde la API si no está presente
           const response = await api.user.getProfile(user.sub, token);
-          setUserName(response.firstName); // Asignar el primer nombre del perfil al estado
+          setUserName(response.firstName);
         } catch (error) {
           console.error('Error al obtener el nombre del usuario:', error);
         }
       };
 
-      fetchUserName(); // Llamar a la función para obtener el nombre
+      fetchUserName();
     }
-  }, [user?.sub, token]); // Ejecutar cuando el `user.sub` o `token` cambien
+  }, [user?.sub, token]);
 
-  useEffect(() => {
-    if (orderId && token) {
-      api.order
-        .getById(orderId, token)
-        .then((ord) => setOrderNumber(ord.id))
-        .catch(console.error);
-    }
-  }, [orderId, token]);
+  const mapCenter = useMemo(() => {
+    const { latitude, longitude } = order.branch!;
+    return { lat: latitude ?? 10.0653, lng: longitude ?? -69.3235 };
+  }, [order]);
+
+  const markers: BranchMarker[] = [
+    {
+      id: order.branch?.id || '',
+      name: order.branch?.name || '',
+      latitude: order.branch?.latitude || 0,
+      longitude: order.branch?.longitude || 0,
+      address: order.branch?.address || '',
+    },
+  ];
 
   return (
     <section className="space-y-8">
@@ -56,21 +57,16 @@ const ReviewOrder: React.FC = () => {
         Confirmación de Orden
       </h2>
       <div className="flex items-center gap-4">
-        {/* Primera columna: Ícono */}
-        <div>
-          <CheckCircleIcon
-            className="h-[60px] w-[60px]"
-            style={{ color: Colors.semanticSuccess }}
-          />
-        </div>
-
-        {/* Segunda columna: Texto dividido en dos filas */}
+        <CheckCircleIcon
+          className="h-[60px] w-[60px]"
+          style={{ color: Colors.semanticSuccess }}
+        />
         <div className="flex flex-col">
           <p
             className="sm:text-[14px] md:text-[28px]"
             style={{ color: Colors.textMain }}
           >
-            Orden #{orderNumber || '...'}
+            Orden #{order.id.slice(0, 8)}
           </p>
           <p
             className="sm:text-[14px] md:text-[28px]"
@@ -88,9 +84,6 @@ const ReviewOrder: React.FC = () => {
         En el mapa adjunto podrás ver la ubicación exacta para que llegues sin
         problemas.
       </p>
-      {/* <p className="mb-4 text-sm text-gray-600">
-        Productos en el carrito: {totalProducts}
-      </p> */}
 
       {isStorePickup ? (
         <div className="flex flex-col gap-4 lg:flex-row">
@@ -99,14 +92,14 @@ const ReviewOrder: React.FC = () => {
               className="mb-2 mt-2 sm:text-[8px] md:text-[16px]"
               style={{ color: Colors.textMain }}
             >
-              Sucursal de retiro: {selectedBranchLabel}
+              Sucursal de retiro: {order.branch?.name}
             </p>
-            <Image
-              src="/images/mapa.jpg"
-              alt="Mapa"
-              width={600}
-              height={400}
-              className="rounded-md border"
+            <GoogleMaps
+              markers={markers}
+              center={mapCenter}
+              mapWidth="100%"
+              mapHeight="600px"
+              zoom={16}
             />
           </div>
         </div>

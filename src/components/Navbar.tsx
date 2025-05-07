@@ -14,6 +14,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 import { CategoryResponse, Pagination } from '@pharmatech/sdk';
+import CartOverlay from './Cart/CartOverlay';
 
 interface UserProfile {
   firstName: string;
@@ -36,6 +37,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
   useEffect(() => {
     api.category
@@ -82,6 +84,8 @@ export default function NavBar({ onCartClick }: NavBarProps) {
 
   return (
     <>
+      {/* Cart Overlay */}
+      <CartOverlay isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} />
       {/* Versión Desktop */}
       <nav className="mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
@@ -108,7 +112,10 @@ export default function NavBar({ onCartClick }: NavBarProps) {
           />
           <div className="flex items-center gap-8">
             {/* Carrito */}
-            <div className="relative cursor-pointer" onClick={onCartClick}>
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setIsCartOpen(true)}
+            >
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
               <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
                 {totalCount}

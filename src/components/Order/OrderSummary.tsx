@@ -7,23 +7,24 @@ import Input from '@/components/Input/Input';
 import { Colors } from '@/styles/styles';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
-import { useCheckout } from '@/app/(shop)/checkout/CheckoutContext';
 
 interface OrderSummaryProps {
   hideCoupon?: boolean;
+  couponCode: string;
+  setCouponCode: (value: string) => void;
 }
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
+const OrderSummary: React.FC<OrderSummaryProps> = ({
+  hideCoupon,
+  couponCode,
+  setCouponCode,
+}) => {
   const { cartItems } = useCart();
   const { token } = useAuth();
-
-  const { couponCode, setCouponCode, couponDiscount, setCouponDiscount } =
-    useCheckout();
-
   const [couponError, setCouponError] = React.useState<string>('');
   const [couponSuccess, setCouponSuccess] = React.useState(false);
+  const [couponDiscount, setCouponDiscount] = React.useState<number>(0);
 
-  // Cuando hideCoupon pase a false (entrar a ShippingInfo), reinicio el cupón
   useEffect(() => {
     if (!hideCoupon) {
       setCouponCode('');
@@ -31,12 +32,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
       setCouponError('');
       setCouponSuccess(false);
     }
-  }, [hideCoupon, setCouponCode, setCouponDiscount]);
+  }, [hideCoupon, setCouponCode]);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
+
   const itemDiscount = cartItems.reduce((acc, item) => {
     if (item.discount) {
       return acc + item.price * item.quantity * (item.discount / 100);
@@ -51,21 +53,25 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
       setCouponSuccess(false);
       return;
     }
+
     try {
       const coupon = await api.coupon.getByCode(couponCode.trim(), token);
       const { discount, minPurchase, expirationDate } = coupon;
+
       if (subtotal < minPurchase) {
         setCouponError(`Compra mínima de $${minPurchase.toFixed(2)}`);
         setCouponDiscount(0);
         setCouponSuccess(false);
         return;
       }
+
       if (new Date(expirationDate) < new Date()) {
         setCouponError('Cupón expirado');
         setCouponDiscount(0);
         setCouponSuccess(false);
         return;
       }
+
       const newDiscount = (subtotal - itemDiscount) * (discount / 100);
       setCouponDiscount(newDiscount);
       setCouponError('');
@@ -84,8 +90,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
     setCouponDiscount(0);
   };
 
-  const tax = (subtotal - itemDiscount - couponDiscount) * 0.16;
-  const total = subtotal - itemDiscount - couponDiscount + (tax > 0 ? tax : 0);
+  const total = subtotal - itemDiscount - couponDiscount;
 
   return (
     <aside className="w-full max-w-[412px] space-y-6 p-6 font-['Poppins']">
@@ -133,6 +138,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
           const discountedPrice = item.discount
             ? item.price * (1 - item.discount / 100)
             : item.price;
+
           return (
             <div key={item.id} className="flex items-start gap-4">
               <div className="relative h-24 w-24">
@@ -186,10 +192,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ hideCoupon }) => {
             <span>${couponDiscount.toFixed(2)}</span>
           </div>
         )}
-        <div className="flex justify-between text-[#6E6D6C]">
-          <span>IVA (16%)</span>
-          <span>${tax.toFixed(2)}</span>
-        </div>
         <div className="flex justify-between pt-2 text-[24px] font-semibold leading-[36px] text-[#393938]">
           <span>Total</span>
           <span>${total.toFixed(2)}</span>

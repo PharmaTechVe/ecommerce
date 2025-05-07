@@ -4,7 +4,6 @@ import Button from '@/components/Button';
 interface Props {
   subtotal: number;
   discount: number;
-  tax: number;
   total: number;
   onCheckout: () => void;
 }
@@ -12,7 +11,6 @@ interface Props {
 const CartSummary: React.FC<Props> = ({
   subtotal,
   discount,
-  tax,
   total,
   onCheckout,
 }) => {
@@ -32,14 +30,6 @@ const CartSummary: React.FC<Props> = ({
         </span>
         <span className="text-[18px] font-normal leading-[27px] text-[#2ECC71]">
           - ${Number.isInteger(discount) ? discount : discount.toFixed(2)}
-        </span>
-      </div>
-      <div className="mb-2 flex justify-between">
-        <span className="text-[16px] leading-[24px] text-[#6E6D6C]">
-          IVA (16%)
-        </span>
-        <span className="text-[16px] leading-[24px] text-[#6E6D6C]">
-          ${Number.isInteger(tax) ? tax : tax.toFixed(2)}
         </span>
       </div>
       <div className="mb-6 mt-6 flex justify-between">

@@ -1,39 +1,24 @@
-// src/app/checkout/[step]/DeliveryInfo.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
-//import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useCheckout } from '../CheckoutContext';
-import { api } from '@/lib/sdkConfig';
+import React from 'react';
 import { Colors } from '@/styles/styles';
 import { OrderDetailedResponse } from '@pharmatech/sdk';
 
-const DeliveryInfo: React.FC = () => {
-  const { token } = useAuth();
-  const { orderId } = useCheckout();
+interface Props {
+  order: OrderDetailedResponse;
+}
 
-  const [orderDetail, setOrderDetail] = useState<OrderDetailedResponse | null>(
-    null,
-  );
-
-  useEffect(() => {
-    if (!orderId || !token) return;
-    api.order.getById(orderId, token).then(setOrderDetail).catch(console.error);
-  }, [orderId, token]);
-
-  const orderNumber = orderDetail?.id || 'No asignado';
-
-  // Si es delivery, la dirección viene de orderDetail.branch.address o address en detalles
+const DeliveryInfo: React.FC<Props> = ({ order }) => {
   const deliveryAddress =
-    orderDetail?.branch?.address ||
-    orderDetail?.details?.[0]?.productPresentation.product.name ||
+    order.branch?.address ||
+    order.details?.[0]?.productPresentation.product.name ||
     'No asignado';
 
-  const deliveryRecord = orderDetail?.orderDeliveries?.[0];
+  const deliveryRecord = order.orderDeliveries?.[0];
   const deliveryPersonName = deliveryRecord?.employee
     ? `${deliveryRecord.employee.firstName} ${deliveryRecord.employee.lastName}`
     : 'No asignado';
+
   const contactPhone = deliveryRecord?.employee?.phoneNumber || 'No asignado';
 
   return (
@@ -59,7 +44,7 @@ const DeliveryInfo: React.FC = () => {
                 className="border px-4 py-2"
                 style={{ color: Colors.textMain }}
               >
-                {orderNumber}
+                {order.id.slice(0, 8)}
               </td>
             </tr>
             <tr>

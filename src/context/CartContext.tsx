@@ -8,6 +8,7 @@ import React, {
   useRef,
 } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'react-toastify';
 
 export interface CartItem {
   id: string;
@@ -40,7 +41,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const showStockAlert = () => {
     if (!alertShownRef.current) {
       alertShownRef.current = true;
-      alert('No hay suficiente stock para este producto.');
+      toast.error('No hay suficiente stock para este producto.');
       setTimeout(() => {
         alertShownRef.current = false;
       }, 1000);

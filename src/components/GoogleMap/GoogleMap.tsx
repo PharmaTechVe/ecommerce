@@ -25,6 +25,7 @@ interface GoogleMapsProps {
   onAddressChange?: (address: string) => void;
   mapHeight?: string;
   mapWidth?: string;
+  zoom?: number;
 }
 
 const GoogleMaps = ({
@@ -35,6 +36,7 @@ const GoogleMaps = ({
   onAddressChange,
   mapHeight = '500px',
   mapWidth = '100%',
+  zoom = 12,
 }: GoogleMapsProps) => {
   const { isLoaded } = useJsApiLoader(GOOGLE_MAPS_OPTIONS);
   const [activeMarker, setActiveMarker] = useState<string | null>(null);
@@ -70,7 +72,7 @@ const GoogleMaps = ({
     <GoogleMap
       mapContainerStyle={{ width: mapWidth, height: mapHeight }}
       center={selectedPosition}
-      zoom={12}
+      zoom={zoom}
       onClick={handleMapClick}
     >
       {/* Pines múltiples para sucursales */}
