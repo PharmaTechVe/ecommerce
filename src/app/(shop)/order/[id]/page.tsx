@@ -21,6 +21,7 @@ import {
   PaymentMethod,
 } from '@pharmatech/sdk';
 import WaitingApproval from '@/components/Order/WaitingApproval';
+import OrderCompleted from '@/components/Order/Completed';
 
 export default function OrderInProgress() {
   const params = useParams<{ id: string }>();
@@ -156,6 +157,8 @@ export default function OrderInProgress() {
         );
       case OrderStatus.CANCELED:
         return <RejectedOrder deliveryMethod={order.type} />;
+      case OrderStatus.COMPLETED:
+        return <OrderCompleted order={order} />;
       default:
         return <div>Error</div>;
     }
