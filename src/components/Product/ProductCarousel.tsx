@@ -15,7 +15,7 @@ export default function ProductSlider({ title, products }: ProductSliderProps) {
 
   const scroll = (direction: 'left' | 'right') => {
     if (!sliderRef.current) return;
-    const scrollAmount = 276; // card width (260) + gap (16)
+    const scrollAmount = 276;
     sliderRef.current.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
       behavior: 'smooth',
@@ -36,7 +36,7 @@ export default function ProductSlider({ title, products }: ProductSliderProps) {
 
       <div
         ref={sliderRef}
-        className="hide-scrollbar flex gap-4 overflow-x-auto scroll-smooth py-2"
+        className="flex gap-4 overflow-x-auto scroll-smooth py-2 scrollbar-hide"
         style={{
           scrollSnapType: 'x mandatory',
           scrollPaddingLeft: '1rem',

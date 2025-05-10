@@ -78,7 +78,7 @@ const CardButton: React.FC<CardButtonProps> = (props) => {
     const defaultContainerStyles =
       quantity === 0
         ? 'w-[48px] h-[48px] rounded-full'
-        : 'w-[129px] h-[48px] rounded-full px-[25px]';
+        : 'w-[120px] h-[48px] rounded-full px-[25px]';
 
     const containerStyles = className ? className : defaultContainerStyles;
 

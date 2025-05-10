@@ -32,16 +32,16 @@ export default function ProductCard({ product }: Props) {
       <div className="flex h-full flex-col justify-between px-4 py-2">
         <div className="flex flex-col gap-2">
           <Link href={href}>
-            <h3 className="mt-[10%] line-clamp-2 min-h-[44px] text-left text-sm font-medium text-gray-900">
+            <h3 className="mt-[10%] line-clamp-2 min-h-[48px] text-left text-base font-medium text-gray-900">
               {name}
             </h3>
           </Link>
 
-          <p className="text-left text-xs text-gray-500">Stock: {stock}</p>
+          <p className="text-left text-lg text-gray-500">Stock: {stock}</p>
         </div>
 
-        <div className="flex items-center justify-between pb-[10%] pt-1">
-          <span className="text-[15px] font-semibold text-gray-900">
+        <div className="flex items-center justify-between gap-x-2 pb-[10%] pr-[10%] pt-1">
+          <span className="text-xl font-medium text-gray-900">
             ${price.toFixed(2)}
           </span>
 
