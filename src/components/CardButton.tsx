@@ -1,4 +1,5 @@
 'use client';
+
 import React from 'react';
 import { Colors, FontSizes } from '@/styles/styles';
 import { useCart } from '@/context/CartContext';
@@ -29,6 +30,11 @@ type CardButtonProps = ProductModeProps | FallbackModeProps;
 
 const CardButton: React.FC<CardButtonProps> = (props) => {
   const { cartItems, addItem, updateItemQuantity, removeItem } = useCart();
+
+  const buttonStyle = {
+    backgroundColor: Colors.primary,
+  };
+
   if ('product' in props && props.product) {
     const { product, className } = props;
     const compositeId = `${product.productPresentationId}`;
@@ -78,24 +84,25 @@ const CardButton: React.FC<CardButtonProps> = (props) => {
 
     return (
       <div
-        className={`${containerStyles} flex items-center overflow-hidden bg-[${Colors.primary}]`}
+        className={`${containerStyles} flex items-center overflow-hidden`}
+        style={buttonStyle}
       >
         {quantity === 0 ? (
           <div
             onClick={handleAdd}
-            className="font-regular flex flex-1 cursor-pointer select-none items-center justify-center text-white"
+            className="flex flex-1 cursor-pointer select-none items-center justify-center text-white"
             style={{ fontSize: FontSizes.h5.size }}
           >
-            <span>+</span>
+            +
           </div>
         ) : (
           <>
             <div
               onClick={handleSubtract}
-              className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
+              className="flex cursor-pointer select-none items-center justify-center text-white"
               style={{ marginRight: 12, fontSize: FontSizes.h5.size }}
             >
-              <span>-</span>
+              –
             </div>
             <h5
               className="flex-1 select-none text-center text-white"
@@ -105,63 +112,64 @@ const CardButton: React.FC<CardButtonProps> = (props) => {
             </h5>
             <div
               onClick={handleAdd}
-              className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
+              className="flex cursor-pointer select-none items-center justify-center text-white"
               style={{ marginLeft: 12, fontSize: FontSizes.h5.size }}
             >
-              <span>+</span>
-            </div>
-          </>
-        )}
-      </div>
-    );
-  } else {
-    const { quantity, onAdd, onSubtract, className } =
-      props as FallbackModeProps;
-    const defaultContainerStyles =
-      quantity === 0
-        ? 'w-[48px] h-[48px] rounded-full'
-        : 'w-[129px] h-[48px] rounded-full px-[25px]';
-    const containerStyles = className ? className : defaultContainerStyles;
-
-    return (
-      <div
-        className={`${containerStyles} flex items-center overflow-hidden bg-[${Colors.primary}]`}
-      >
-        {quantity === 0 ? (
-          <div
-            onClick={onAdd}
-            className="font-regular flex flex-1 cursor-pointer select-none items-center justify-center text-white"
-            style={{ fontSize: FontSizes.h5.size }}
-          >
-            <span>+</span>
-          </div>
-        ) : (
-          <>
-            <div
-              onClick={onSubtract}
-              className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
-              style={{ marginRight: 12, fontSize: FontSizes.h5.size }}
-            >
-              <span>-</span>
-            </div>
-            <h5
-              className="flex-1 select-none text-center text-white"
-              style={{ fontSize: FontSizes.h5.size }}
-            >
-              {quantity}
-            </h5>
-            <div
-              onClick={onAdd}
-              className="font-regular flex cursor-pointer select-none items-center justify-center text-white"
-              style={{ marginLeft: 12, fontSize: FontSizes.h5.size }}
-            >
-              <span>+</span>
+              +
             </div>
           </>
         )}
       </div>
     );
   }
+
+  // fallback mode
+  const { quantity, onAdd, onSubtract, className } = props as FallbackModeProps;
+  const containerStyles =
+    className ||
+    (quantity === 0
+      ? 'w-[48px] h-[48px] rounded-full'
+      : 'w-[129px] h-[48px] rounded-full px-[25px]');
+
+  return (
+    <div
+      className={`${containerStyles} flex items-center overflow-hidden`}
+      style={{ backgroundColor: Colors.primary }}
+    >
+      {quantity === 0 ? (
+        <div
+          onClick={onAdd}
+          className="flex flex-1 cursor-pointer select-none items-center justify-center text-white"
+          style={{ fontSize: FontSizes.h5.size }}
+        >
+          +
+        </div>
+      ) : (
+        <>
+          <div
+            onClick={onSubtract}
+            className="flex cursor-pointer select-none items-center justify-center text-white"
+            style={{ marginRight: 12, fontSize: FontSizes.h5.size }}
+          >
+            –
+          </div>
+          <h5
+            className="flex-1 select-none text-center text-white"
+            style={{ fontSize: FontSizes.h5.size }}
+          >
+            {quantity}
+          </h5>
+          <div
+            onClick={onAdd}
+            className="flex cursor-pointer select-none items-center justify-center text-white"
+            style={{ marginLeft: 12, fontSize: FontSizes.h5.size }}
+          >
+            +
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default CardButton;

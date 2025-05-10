@@ -1,214 +1,64 @@
 'use client';
-import React from 'react';
-import CardBase from './CardBase';
-import { Colors, FontSizes } from '@/styles/styles';
-import CardButton from '../CardButton';
-import Link from 'next/link';
-import { ProductPresentation } from '@pharmatech/sdk';
 
-export type ProductCardProps = {
+import Image from 'next/image';
+import Link from 'next/link';
+import type { ProductPresentation } from '@pharmatech/sdk';
+import CardButton from '../CardButton';
+
+type Props = {
   product: ProductPresentation;
-  ribbonText?: string;
-  label?: string;
-  lastPrice?: number;
-  discountPercentage?: number;
-  variant?: 'regular' | 'minimal' | 'responsive';
 };
 
-const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  ribbonText,
-  label,
-  lastPrice,
-  discountPercentage,
-  variant,
-}) => {
-  const detailLink = {
-    pathname: `/product/${product.product.id}/presentation/${product.presentation.id}`,
-    query: { productPresentationId: product.id },
-  };
-  const imageSrc = product.product.images?.[0]?.url ?? '';
+export default function ProductCard({ product }: Props) {
+  const name = `${product.product.name} ${product.presentation.name}`;
+  const image = product.product.images?.[0]?.url || '/placeholder.svg';
+  const stock = product.stock ?? 0;
+  const price = product.price;
+  const href = `/product/${product.product.id}/presentation/${product.presentation.id}`;
+
   return (
-    <div className="flex items-center justify-center">
-      <CardBase
-        variant={variant}
-        showRibbon={!!ribbonText}
-        ribbonText={ribbonText}
-        imageSrc={product.product.images?.[0]?.url ?? ''}
-        label={label}
-        imageLink={detailLink}
-      >
-        <div
-          className={`flex flex-col px-[24px] ${
-            variant === 'responsive' ? 'pt-[10px]' : 'pt-[18px]'
-          }`}
-        >
-          {variant === 'responsive' && (
-            <div className="mb-[5px] flex justify-end">
-              <CardButton
-                product={{
-                  productPresentationId: product.id, // del API
-                  name: product.product.name,
-                  price: product.price,
-                  discount: discountPercentage,
-                  image: typeof imageSrc === 'string' ? imageSrc : '',
-                  stock: product.stock || 0,
-                }}
-              />
-            </div>
-          )}
-          <Link href={detailLink}>
-            <p
-              className="w-full text-left"
-              style={{
-                fontSize: `${
-                  variant === 'minimal'
-                    ? FontSizes.s1.size
-                    : variant === 'responsive'
-                      ? FontSizes.b1.size
-                      : FontSizes.h5.size
-                }px`,
-                lineHeight: `${
-                  variant === 'minimal'
-                    ? FontSizes.s1.lineHeight
-                    : variant === 'responsive'
-                      ? FontSizes.b1.lineHeight
-                      : FontSizes.h5.lineHeight
-                }px`,
-                color: Colors.textMain,
-                overflow: 'hidden',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-              }}
-            >
-              {product.product.name}
-            </p>
-            <p
-              className={`${
-                variant === 'minimal'
-                  ? 'mb-[5px] mt-[20px]'
-                  : variant === 'responsive'
-                    ? 'mb-[2px] mt-[10px]'
-                    : 'mb-[20px] mt-[38px]'
-              }`}
-              style={{
-                fontSize: `${
-                  variant === 'minimal'
-                    ? FontSizes.b3.size
-                    : variant === 'responsive'
-                      ? FontSizes.b3.size
-                      : FontSizes.b1.size
-                }px`,
-                lineHeight: `${
-                  variant === 'minimal'
-                    ? FontSizes.b3.lineHeight
-                    : variant === 'responsive'
-                      ? FontSizes.b3.lineHeight
-                      : FontSizes.b1.lineHeight
-                }px`,
-                color: Colors.textMain,
-              }}
-            >
-              Stock: {product.stock || 0}
-            </p>
+    <div className="flex h-[400px] w-[260px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <Link href={href} className="flex h-[160px] items-center justify-center">
+        <Image
+          src={image}
+          alt={name}
+          width={120}
+          height={120}
+          className="object-contain"
+        />
+      </Link>
+
+      {/* Contenido */}
+      <div className="flex h-full flex-col justify-between px-4 py-2">
+        <div className="flex flex-col gap-2">
+          <Link href={href}>
+            <h3 className="mt-[10%] line-clamp-2 min-h-[44px] text-left text-sm font-medium text-gray-900">
+              {name}
+            </h3>
           </Link>
 
-          <div
-            className={`mt-4 flex w-full items-end justify-between ${
-              variant === 'minimal'
-                ? 'pb-[16px]'
-                : variant === 'responsive'
-                  ? 'pb-[6px]'
-                  : 'pb-[30px]'
-            }`}
-          >
-            <div className="flex flex-col">
-              {lastPrice !== undefined && (
-                <div
-                  className={`${
-                    variant === 'responsive' ? 'mt-[5px]' : 'mt-[10px]'
-                  } flex items-center`}
-                  style={{
-                    flexShrink: 0,
-                  }}
-                >
-                  <p
-                    className="line-through"
-                    style={{
-                      fontSize: `${FontSizes.s1.size}px`,
-                      lineHeight: `${FontSizes.s1.lineHeight}px`,
-                      color: Colors.textMain,
-                    }}
-                  >
-                    ${lastPrice.toFixed(2)}
-                  </p>
-                  {discountPercentage !== undefined && (
-                    <div
-                      className="ml-[10px] flex items-center justify-center"
-                      style={{
-                        width: '50px',
-                        height: '28px',
-                        backgroundColor: Colors.secondaryLight,
-                        color: Colors.textHighContrast,
-                        borderRadius: '3px',
-                        fontSize: FontSizes.b1.size,
-                        flexShrink: 0,
-                      }}
-                    >
-                      -{discountPercentage}%
-                    </div>
-                  )}
-                </div>
-              )}
+          <p className="text-left text-xs text-gray-500">Stock: {stock}</p>
+        </div>
 
-              <p
-                className={`font-medium ${
-                  variant === 'minimal'
-                    ? 'mt-[10px] pr-[6px]'
-                    : variant === 'responsive'
-                      ? 'mt-[5px]'
-                      : 'mt-[16px]'
-                }`}
-                style={{
-                  fontSize: `${
-                    variant === 'minimal'
-                      ? FontSizes.h5.size
-                      : variant === 'responsive'
-                        ? FontSizes.b1.size
-                        : FontSizes.h5.size
-                  }px`,
-                  lineHeight: `${
-                    variant === 'minimal'
-                      ? FontSizes.s1.lineHeight
-                      : variant === 'responsive'
-                        ? FontSizes.s1.lineHeight
-                        : FontSizes.h5.lineHeight
-                  }px`,
-                  color: Colors.textHighContrast,
-                }}
-              >
-                ${product.price.toFixed(2)}
-              </p>
-            </div>
+        <div className="flex items-center justify-between pb-[10%] pt-1">
+          <span className="text-[15px] font-semibold text-gray-900">
+            ${price.toFixed(2)}
+          </span>
 
-            {variant !== 'responsive' && (
-              <CardButton
-                product={{
-                  productPresentationId: product.id, // del API
-                  name: product.product.name,
-                  price: lastPrice || product.price,
-                  discount: discountPercentage,
-                  image: typeof imageSrc === 'string' ? imageSrc : '',
-                  stock: product.stock || 0,
-                }}
-              />
-            )}
+          <div className="max-w-[100px]">
+            <CardButton
+              product={{
+                productPresentationId: product.id,
+                name: product.product.name,
+                price,
+                discount: undefined,
+                image,
+                stock,
+              }}
+            />
           </div>
         </div>
-      </CardBase>
+      </div>
     </div>
   );
-};
-
-export default ProductCard;
+}
