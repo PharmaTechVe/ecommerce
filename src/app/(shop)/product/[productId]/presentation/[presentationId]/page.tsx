@@ -184,7 +184,7 @@ export default function ProductDetailPage() {
         <h3 className="mb-6 text-2xl font-semibold text-[#1C2143]">
           Productos de la marca {genericProduct.manufacturer.name}
         </h3>
-        <ProductCarousel carouselType="regular" products={products} />
+        <ProductCarousel products={products} />
       </div>
     </main>
   );
