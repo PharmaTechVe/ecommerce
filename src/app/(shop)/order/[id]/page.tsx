@@ -28,40 +28,31 @@ export default function OrderInProgress() {
   const id = params?.id;
   const router = useRouter();
   const { token } = useAuth();
-  const [order, setOrder] = useState<OrderDetailedResponse>();
-  const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    const socket = io(SOCKET_URL, {
-      transportOptions: {
-        polling: {
-          extraHeaders: {
-            authorization: `Bearer ${token}`,
-          },
+  const socket = io(SOCKET_URL, {
+    autoConnect: false,
+    transportOptions: {
+      polling: {
+        extraHeaders: {
+          authorization: `Bearer ${token}`,
         },
       },
-    });
+    },
+  });
+  const [order, setOrder] = useState<OrderDetailedResponse>();
+  const [orderStatus, setOrderStatus] = useState(OrderStatus.REQUESTED);
 
-    function onConnect() {
-      setIsConnected(true);
-      console.log('Connected to socket: ', isConnected);
-      socket.on('order', (order: OrderDetailedResponse) => {
-        setOrder(order);
-      });
+  useEffect(() => {
+    function onOrderUpdated(order: { orderId: string; status: OrderStatus }) {
+      setOrderStatus(order.status);
     }
 
-    function onDisconnect() {
-      setIsConnected(false);
-    }
+    socket.connect();
+    socket.on('orderUpdated', onOrderUpdated);
 
-    if (id && token) {
-      socket.on('connect', onConnect);
-      socket.on('disconnect', onDisconnect);
-      return () => {
-        socket.off('connect', onConnect);
-        socket.off('disconnect', onDisconnect);
-      };
-    }
+    return () => {
+      socket.off('orderUpdated', onOrderUpdated);
+      socket.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -75,7 +66,7 @@ export default function OrderInProgress() {
           router.push('/checkout');
         });
     }
-  }, [id, token, router]);
+  }, [id, token, router, orderStatus]);
 
   const steps = useMemo<string[]>(() => {
     if (!order) return ['Opciones de Compra'];
