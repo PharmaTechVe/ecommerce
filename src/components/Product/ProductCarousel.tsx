@@ -3,11 +3,11 @@
 import { useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProductCard from './ProductCard';
-import type { ProductPresentation } from '@pharmatech/sdk';
+import type { ExtendedProduct } from '@/lib/types/ExtendedProduct';
 
 interface ProductSliderProps {
   title?: string;
-  products: ProductPresentation[];
+  products: ExtendedProduct[];
 }
 
 export default function ProductSlider({ title, products }: ProductSliderProps) {
@@ -23,7 +23,7 @@ export default function ProductSlider({ title, products }: ProductSliderProps) {
   };
 
   return (
-    <section className="relative w-full px-4">
+    <section className="relative w-full px-2 sm:px-4">
       {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
 
       <button
@@ -43,15 +43,20 @@ export default function ProductSlider({ title, products }: ProductSliderProps) {
           scrollPaddingRight: '1rem',
         }}
       >
-        {products.map((p) => (
-          <div
-            key={p.id}
-            className="flex-shrink-0 snap-start"
-            style={{ width: '260px' }}
-          >
-            <ProductCard product={p} />
-          </div>
-        ))}
+        {products
+          .filter((p) => p.stock > 0)
+          .map((p) => (
+            <div
+              key={p.id}
+              className="flex-shrink-0 snap-start"
+              style={{
+                width: '96vw',
+                maxWidth: '260px',
+              }}
+            >
+              <ProductCard product={p} />
+            </div>
+          ))}
       </div>
 
       <button
