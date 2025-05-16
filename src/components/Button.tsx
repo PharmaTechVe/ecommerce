@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import '../styles/globals.css';
 import { Colors } from '../styles/styles';
@@ -16,6 +16,7 @@ type ButtonProps = {
   className?: string;
   variant?: 'submit' | 'white' | 'light' | 'icon' | 'gray';
   textColor?: string;
+  type?: 'submit' | 'reset' | 'button' | undefined;
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -31,7 +32,26 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   variant = 'submit',
   textColor = 'white',
+  type = undefined,
 }) => {
+  const [internalDisabled, setInternalDisabled] = useState(false);
+
+  const handleClick = () => {
+    if (disabled || internalDisabled) return;
+
+    setInternalDisabled(true);
+
+    const result = onClick?.();
+
+    if (result && typeof result === 'object' && 'then' in result) {
+      (result as Promise<void>).finally(() => setInternalDisabled(false));
+    } else {
+      setInternalDisabled(false);
+    }
+  };
+
+  const isDisabled = disabled || internalDisabled;
+
   const baseStyles = `font-medium transition duration-200 rounded-md shadow-sm border-transparent px-${paddingX} py-${paddingY} text-${textSize}`;
 
   const variantStyles =
@@ -47,10 +67,11 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      onClick={onClick}
-      disabled={disabled}
+      type={type}
+      onClick={handleClick}
+      disabled={isDisabled}
       style={{
-        backgroundColor: disabled
+        backgroundColor: isDisabled
           ? `${Colors.disabled}`
           : variant === 'white'
             ? 'white'
@@ -59,7 +80,7 @@ const Button: React.FC<ButtonProps> = ({
               : variant === 'gray'
                 ? `${Colors.neuter}`
                 : color,
-        color: disabled
+        color: isDisabled
           ? `${Colors.textHighContrast}`
           : variant === 'white'
             ? `${Colors.textMain}`
@@ -73,7 +94,7 @@ const Button: React.FC<ButtonProps> = ({
         border: variant === 'white' ? `2px solid ${Colors.primary}` : 'none',
       }}
       className={`${baseStyles} ${variantStyles} ${
-        disabled
+        isDisabled
           ? 'cursor-not-allowed border-none bg-gray-300 text-black opacity-50'
           : ''
       } hover:opacity-50 ${className}`}
