@@ -13,30 +13,21 @@ type Props = {
 export default function ProductCard({ product }: Props) {
   const stock = product.stock ?? 0;
   if (stock < 0) return null;
-
+  let hasDiscount = false;
   const name = `${product.product.name} ${product.presentation.name}`;
   const imageUrl = product.product.images?.[0]?.url || '/placeholder.svg';
   const price = product.price;
-  const now = new Date();
-
-  const promosArray = Array.isArray(product.promo)
-    ? product.promo
-    : product.promo
-      ? [product.promo]
-      : [];
-
-  const activePromos = promosArray.filter((promo) => {
-    const start = new Date(promo.startAt);
-    const end = new Date(promo.expiredAt);
-    return start <= now && now < end;
-  });
-
-  const totalDiscount = activePromos.reduce(
-    (sum, promo) => sum + (promo.discount || 0),
-    0,
-  );
-  const hasDiscount = totalDiscount > 0;
-  const finalPrice = hasDiscount ? price * (1 - totalDiscount / 100) : price;
+  let finalPrice = price;
+  if (product.promo) {
+    const now = new Date();
+    const start = new Date(product.promo.startAt);
+    const end = new Date(product.promo.expiredAt);
+    const activePromo = start <= now && now < end;
+    hasDiscount = product.promo.discount > 0 && activePromo;
+    finalPrice = hasDiscount
+      ? price * (1 - product.promo.discount / 100)
+      : price;
+  }
 
   const firstCategory = product.product.categories?.[0];
   const href = `/product/${product.product.id}/presentation/${product.presentation.id}`;
@@ -90,7 +81,9 @@ export default function ProductCard({ product }: Props) {
                     size="small"
                     borderRadius="square"
                   >
-                    <span style={{ color: '#000' }}>-{totalDiscount}%</span>
+                    <span style={{ color: '#000' }}>
+                      -{product.promo?.discount}%
+                    </span>
                   </Badge>
                 </div>
                 <span className="text-xl font-medium text-gray-900">
@@ -110,7 +103,7 @@ export default function ProductCard({ product }: Props) {
                 productPresentationId: product.id,
                 name: product.product.name,
                 price,
-                discount: hasDiscount ? totalDiscount : undefined,
+                discount: hasDiscount ? product.promo?.discount : undefined,
                 image: imageUrl,
                 stock,
               }}
