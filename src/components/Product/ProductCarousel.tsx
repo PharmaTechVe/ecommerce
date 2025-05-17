@@ -3,11 +3,11 @@
 import { useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProductCard from './ProductCard';
-import type { ExtendedProduct } from '@/lib/types/ExtendedProduct';
+import { ProductPresentation } from '@pharmatech/sdk';
 
 interface ProductSliderProps {
   title?: string;
-  products: ExtendedProduct[];
+  products: ProductPresentation[];
 }
 
 export default function ProductSlider({ title, products }: ProductSliderProps) {

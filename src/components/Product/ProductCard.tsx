@@ -2,12 +2,12 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ExtendedProduct } from '@/lib/types/ExtendedProduct';
 import CardButton from '../CardButton';
 import Badge from '../Badge';
+import { ProductPresentation } from '@pharmatech/sdk';
 
 type Props = {
-  product: ExtendedProduct;
+  product: ProductPresentation;
 };
 
 export default function ProductCard({ product }: Props) {

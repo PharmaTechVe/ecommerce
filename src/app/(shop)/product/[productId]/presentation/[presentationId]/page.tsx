@@ -18,7 +18,6 @@ import {
   ProductPresentation,
   ProductPaginationRequest,
 } from '@pharmatech/sdk';
-import type { ExtendedProduct } from '@/lib/types/ExtendedProduct';
 import Loading from '@/app/loading';
 import ProductNotFound from '@/components/Product/NotFound';
 
@@ -185,9 +184,7 @@ export default function ProductDetailPage() {
         <h3 className="mb-6 text-2xl font-semibold text-[#1C2143]">
           Productos de la marca {genericProduct.manufacturer.name}
         </h3>
-        <ProductCarousel
-          products={products.map((p) => p as unknown as ExtendedProduct)}
-        />
+        <ProductCarousel products={products.map((p) => p)} />
       </div>
     </main>
   );

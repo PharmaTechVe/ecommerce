@@ -8,7 +8,6 @@ import { api } from '@/lib/sdkConfig';
 import Breadcrumb from '@/components/Breadcrumb';
 import Loading from '@/app/loading';
 import { ProductPaginationRequest, ProductPresentation } from '@pharmatech/sdk';
-import { ExtendedProduct } from '@/lib/types/ExtendedProduct';
 
 interface CategoryOption {
   id: string;
@@ -280,10 +279,7 @@ export default function SearchPage() {
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
                 {displayProducts.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    product={p as unknown as ExtendedProduct}
-                  />
+                  <ProductCard key={p.id} product={p} />
                 ))}
               </div>
             </section>
