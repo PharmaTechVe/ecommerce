@@ -8,6 +8,7 @@ import {
   UserCircleIcon,
   BellIcon,
 } from '@heroicons/react/24/outline';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import Avatar from '@/components/Avatar';
 import SearchBar from '@/components/SearchBar';
 import { useRouter } from 'next/navigation';
@@ -16,7 +17,7 @@ import { Colors } from '../styles/styles';
 import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { api } from '@/lib/sdkConfig';
+import { api, API_URL } from '@/lib/sdkConfig';
 import { CategoryResponse, Pagination } from '@pharmatech/sdk';
 import CartOverlay from './Cart/CartOverlay';
 import NotificationList from '@/components/User/NotificationList';
@@ -45,6 +46,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     api.category
@@ -90,6 +92,45 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchData = async () => {
+      await fetchEventSource(`${API_URL}/notification/stream`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        async onopen(res) {
+          if (res.ok && res.status === 200) {
+            console.log('Connection made ', res);
+          } else if (
+            res.status >= 400 &&
+            res.status < 500 &&
+            res.status !== 429
+          ) {
+            console.log('Client side error ', res);
+          }
+        },
+        onmessage(event) {
+          console.log('New message from server', event);
+          setNotificationCount((prev) => prev + 1);
+        },
+        onclose() {
+          console.log('Connection closed by the server');
+        },
+        onerror(err) {
+          console.log('There was an error from server', err);
+        },
+      });
+    };
+    if (token) {
+      fetchData();
+    }
+    return () => {
+      controller.abort();
+      console.log('Connection aborted');
+    };
+  }, [token]);
 
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
@@ -144,8 +185,14 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             <div className="relative" ref={notificationsRef}>
               <div
                 className="cursor-pointer"
-                onClick={() => setIsNotificationsOpen((prev) => !prev)}
+                onClick={() => {
+                  setNotificationCount(0);
+                  setIsNotificationsOpen((prev) => !prev);
+                }}
               >
+                <div className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
+                  {notificationCount}
+                </div>
                 <BellIcon className="h-7 w-7 text-gray-700 hover:text-black" />
               </div>
               {isNotificationsOpen && (
