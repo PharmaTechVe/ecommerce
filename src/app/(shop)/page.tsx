@@ -132,7 +132,7 @@ export default function Home() {
           Productos en Oferta Exclusiva
         </h3>
         <div className="mt-8 cursor-pointer">
-          <ProductCarousel carouselType="regular" products={products} />
+          <ProductCarousel products={products} />
         </div>
 
         {/* Sección recomendados */}
@@ -142,10 +142,7 @@ export default function Home() {
               Productos Recomendados para ti
             </h3>
             <div className="mt-8 cursor-pointer">
-              <ProductCarousel
-                carouselType="regular"
-                products={recommendedProducts}
-              />
+              <ProductCarousel products={recommendedProducts} />
             </div>
           </>
         )}
