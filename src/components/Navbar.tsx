@@ -1,9 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCartIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import {
+  ShoppingCartIcon,
+  UserCircleIcon,
+  BellIcon,
+} from '@heroicons/react/24/outline';
 import Avatar from '@/components/Avatar';
 import SearchBar from '@/components/SearchBar';
 import { useRouter } from 'next/navigation';
@@ -15,6 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 import { CategoryResponse, Pagination } from '@pharmatech/sdk';
 import CartOverlay from './Cart/CartOverlay';
+import NotificationList from '@/components/User/NotificationList';
 
 interface UserProfile {
   firstName: string;
@@ -31,6 +36,8 @@ type NavBarProps = {
 export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
   const { cartItems } = useCart();
   const { token, user } = useAuth();
 
@@ -43,16 +50,13 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     api.category
       .findAll({ page: 1, limit: 20 })
       .then((resp: Pagination<CategoryResponse>) => {
-        if (resp && resp.results) {
-          setCategories(resp.results);
-        }
+        if (resp?.results) setCategories(resp.results);
       })
       .catch((err: unknown) => {
         console.error('Error al cargar categorías:', err);
       });
   }, []);
 
-  // Obtener perfil si está logueado
   useEffect(() => {
     if (!token || !user?.sub) {
       setIsLoggedIn(false);
@@ -66,13 +70,26 @@ export default function NavBar({ onCartClick }: NavBarProps) {
       try {
         const profileResponse = await api.user.getProfile(user.sub, token);
         setUserData(profileResponse);
-        console.log('Perfil obtenido:', profileResponse);
       } catch (error) {
         console.error('Error al obtener perfil:', error);
         setUserData(null);
       }
     })();
   }, [token, user]);
+
+  // Cerrar dropdown si se hace click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
@@ -86,8 +103,9 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     <>
       {/* Cart Overlay */}
       <CartOverlay isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} />
+
       {/* Versión Desktop */}
-      <nav className="mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
+      <nav className="relative mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
           <Link href="/">
             <Image
@@ -120,6 +138,21 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
                 {totalCount}
               </span>
+            </div>
+
+            {/* Notificaciones */}
+            <div className="relative" ref={notificationsRef}>
+              <div
+                className="cursor-pointer"
+                onClick={() => setIsNotificationsOpen((prev) => !prev)}
+              >
+                <BellIcon className="h-7 w-7 text-gray-700 hover:text-black" />
+              </div>
+              {isNotificationsOpen && (
+                <div className="absolute right-0 z-50 mt-3 max-h-[600px] w-[400px] overflow-y-auto rounded-xl bg-white shadow-lg">
+                  <NotificationList />
+                </div>
+              )}
             </div>
 
             {/* Usuario */}
