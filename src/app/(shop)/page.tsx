@@ -9,6 +9,7 @@ import Banner3 from '@/lib/utils/images/banner_final.jpg';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProductDetailImg from '@/lib/utils/images/Antibioticos.png';
+import { ExtendedProduct } from '@/lib/types/ExtendedProduct';
 
 import type {
   Category as SDKCategory,
@@ -132,7 +133,9 @@ export default function Home() {
           Productos en Oferta Exclusiva
         </h3>
         <div className="mt-8 cursor-pointer">
-          <ProductCarousel products={products} />
+          <ProductCarousel
+            products={products as unknown as ExtendedProduct[]}
+          />
         </div>
 
         {/* Sección recomendados */}
@@ -142,7 +145,9 @@ export default function Home() {
               Productos Recomendados para ti
             </h3>
             <div className="mt-8 cursor-pointer">
-              <ProductCarousel products={recommendedProducts} />
+              <ProductCarousel
+                products={recommendedProducts as unknown as ExtendedProduct[]}
+              />
             </div>
           </>
         )}
