@@ -3,11 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  ShoppingCartIcon,
-  UserCircleIcon,
-  BellIcon,
-} from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import Avatar from '@/components/Avatar';
 import SearchBar from '@/components/SearchBar';
@@ -20,7 +16,7 @@ import { useAuth } from '@/context/AuthContext';
 import { api, API_URL } from '@/lib/sdkConfig';
 import { CategoryResponse, Pagination } from '@pharmatech/sdk';
 import CartOverlay from './Cart/CartOverlay';
-import NotificationList from '@/components/User/NotificationList';
+import NotificationBell from '@/components/User/NotificationBell';
 
 interface UserProfile {
   firstName: string;
@@ -112,8 +108,20 @@ export default function NavBar({ onCartClick }: NavBarProps) {
           }
         },
         onmessage(event) {
-          console.log('New message from server', event);
-          setNotificationCount((prev) => prev + 1);
+          try {
+            if (!event.data) return;
+
+            const parsed = JSON.parse(event.data);
+
+            if (parsed?.message && parsed?.order?.id) {
+              console.log('New message from server', event);
+              setNotificationCount((prev) => prev + 1);
+            } else {
+              console.log('Ignored message from server', parsed);
+            }
+          } catch (err) {
+            console.log('Error parsing message from server', err);
+          }
         },
         onclose() {
           console.log('Connection closed by the server');
@@ -182,25 +190,16 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             </div>
 
             {/* Notificaciones */}
-            <div className="relative" ref={notificationsRef}>
-              <div
-                className="cursor-pointer"
-                onClick={() => {
-                  setNotificationCount(0);
-                  setIsNotificationsOpen((prev) => !prev);
-                }}
-              >
-                <div className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-                  {notificationCount}
-                </div>
-                <BellIcon className="h-7 w-7 text-gray-700 hover:text-black" />
-              </div>
-              {isNotificationsOpen && (
-                <div className="absolute right-0 z-50 mt-3 max-h-[600px] w-[400px] overflow-y-auto rounded-xl bg-white shadow-lg">
-                  <NotificationList />
-                </div>
-              )}
-            </div>
+            <NotificationBell
+              isMobile={false}
+              notificationCount={notificationCount}
+              isOpen={isNotificationsOpen}
+              onToggle={() => {
+                setNotificationCount(0);
+                setIsNotificationsOpen((prev) => !prev);
+              }}
+              refProp={notificationsRef}
+            />
 
             {/* Usuario */}
             {isLoggedIn && userData ? (
@@ -228,7 +227,8 @@ export default function NavBar({ onCartClick }: NavBarProps) {
 
       {/* Versión Mobile */}
       <nav className="mx-auto my-4 max-w-7xl rounded-2xl bg-white px-4 py-3 shadow sm:hidden">
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
+          {/* Columna izquierda: avatar */}
           {isLoggedIn && userData ? (
             <Avatar
               name={`${userData.firstName} ${userData.lastName}`}
@@ -243,7 +243,9 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               onClick={handleLoginClick}
             />
           )}
-          <Link href="/">
+
+          {/* Columna centro: logo */}
+          <Link href="/" className="justify-self-center">
             <Image
               src="/images/logo-horizontal.svg"
               alt="Logo Pharmatech"
@@ -252,13 +254,28 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               priority
             />
           </Link>
-          <div className="relative cursor-pointer" onClick={onCartClick}>
-            <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
-            <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-              {totalCount}
-            </span>
+
+          {/* Columna derecha: campanita + carrito */}
+          <div className="flex items-center gap-4 justify-self-end">
+            <NotificationBell
+              isMobile
+              notificationCount={notificationCount}
+              isOpen={isNotificationsOpen}
+              onToggle={() => {
+                setNotificationCount(0);
+                setIsNotificationsOpen((prev) => !prev);
+              }}
+              refProp={notificationsRef}
+            />
+            <div className="relative cursor-pointer" onClick={onCartClick}>
+              <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
+              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
+                {totalCount}
+              </span>
+            </div>
           </div>
         </div>
+
         <div className="mt-3">
           <SearchBar
             categories={categories}
