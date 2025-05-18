@@ -62,9 +62,10 @@ const baseSchema = z.object({
 
   gender: z
     .string()
-    .nonempty('Selecciona un género')
+    .transform((val) => (val?.trim() === '' ? null : val))
+    .nullable()
     .refine(
-      (value) => value === 'hombre' || value === 'mujer',
+      (value) => value === null || value === 'hombre' || value === 'mujer',
       'Selecciona un género válido',
     ),
 
