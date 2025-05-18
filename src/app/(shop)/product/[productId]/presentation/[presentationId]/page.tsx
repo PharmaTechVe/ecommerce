@@ -18,15 +18,12 @@ import {
   ProductPresentation,
   ProductPaginationRequest,
 } from '@pharmatech/sdk';
-import Loading from '@/app/loading';
 import ProductNotFound from '@/components/Product/NotFound';
-import { useAuth } from '@/context/AuthContext';
 
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const { isLoading } = useAuth();
 
   // Detect if we came from a filtered search
   const queryString = searchParams?.toString() || '';
@@ -44,7 +41,6 @@ export default function ProductDetailPage() {
   const [presentationList, setPresentationList] = useState<
     ProductPresentationResponse[]
   >([]);
-  const [loading, setLoading] = useState(true);
 
   // 1) Load presentation detail
   useEffect(() => {
@@ -104,11 +100,9 @@ export default function ProductDetailPage() {
     api.product
       .getProducts(req)
       .then((res) => setProducts(res.results))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      .catch((err) => console.error(err));
   }, [genericProduct]);
 
-  if (loading) return <Loading />;
   if (!presentation || !genericProduct) return <ProductNotFound />;
 
   // Breadcrumb con acción de "volver" si es búsqueda personalizada
@@ -133,7 +127,6 @@ export default function ProductDetailPage() {
     if (found) router.push(`/product/${productId}/presentation/${found.id}`);
   };
 
-  if (isLoading) return <Loading />;
   return (
     <main className="mx-auto mb-12 max-w-7xl p-4">
       <Breadcrumb items={breadcrumbItems} />

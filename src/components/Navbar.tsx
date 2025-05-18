@@ -14,7 +14,11 @@ import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api, API_URL } from '@/lib/sdkConfig';
-import { CategoryResponse, Pagination } from '@pharmatech/sdk';
+import {
+  CategoryResponse,
+  Pagination,
+  NotificationResponse,
+} from '@pharmatech/sdk';
 import CartOverlay from './Cart/CartOverlay';
 import NotificationBell from '@/components/User/NotificationBell';
 
@@ -41,9 +45,12 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationResponse[]>(
+    [],
+  );
 
   useEffect(() => {
     api.category
@@ -51,7 +58,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
       .then((resp: Pagination<CategoryResponse>) => {
         if (resp?.results) setCategories(resp.results);
       })
-      .catch((err: unknown) => {
+      .catch((err) => {
         console.error('Error al cargar categorías:', err);
       });
   }, []);
@@ -66,7 +73,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
         } catch (error) {
           console.error('Error al obtener perfil:', error);
           setUserData(null);
-        } finally {
         }
       })();
     } else {
@@ -79,11 +85,50 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     const timeout = setTimeout(() => {
       setShowLogin(true);
     }, 1000);
-
     return () => clearTimeout(timeout);
   }, []);
 
-  // Cerrar dropdown si se hace click fuera
+  // Fetch notifications stream
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchData = async () => {
+      await fetchEventSource(`${API_URL}/notification/stream`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        signal: controller.signal,
+        async onopen(res) {
+          if (res.ok && res.status === 200) {
+            console.log('Connection made', res);
+          } else if (
+            res.status >= 400 &&
+            res.status < 500 &&
+            res.status !== 429
+          ) {
+            console.log('Client side error', res);
+          }
+        },
+        onmessage(event) {
+          console.log('New message from server', event);
+          setNotificationCount((prev) => prev + 1);
+        },
+        onerror(err) {
+          console.log('There was an error from server', err);
+        },
+      });
+    };
+
+    if (token) {
+      fetchData();
+    }
+
+    return () => {
+      controller.abort();
+      console.log('Connection aborted');
+    };
+  }, [token]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -97,43 +142,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchData = async () => {
-      await fetchEventSource(`${API_URL}/notification/stream`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        async onopen(res) {
-          if (res.ok && res.status === 200) {
-            console.log('Connection made ', res);
-          } else if (
-            res.status >= 400 &&
-            res.status < 500 &&
-            res.status !== 429
-          ) {
-            console.log('Client side error ', res);
-          }
-        },
-        onmessage(event) {
-          console.log('New message from server', event);
-          setNotificationCount((prev) => prev + 1);
-        },
-
-        onerror(err) {
-          console.log('There was an error from server', err);
-        },
-      });
-    };
-    if (token) {
-      fetchData();
-    }
-    return () => {
-      controller.abort();
-      console.log('Connection aborted');
-    };
-  }, [token]);
-
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
@@ -141,14 +149,48 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const handleLoginClick = () => {
     router.push('/login');
   };
+
+  const handleNotificationToggle = async () => {
+    const willOpen = !isNotificationsOpen;
+
+    if (willOpen && token) {
+      try {
+        const res = await api.notification.getNotifications(token);
+        if (Array.isArray(res)) {
+          setNotifications(res);
+
+          const unread = res.filter((n) => !n.isRead);
+          setNotificationCount(unread.length);
+          // Mark notifications as read
+          if (unread.length > 0) {
+            await Promise.all(
+              unread.map((notif) =>
+                api.notification.markAsRead(notif.order.id, token),
+              ),
+            );
+            setNotifications((prev) =>
+              prev.map((n) =>
+                unread.some((u) => u.id === n.id) ? { ...n, isRead: true } : n,
+              ),
+            );
+            setNotificationCount(0);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      }
+    }
+
+    setIsNotificationsOpen(willOpen);
+  };
+
   if (isLoading) return null;
 
   return (
     <>
-      {/* Cart Overlay */}
       <CartOverlay isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} />
 
-      {/* Versión Desktop */}
+      {/* Desktop Nav */}
       <nav className="relative mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
           <Link href="/">
@@ -173,7 +215,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             inputPlaceholder="Buscar producto"
           />
           <div className="flex items-center gap-8">
-            {/* Carrito */}
             <div
               className="relative cursor-pointer"
               onClick={() => setIsCartOpen(true)}
@@ -184,19 +225,15 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               </span>
             </div>
 
-            {/* Notificaciones */}
             <NotificationBell
               isMobile={false}
               notificationCount={notificationCount}
               isOpen={isNotificationsOpen}
-              onToggle={() => {
-                setNotificationCount(0);
-                setIsNotificationsOpen((prev) => !prev);
-              }}
+              onToggle={handleNotificationToggle}
               refProp={notificationsRef}
+              notifications={notifications}
             />
 
-            {/* Usuario */}
             {isLoggedIn && userData ? (
               <Avatar
                 name={`${userData.firstName} ${userData.lastName}`}
@@ -220,10 +257,9 @@ export default function NavBar({ onCartClick }: NavBarProps) {
         </div>
       </nav>
 
-      {/* Versión Mobile */}
+      {/* Mobile Nav */}
       <nav className="mx-auto my-4 max-w-7xl rounded-2xl bg-white px-4 py-3 shadow sm:hidden">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-          {/* Columna izquierda: avatar */}
           {isLoggedIn && userData ? (
             <Avatar
               name={`${userData.firstName} ${userData.lastName}`}
@@ -239,7 +275,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             />
           ) : null}
 
-          {/* Columna centro: logo */}
           <Link href="/" className="justify-self-center">
             <Image
               src="/images/logo-horizontal.svg"
@@ -250,17 +285,14 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             />
           </Link>
 
-          {/* Columna derecha: campanita + carrito */}
           <div className="flex items-center gap-4 justify-self-end">
             <NotificationBell
               isMobile
               notificationCount={notificationCount}
               isOpen={isNotificationsOpen}
-              onToggle={() => {
-                setNotificationCount(0);
-                setIsNotificationsOpen((prev) => !prev);
-              }}
+              onToggle={handleNotificationToggle}
               refProp={notificationsRef}
+              notifications={notifications}
             />
             <div className="relative cursor-pointer" onClick={onCartClick}>
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />

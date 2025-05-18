@@ -3,6 +3,7 @@
 import { BellIcon } from '@heroicons/react/24/outline';
 import { RefObject } from 'react';
 import NotificationList from '@/components/User/NotificationList';
+import type { NotificationResponse } from '@pharmatech/sdk';
 
 interface Props {
   isMobile?: boolean;
@@ -10,6 +11,7 @@ interface Props {
   isOpen: boolean;
   onToggle: () => void;
   refProp: RefObject<HTMLDivElement | null>;
+  notifications: NotificationResponse[];
 }
 
 export default function NotificationBell({
@@ -18,6 +20,7 @@ export default function NotificationBell({
   isOpen,
   onToggle,
   refProp,
+  notifications,
 }: Props) {
   return (
     <div className="relative cursor-pointer" ref={refProp} onClick={onToggle}>
@@ -35,7 +38,7 @@ export default function NotificationBell({
             isMobile ? 'max-h-[500px] w-[300px]' : 'max-h-[600px] w-[400px]'
           } overflow-y-auto`}
         >
-          <NotificationList />
+          <NotificationList notifications={notifications} />
         </div>
       )}
     </div>
