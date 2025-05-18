@@ -36,13 +36,14 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const { cartItems } = useCart();
-  const { token, user } = useAuth();
+  const { token, user, isLoading } = useAuth();
 
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     api.category
@@ -56,24 +57,31 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   }, []);
 
   useEffect(() => {
-    if (!token || !user?.sub) {
+    if (token && user?.sub) {
+      setIsLoggedIn(true);
+      (async () => {
+        try {
+          const profileResponse = await api.user.getProfile(user.sub, token);
+          setUserData(profileResponse);
+        } catch (error) {
+          console.error('Error al obtener perfil:', error);
+          setUserData(null);
+        } finally {
+        }
+      })();
+    } else {
       setIsLoggedIn(false);
       setUserData(null);
-      return;
     }
-
-    setIsLoggedIn(true);
-
-    (async () => {
-      try {
-        const profileResponse = await api.user.getProfile(user.sub, token);
-        setUserData(profileResponse);
-      } catch (error) {
-        console.error('Error al obtener perfil:', error);
-        setUserData(null);
-      }
-    })();
   }, [token, user]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowLogin(true);
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Cerrar dropdown si se hace click fuera
   useEffect(() => {
@@ -108,24 +116,10 @@ export default function NavBar({ onCartClick }: NavBarProps) {
           }
         },
         onmessage(event) {
-          try {
-            if (!event.data) return;
-
-            const parsed = JSON.parse(event.data);
-
-            if (parsed?.message && parsed?.order?.id) {
-              console.log('New message from server', event);
-              setNotificationCount((prev) => prev + 1);
-            } else {
-              console.log('Ignored message from server', parsed);
-            }
-          } catch (err) {
-            console.log('Error parsing message from server', err);
-          }
+          console.log('New message from server', event);
+          setNotificationCount((prev) => prev + 1);
         },
-        onclose() {
-          console.log('Connection closed by the server');
-        },
+
         onerror(err) {
           console.log('There was an error from server', err);
         },
@@ -147,6 +141,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const handleLoginClick = () => {
     router.push('/login');
   };
+  if (isLoading) return null;
 
   return (
     <>
@@ -210,7 +205,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 withDropdown={true}
                 onProfileClick={() => router.push('/user')}
               />
-            ) : (
+            ) : showLogin ? (
               <Button
                 onClick={handleLoginClick}
                 variant="submit"
@@ -220,7 +215,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               >
                 Iniciar sesión
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </nav>
@@ -237,12 +232,12 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               withDropdown={true}
               onProfileClick={() => router.push('/user')}
             />
-          ) : (
+          ) : showLogin ? (
             <UserCircleIcon
               className="h-8 w-8 text-gray-700"
               onClick={handleLoginClick}
             />
-          )}
+          ) : null}
 
           {/* Columna centro: logo */}
           <Link href="/" className="justify-self-center">

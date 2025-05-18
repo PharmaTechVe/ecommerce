@@ -23,6 +23,7 @@ interface AuthContextType {
   user: JwtPayload | null;
   login: (token: string, remember: boolean) => void;
   logout: () => void;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => {},
   logout: () => {},
+  isLoading: true,
 });
 
 const decodeToken = (rawToken: string): JwtPayload | null => {
@@ -52,6 +54,8 @@ const decodeToken = (rawToken: string): JwtPayload | null => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<JwtPayload | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -64,6 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const decoded = decodeToken(storedToken);
       setUser(decoded);
     }
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -104,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
