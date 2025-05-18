@@ -91,46 +91,48 @@ export default function NavBar({ onCartClick }: NavBarProps) {
 
   // Fetch notifications stream
   useEffect(() => {
-    const controller = new AbortController();
+    if (!token) return;
 
-    const fetchData = async () => {
-      await fetchEventSource(`${API_URL}/notification/stream`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        signal: controller.signal,
+    let aborted = false;
+    let retryId: NodeJS.Timeout;
+
+    const connect = () => {
+      fetchEventSource(`${API_URL}/notification/stream`, {
+        headers: { Authorization: `Bearer ${token}` },
+        openWhenHidden: true,
         async onopen(res) {
-          if (res.ok && res.status === 200) {
-            console.log('Connection made', res);
-          } else if (
-            res.status >= 400 &&
-            res.status < 500 &&
-            res.status !== 429
-          ) {
-            console.log('Client side error', res);
-          }
+          if (res.ok) console.log('SSE abierta');
         },
-        onmessage(event) {
-          if (event.event == 'notification') {
-            setNotificationCount((prev) => prev + 1);
-          }
+        onmessage(ev) {
+          if (!ev.data) return;
+
+          try {
+            const d = JSON.parse(ev.data);
+            if (d.type !== 'notification') return;
+
+            setNotifications((prev) => {
+              const exists = prev.some((n) => n.id === d.payload.id);
+              if (exists) return prev;
+
+              setNotificationCount((c) => c + 1);
+              return [d.payload, ...prev];
+            });
+          } catch {}
         },
         onclose() {
-          console.log('Connection closed by the server');
+          if (!aborted) retryId = setTimeout(connect, 5000);
         },
-        onerror(err) {
-          console.log('There was an error from server', err);
+        onerror() {
+          if (!aborted) retryId = setTimeout(connect, 5000);
         },
       });
     };
 
-    if (token) {
-      fetchData();
-    }
+    connect();
 
     return () => {
-      controller.abort();
-      console.log('Connection aborted');
+      aborted = true;
+      clearTimeout(retryId);
     };
   }, [token]);
 
