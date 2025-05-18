@@ -23,6 +23,7 @@ import CartOverlay from './Cart/CartOverlay';
 import NotificationList from '@/components/User/NotificationList';
 
 interface UserProfile {
+  id: string;
   firstName: string;
   lastName: string;
   profile: {
@@ -112,8 +113,9 @@ export default function NavBar({ onCartClick }: NavBarProps) {
           }
         },
         onmessage(event) {
-          console.log('New message from server', event);
-          setNotificationCount((prev) => prev + 1);
+          if (event.event == 'notification') {
+            setNotificationCount((prev) => prev + 1);
+          }
         },
         onclose() {
           console.log('Connection closed by the server');
