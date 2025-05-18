@@ -3,11 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  ShoppingCartIcon,
-  UserCircleIcon,
-  BellIcon,
-} from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import Avatar from '@/components/Avatar';
 import SearchBar from '@/components/SearchBar';
@@ -18,9 +14,13 @@ import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api, API_URL } from '@/lib/sdkConfig';
-import { CategoryResponse, Pagination } from '@pharmatech/sdk';
+import {
+  CategoryResponse,
+  Pagination,
+  NotificationResponse,
+} from '@pharmatech/sdk';
 import CartOverlay from './Cart/CartOverlay';
-import NotificationList from '@/components/User/NotificationList';
+import NotificationBell from '@/components/User/NotificationBell';
 
 interface UserProfile {
   id: string;
@@ -41,13 +41,17 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const { cartItems } = useCart();
-  const { token, user } = useAuth();
+  const { token, user, isLoading } = useAuth();
 
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationResponse[]>(
+    [],
+  );
 
   useEffect(() => {
     api.category
@@ -55,32 +59,83 @@ export default function NavBar({ onCartClick }: NavBarProps) {
       .then((resp: Pagination<CategoryResponse>) => {
         if (resp?.results) setCategories(resp.results);
       })
-      .catch((err: unknown) => {
+      .catch((err) => {
         console.error('Error al cargar categorías:', err);
       });
   }, []);
 
   useEffect(() => {
-    if (!token || !user?.sub) {
+    if (token && user?.sub) {
+      setIsLoggedIn(true);
+      (async () => {
+        try {
+          const profileResponse = await api.user.getProfile(user.sub, token);
+          setUserData(profileResponse);
+        } catch (error) {
+          console.error('Error al obtener perfil:', error);
+          setUserData(null);
+        }
+      })();
+    } else {
       setIsLoggedIn(false);
       setUserData(null);
-      return;
     }
-
-    setIsLoggedIn(true);
-
-    (async () => {
-      try {
-        const profileResponse = await api.user.getProfile(user.sub, token);
-        setUserData(profileResponse);
-      } catch (error) {
-        console.error('Error al obtener perfil:', error);
-        setUserData(null);
-      }
-    })();
   }, [token, user]);
 
-  // Cerrar dropdown si se hace click fuera
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowLogin(true);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Fetch notifications stream
+  useEffect(() => {
+    if (!token) return;
+
+    let aborted = false;
+    let retryId: NodeJS.Timeout;
+
+    const connect = () => {
+      fetchEventSource(`${API_URL}/notification/stream`, {
+        headers: { Authorization: `Bearer ${token}` },
+        openWhenHidden: true,
+        async onopen(res) {
+          if (res.ok) console.log('SSE abierta');
+        },
+        onmessage(ev) {
+          if (!ev.data) return;
+
+          try {
+            const d = JSON.parse(ev.data);
+            if (d.type !== 'notification') return;
+
+            setNotifications((prev) => {
+              const exists = prev.some((n) => n.id === d.payload.id);
+              if (exists) return prev;
+
+              setNotificationCount((c) => c + 1);
+              return [d.payload, ...prev];
+            });
+          } catch {}
+        },
+        onclose() {
+          if (!aborted) retryId = setTimeout(connect, 5000);
+        },
+        onerror() {
+          if (!aborted) retryId = setTimeout(connect, 5000);
+        },
+      });
+    };
+
+    connect();
+
+    return () => {
+      aborted = true;
+      clearTimeout(retryId);
+    };
+  }, [token]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -94,46 +149,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchData = async () => {
-      await fetchEventSource(`${API_URL}/notification/stream`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        async onopen(res) {
-          if (res.ok && res.status === 200) {
-            console.log('Connection made ', res);
-          } else if (
-            res.status >= 400 &&
-            res.status < 500 &&
-            res.status !== 429
-          ) {
-            console.log('Client side error ', res);
-          }
-        },
-        onmessage(event) {
-          if (event.event == 'notification') {
-            setNotificationCount((prev) => prev + 1);
-          }
-        },
-        onclose() {
-          console.log('Connection closed by the server');
-        },
-        onerror(err) {
-          console.log('There was an error from server', err);
-        },
-      });
-    };
-    if (token) {
-      fetchData();
-    }
-    return () => {
-      controller.abort();
-      console.log('Connection aborted');
-    };
-  }, [token]);
-
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
@@ -142,12 +157,47 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     router.push('/login');
   };
 
+  const handleNotificationToggle = async () => {
+    const willOpen = !isNotificationsOpen;
+
+    if (willOpen && token) {
+      try {
+        const res = await api.notification.getNotifications(token);
+        if (Array.isArray(res)) {
+          setNotifications(res);
+
+          const unread = res.filter((n) => !n.isRead);
+          setNotificationCount(unread.length);
+          // Mark notifications as read
+          if (unread.length > 0) {
+            await Promise.all(
+              unread.map((notif) =>
+                api.notification.markAsRead(notif.order.id, token),
+              ),
+            );
+            setNotifications((prev) =>
+              prev.map((n) =>
+                unread.some((u) => u.id === n.id) ? { ...n, isRead: true } : n,
+              ),
+            );
+            setNotificationCount(0);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      }
+    }
+
+    setIsNotificationsOpen(willOpen);
+  };
+
+  if (isLoading) return null;
+
   return (
     <>
-      {/* Cart Overlay */}
       <CartOverlay isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} />
 
-      {/* Versión Desktop */}
+      {/* Desktop Nav */}
       <nav className="relative mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
           <Link href="/">
@@ -172,7 +222,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             inputPlaceholder="Buscar producto"
           />
           <div className="flex items-center gap-8">
-            {/* Carrito */}
             <div
               className="relative cursor-pointer"
               onClick={() => setIsCartOpen(true)}
@@ -183,28 +232,15 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               </span>
             </div>
 
-            {/* Notificaciones */}
-            <div className="relative" ref={notificationsRef}>
-              <div
-                className="cursor-pointer"
-                onClick={() => {
-                  setNotificationCount(0);
-                  setIsNotificationsOpen((prev) => !prev);
-                }}
-              >
-                <div className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-                  {notificationCount}
-                </div>
-                <BellIcon className="h-7 w-7 text-gray-700 hover:text-black" />
-              </div>
-              {isNotificationsOpen && (
-                <div className="absolute right-0 z-50 mt-3 max-h-[600px] w-[400px] overflow-y-auto rounded-xl bg-white shadow-lg">
-                  <NotificationList />
-                </div>
-              )}
-            </div>
+            <NotificationBell
+              isMobile={false}
+              notificationCount={notificationCount}
+              isOpen={isNotificationsOpen}
+              onToggle={handleNotificationToggle}
+              refProp={notificationsRef}
+              notifications={notifications}
+            />
 
-            {/* Usuario */}
             {isLoggedIn && userData ? (
               <Avatar
                 name={`${userData.firstName} ${userData.lastName}`}
@@ -213,7 +249,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 withDropdown={true}
                 onProfileClick={() => router.push('/user')}
               />
-            ) : (
+            ) : showLogin ? (
               <Button
                 onClick={handleLoginClick}
                 variant="submit"
@@ -223,14 +259,14 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               >
                 Iniciar sesión
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </nav>
 
-      {/* Versión Mobile */}
+      {/* Mobile Nav */}
       <nav className="mx-auto my-4 max-w-7xl rounded-2xl bg-white px-4 py-3 shadow sm:hidden">
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
           {isLoggedIn && userData ? (
             <Avatar
               name={`${userData.firstName} ${userData.lastName}`}
@@ -239,13 +275,14 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               withDropdown={true}
               onProfileClick={() => router.push('/user')}
             />
-          ) : (
+          ) : showLogin ? (
             <UserCircleIcon
               className="h-8 w-8 text-gray-700"
               onClick={handleLoginClick}
             />
-          )}
-          <Link href="/">
+          ) : null}
+
+          <Link href="/" className="justify-self-center">
             <Image
               src="/images/logo-horizontal.svg"
               alt="Logo Pharmatech"
@@ -254,13 +291,25 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               priority
             />
           </Link>
-          <div className="relative cursor-pointer" onClick={onCartClick}>
-            <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
-            <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-              {totalCount}
-            </span>
+
+          <div className="flex items-center gap-4 justify-self-end">
+            <NotificationBell
+              isMobile
+              notificationCount={notificationCount}
+              isOpen={isNotificationsOpen}
+              onToggle={handleNotificationToggle}
+              refProp={notificationsRef}
+              notifications={notifications}
+            />
+            <div className="relative cursor-pointer" onClick={onCartClick}>
+              <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
+              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
+                {totalCount}
+              </span>
+            </div>
           </div>
         </div>
+
         <div className="mt-3">
           <SearchBar
             categories={categories}

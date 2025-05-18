@@ -50,7 +50,8 @@ export default function ProductDetailPage() {
     api.productPresentation
       .getByPresentationId(productId, presentationId)
       .then((data) => setPresentation(data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, [productId, presentationId]);
 
   // 2) Load generic product info & variants
@@ -102,10 +103,8 @@ export default function ProductDetailPage() {
     api.product
       .getProducts(req)
       .then((res) => setProducts(res.results))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      .catch((err) => console.error(err));
   }, [genericProduct]);
-
   if (loading) return <Loading />;
   if (!presentation || !genericProduct) return <ProductNotFound />;
 
