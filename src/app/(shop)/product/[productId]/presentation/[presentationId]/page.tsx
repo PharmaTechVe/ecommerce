@@ -18,6 +18,7 @@ import {
   ProductPresentation,
   ProductPaginationRequest,
 } from '@pharmatech/sdk';
+import Loading from '@/app/loading';
 import ProductNotFound from '@/components/Product/NotFound';
 
 export default function ProductDetailPage() {
@@ -41,6 +42,7 @@ export default function ProductDetailPage() {
   const [presentationList, setPresentationList] = useState<
     ProductPresentationResponse[]
   >([]);
+  const [loading, setLoading] = useState(true);
 
   // 1) Load presentation detail
   useEffect(() => {
@@ -48,7 +50,8 @@ export default function ProductDetailPage() {
     api.productPresentation
       .getByPresentationId(productId, presentationId)
       .then((data) => setPresentation(data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, [productId, presentationId]);
 
   // 2) Load generic product info & variants
@@ -102,7 +105,7 @@ export default function ProductDetailPage() {
       .then((res) => setProducts(res.results))
       .catch((err) => console.error(err));
   }, [genericProduct]);
-
+  if (loading) return <Loading />;
   if (!presentation || !genericProduct) return <ProductNotFound />;
 
   // Breadcrumb con acción de "volver" si es búsqueda personalizada
