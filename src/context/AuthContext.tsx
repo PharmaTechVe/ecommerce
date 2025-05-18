@@ -37,13 +37,10 @@ const AuthContext = createContext<AuthContextType>({
 const decodeToken = (rawToken: string): JwtPayload | null => {
   try {
     const decoded = jwtDecode<JwtPayload>(rawToken);
-
-    // (Opcional) Verificar expiración
     if (decoded.exp && decoded.exp * 1000 < Date.now()) {
       console.warn('Token expirado');
       return null;
     }
-
     return decoded;
   } catch (error) {
     console.error('Error decoding token:', error);
@@ -60,8 +57,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const storedToken =
-      sessionStorage.getItem('pharmatechToken') ||
-      localStorage.getItem('pharmatechToken');
+      localStorage.getItem('pharmatechToken') ||
+      sessionStorage.getItem('pharmatechToken');
 
     if (storedToken) {
       setToken(storedToken);
@@ -89,9 +86,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (newToken: string, remember: boolean) => {
-    sessionStorage.setItem('pharmatechToken', newToken);
-    if (remember) {
-      localStorage.setItem('pharmatechToken', newToken);
+    localStorage.setItem('pharmatechToken', newToken);
+    if (!remember) {
+      sessionStorage.setItem('pharmatechToken', newToken);
     }
 
     setToken(newToken);
