@@ -30,8 +30,8 @@ const baseSchema = z.object({
     .transform((value) => (value?.trim() === '' ? null : value))
     .nullable()
     .refine(
-      (value) => value === null || /^\+\d{8,15}$/.test(value),
-      'El teléfono debe iniciar con + y tener entre 8 y 15 dígitos',
+      (value) => value === null || /^\d{8,15}$/.test(value),
+      'El teléfono debe tener entre 8 y 15 dígitos numéricos',
     ),
 
   fechaNacimiento: z
