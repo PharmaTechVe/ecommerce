@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCartIcon, UserCircleIcon } from '@heroicons/react/24/outline';
@@ -39,7 +39,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const notificationsRef = useRef<HTMLDivElement>(null);
   const { cartItems } = useCart();
   const { token, user, isLoading } = useAuth();
 
@@ -52,6 +51,40 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const [notifications, setNotifications] = useState<NotificationResponse[]>(
     [],
   );
+
+  const handleNotificationToggle = async () => {
+    const willOpen = !isNotificationsOpen;
+
+    if (willOpen && token) {
+      try {
+        const res = await api.notification.getNotifications(token);
+        if (Array.isArray(res)) {
+          setNotifications(res);
+
+          const unread = res.filter((n) => !n.isRead);
+          setNotificationCount(unread.length);
+
+          if (unread.length > 0) {
+            await Promise.all(
+              unread.map((notif) =>
+                api.notification.markAsRead(notif.order.id, token),
+              ),
+            );
+            setNotifications((prev) =>
+              prev.map((n) =>
+                unread.some((u) => u.id === n.id) ? { ...n, isRead: true } : n,
+              ),
+            );
+            setNotificationCount(0);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      }
+    }
+
+    setIsNotificationsOpen(willOpen);
+  };
 
   useEffect(() => {
     api.category
@@ -136,59 +169,12 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     };
   }, [token]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node)
-      ) {
-        setIsNotificationsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleSearch = (query: string, category: string) => {
     console.log('Buscando:', query, 'en', category);
   };
 
   const handleLoginClick = () => {
     router.push('/login');
-  };
-
-  const handleNotificationToggle = async () => {
-    const willOpen = !isNotificationsOpen;
-
-    if (willOpen && token) {
-      try {
-        const res = await api.notification.getNotifications(token);
-        if (Array.isArray(res)) {
-          setNotifications(res);
-
-          const unread = res.filter((n) => !n.isRead);
-          setNotificationCount(unread.length);
-          // Mark notifications as read
-          if (unread.length > 0) {
-            await Promise.all(
-              unread.map((notif) =>
-                api.notification.markAsRead(notif.order.id, token),
-              ),
-            );
-            setNotifications((prev) =>
-              prev.map((n) =>
-                unread.some((u) => u.id === n.id) ? { ...n, isRead: true } : n,
-              ),
-            );
-            setNotificationCount(0);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching notifications:', err);
-      }
-    }
-
-    setIsNotificationsOpen(willOpen);
   };
 
   if (isLoading) return null;
@@ -237,7 +223,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               notificationCount={notificationCount}
               isOpen={isNotificationsOpen}
               onToggle={handleNotificationToggle}
-              refProp={notificationsRef}
               notifications={notifications}
             />
 
@@ -298,7 +283,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               notificationCount={notificationCount}
               isOpen={isNotificationsOpen}
               onToggle={handleNotificationToggle}
-              refProp={notificationsRef}
               notifications={notifications}
             />
             <div className="relative cursor-pointer" onClick={onCartClick}>
