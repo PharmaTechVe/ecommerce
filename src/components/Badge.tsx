@@ -99,7 +99,7 @@ const Badge: React.FC<BadgeProps> = ({
     info: { color: Colors.semanticInfo },
   };
 
-  const styleByVariant = {
+  const variantStyle = {
     filled: colorClasses[color],
     outlined: outlinedClasses[color],
     text: textClasses[color],
@@ -108,7 +108,7 @@ const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       className={`${baseStyle} ${sizeStyle} ${borderRadiusStyle} ${className ?? ''}`}
-      style={styleByVariant[variant]}
+      style={variantStyle[variant]}
     >
       {children}
     </span>
