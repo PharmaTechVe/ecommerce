@@ -14,7 +14,6 @@ interface OrderDetailProps {
   orderNumber: string;
   products: OrderDetailResponse[];
   subtotal: number;
-  discount: number;
   total: number;
 }
 
@@ -22,13 +21,34 @@ export default function UserOrderDetail({
   orderNumber,
   products,
   subtotal,
-  discount,
   total,
 }: OrderDetailProps) {
+  const now = new Date();
+
+  const totalDiscount = products.reduce((acc, item) => {
+    const presentation: OrderDetailProductPresentationResponse =
+      item.productPresentation;
+    const promo = presentation.promo;
+    const basePrice = presentation.price;
+    const quantity = item.quantity;
+
+    const isPromoActive =
+      promo &&
+      new Date(promo.startAt) <= now &&
+      now < new Date(promo.expiredAt);
+
+    if (isPromoActive) {
+      const discountedPrice = basePrice * (1 - promo.discount / 100);
+      const discountAmount = (basePrice - discountedPrice) * quantity;
+      return acc + discountAmount;
+    }
+
+    return acc;
+  }, 0);
+
   return (
     <div className="mx-auto w-full max-w-[954px] bg-white px-2 py-6 sm:px-6">
-      {/* Encabezado */}
-
+      {/* Header */}
       <div className="space-around mb-4 flex items-center justify-between">
         <h2 className="font-medium text-gray-500">
           Pedido #{orderNumber.slice(0, 8)}
@@ -43,18 +63,27 @@ export default function UserOrderDetail({
           </Button>
         </Link>
       </div>
+
       <div className="my-4 border-t border-gray-200" />
 
-      {/* Lista con scroll en mobile */}
+      {/* Order Summary*/}
       <div className="max-h-[460px] space-y-6 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:max-h-none sm:overflow-visible [&::-webkit-scrollbar]:hidden">
         {products.map((item, idx) => {
           const presentation: OrderDetailProductPresentationResponse =
             item.productPresentation;
           const product = presentation.product;
+          const basePrice = presentation.price;
+          const quantity = item.quantity;
+          const promo = presentation.promo;
 
-          const originalPrice = presentation.promo
-            ? presentation.price * item.quantity
-            : null;
+          const isPromoActive =
+            promo &&
+            new Date(promo.startAt) <= now &&
+            now < new Date(promo.expiredAt);
+
+          const discountedPrice = isPromoActive
+            ? basePrice * (1 - promo.discount / 100)
+            : basePrice;
 
           return (
             <div
@@ -64,7 +93,6 @@ export default function UserOrderDetail({
               {/* MOBILE */}
               <div className="flex w-full flex-col sm:hidden">
                 <div className="flex gap-2">
-                  {/* Imagen */}
                   <div className="h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                     <Image
                       src={product.images?.[0]?.url ?? '/placeholder.png'}
@@ -76,36 +104,32 @@ export default function UserOrderDetail({
                   </div>
 
                   <div className="flex w-full flex-col">
-                    {/* Nombre y cantidad */}
                     <div className="flex justify-between">
                       <h3 className="truncate text-sm font-medium text-gray-900">
                         {product.name}
                       </h3>
                       <span className="text-xs text-gray-500">
-                        Cantidad: {item.quantity}
+                        Cantidad: {quantity}
                       </span>
                     </div>
 
-                    {/* Descripción */}
                     <p className="max-w-[13ch] truncate text-xs text-gray-500">
                       {product.description}
                     </p>
 
-                    {/* Precios */}
                     <div className="mt-1 flex items-center justify-between">
                       <div className="flex flex-col">
-                        {originalPrice && (
+                        {isPromoActive && (
                           <span className="text-xs text-gray-400 line-through">
-                            ${originalPrice.toFixed(2)}
+                            ${(basePrice * quantity).toFixed(2)}
                           </span>
                         )}
                         <span className="text-sm font-medium text-gray-900">
-                          ${item.subtotal.toFixed(2)}
+                          ${(discountedPrice * quantity).toFixed(2)}
                         </span>
                       </div>
                     </div>
 
-                    {/* Ir al producto */}
                     <div className="mt-1">
                       <Link
                         href={{
@@ -149,7 +173,6 @@ export default function UserOrderDetail({
                   <p className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
                     {product.description}
                   </p>
-
                   <Link
                     href={{
                       pathname: `/product/${product.id}/presentation/${presentation.presentation.id}`,
@@ -163,14 +186,14 @@ export default function UserOrderDetail({
                 </div>
 
                 <div className="flex items-center gap-10">
-                  <div className="text-sm text-gray-500">{item.quantity}</div>
+                  <div className="text-sm text-gray-500">{quantity}</div>
                   <div className="flex w-28 flex-col items-end text-right font-medium text-gray-900">
-                    {originalPrice && (
+                    {isPromoActive && (
                       <span className="text-xs text-gray-400 line-through">
-                        ${originalPrice.toFixed(2)}
+                        ${(basePrice * quantity).toFixed(2)}
                       </span>
                     )}
-                    <span>${item.subtotal.toFixed(2)}</span>
+                    <span>${(discountedPrice * quantity).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -179,7 +202,7 @@ export default function UserOrderDetail({
         })}
       </div>
 
-      {/* Resumen del pedido */}
+      {/* TOTALS */}
       <div className="mt-8 w-full rounded-md bg-[#F1F5FD] p-6">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -194,7 +217,7 @@ export default function UserOrderDetail({
 
           <div className="flex items-center justify-between">
             <div className="text-[#2ECC71]">Descuentos</div>
-            <div className="text-[#2ECC71]">-${discount.toFixed(2)}</div>
+            <div className="text-[#2ECC71]">-${totalDiscount.toFixed(2)}</div>
           </div>
 
           <div className="my-2 border-t border-gray-300" />
