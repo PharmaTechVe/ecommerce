@@ -2,21 +2,26 @@
 import React from 'react';
 import '../styles/globals.css';
 import { Colors } from '../styles/styles';
+
 export interface BadgeProps {
   variant: 'filled' | 'outlined' | 'text';
   color: 'primary' | 'tertiary' | 'warning' | 'danger' | 'success' | 'info';
   size: 'small' | 'medium' | 'large';
   borderRadius?: 'rounded' | 'square';
+  className?: string;
   children: React.ReactNode;
 }
+
 const Badge: React.FC<BadgeProps> = ({
   variant,
   color,
   size,
   borderRadius = 'rounded',
+  className,
   children,
 }) => {
-  const baseStyle = 'font-poppins px-4 py-2';
+  const baseStyle =
+    'inline-flex items-center justify-center font-poppins select-none px-4 py-2 whitespace-nowrap w-fit';
   const sizeStyle =
     size === 'small'
       ? 'text-sm mt-2'
@@ -37,7 +42,6 @@ const Badge: React.FC<BadgeProps> = ({
       color: Colors.textWhite,
       borderColor: Colors.secondaryLight,
     },
-
     warning: {
       backgroundColor: Colors.semanticWarning,
       color: Colors.textWhite,
@@ -59,6 +63,7 @@ const Badge: React.FC<BadgeProps> = ({
       borderColor: Colors.semanticInfo,
     },
   };
+
   const outlinedClasses: Record<string, React.CSSProperties> = {
     primary: {
       color: Colors.primary,
@@ -85,6 +90,7 @@ const Badge: React.FC<BadgeProps> = ({
       border: `1px solid ${Colors.semanticInfo}`,
     },
   };
+
   const textClasses: Record<string, React.CSSProperties> = {
     primary: { color: Colors.primary },
     warning: { color: Colors.semanticWarning },
@@ -92,18 +98,21 @@ const Badge: React.FC<BadgeProps> = ({
     success: { color: Colors.semanticSuccess },
     info: { color: Colors.semanticInfo },
   };
-  const variantStyle = {
+
+  const styleByVariant = {
     filled: colorClasses[color],
     outlined: outlinedClasses[color],
     text: textClasses[color],
   };
+
   return (
     <span
-      className={`${baseStyle} ${sizeStyle} ${borderRadiusStyle}`}
-      style={variantStyle[variant]}
+      className={`${baseStyle} ${sizeStyle} ${borderRadiusStyle} ${className ?? ''}`}
+      style={styleByVariant[variant]}
     >
       {children}
     </span>
   );
 };
+
 export default Badge;
