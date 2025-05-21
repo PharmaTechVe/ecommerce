@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCartIcon, UserCircleIcon } from '@heroicons/react/24/outline';
@@ -39,6 +39,7 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const lastMsgRef = useRef<string | null>(null);
   const { cartItems } = useCart();
   const { token, user, isLoading } = useAuth();
 
@@ -137,20 +138,15 @@ export default function NavBar({ onCartClick }: NavBarProps) {
           if (res.ok) console.log('SSE abierta');
         },
         onmessage(ev) {
-          if (!ev.data) return;
+          const msg = ev.data?.trim();
 
-          try {
-            const d = JSON.parse(ev.data);
-            if (d.type !== 'notification') return;
+          if (!msg || msg === lastMsgRef.current) {
+            return;
+          }
 
-            setNotifications((prev) => {
-              const exists = prev.some((n) => n.id === d.payload.id);
-              if (exists) return prev;
+          lastMsgRef.current = msg;
 
-              setNotificationCount((c) => c + 1);
-              return [d.payload, ...prev];
-            });
-          } catch {}
+          setNotificationCount((c) => c + 1);
         },
         onclose() {
           if (!aborted) retryId = setTimeout(connect, 5000);
