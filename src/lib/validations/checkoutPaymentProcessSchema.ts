@@ -33,7 +33,7 @@ export const checkoutPaymentProcessSchema = z.object({
     .string()
     .trim() // Elimina espacios en blanco al inicio y al final
     .refine(
-      (value) => /^\+\d{8,15}$/.test(value), // El teléfono debe iniciar con + y tener entre 8 y 15 dígitos
-      'El teléfono debe iniciar con + y tener entre 8 y 15 dígitos',
+      (value) => /^\d{8,15}$/.test(value),
+      'El teléfono debe tener entre 8 y 15 dígitos numéricos',
     ),
 });

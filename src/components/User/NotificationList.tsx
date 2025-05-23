@@ -1,46 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import type { NotificationResponse } from '@pharmatech/sdk';
 import { getIconType, iconMap } from '@/lib/utils/constants/IconType';
 import { formatTimeAgo } from '@/lib/utils/constants/DateUtils';
-import { api } from '@/lib/sdkConfig';
-import { useAuth } from '@/context/AuthContext';
 
-export default function NotificationList() {
-  const { token } = useAuth();
-  const [notifications, setNotifications] = useState<NotificationResponse[]>(
-    [],
-  );
+type Props = {
+  notifications: NotificationResponse[];
+};
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (!token) return;
-      try {
-        const res = await api.notification.getNotifications(token);
-
-        if (Array.isArray(res)) {
-          setNotifications(res);
-
-          await Promise.all(
-            res.map((notif) =>
-              api.notification.markAsRead(notif.order.id, token),
-            ),
-          );
-        } else {
-          console.warn('Error:', res);
-        }
-      } catch (error) {
-        console.error('Error al cargar notificaciones:', error);
-      }
-    };
-
-    fetchNotifications();
-  }, [token]);
-
+export default function NotificationList({ notifications }: Props) {
   return (
-    <section className="max-h-[600px] overflow-y-auto rounded-lg bg-white p-6 shadow-md">
+    <section
+      className="max-h-[600px] overflow-y-auto rounded-lg bg-white p-6 shadow-md"
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <h2 className="mb-6 text-2xl font-semibold text-gray-800">
         Notificaciones
       </h2>

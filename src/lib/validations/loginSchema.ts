@@ -5,6 +5,10 @@ export const loginSchema = z.object({
     .string()
     .nonempty('El email es obligatorio')
     .email('Formato de email inválido'),
-  password: z.string().nonempty('La contraseña es obligatoria'),
-  //.min(6, 'La contraseña debe tener al menos 6 caracteres'),
+
+  password: z
+    .string()
+    .nonempty('La contraseña es obligatoria')
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .max(255, 'La contraseña no puede exceder los 255 caracteres'),
 });

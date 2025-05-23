@@ -23,6 +23,7 @@ interface AuthContextType {
   user: JwtPayload | null;
   login: (token: string, remember: boolean) => void;
   logout: () => void;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -30,18 +31,16 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => {},
   logout: () => {},
+  isLoading: true,
 });
 
 const decodeToken = (rawToken: string): JwtPayload | null => {
   try {
     const decoded = jwtDecode<JwtPayload>(rawToken);
-
-    // (Opcional) Verificar expiración
     if (decoded.exp && decoded.exp * 1000 < Date.now()) {
       console.warn('Token expirado');
       return null;
     }
-
     return decoded;
   } catch (error) {
     console.error('Error decoding token:', error);
@@ -52,18 +51,21 @@ const decodeToken = (rawToken: string): JwtPayload | null => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<JwtPayload | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const router = useRouter();
 
   useEffect(() => {
     const storedToken =
-      sessionStorage.getItem('pharmatechToken') ||
-      localStorage.getItem('pharmatechToken');
+      localStorage.getItem('pharmatechToken') ||
+      sessionStorage.getItem('pharmatechToken');
 
     if (storedToken) {
       setToken(storedToken);
       const decoded = decodeToken(storedToken);
       setUser(decoded);
     }
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -84,9 +86,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (newToken: string, remember: boolean) => {
-    sessionStorage.setItem('pharmatechToken', newToken);
-    if (remember) {
-      localStorage.setItem('pharmatechToken', newToken);
+    localStorage.setItem('pharmatechToken', newToken);
+    if (!remember) {
+      sessionStorage.setItem('pharmatechToken', newToken);
     }
 
     setToken(newToken);
@@ -104,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

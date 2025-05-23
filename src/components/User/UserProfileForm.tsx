@@ -120,21 +120,21 @@ export default function EditForm({
     const genderText = gender === UserGender.FEMALE ? 'mujer' : 'hombre';
 
     const result = editProfileSchema.safeParse({
-      nombre: firstName,
-      apellido: lastName,
-      telefono: phoneNumber,
-      fechaNacimiento: birthDate,
-      genero: genderText,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+      birthDate: birthDate,
+      gender: genderText,
     });
 
     if (!result.success) {
       const { fieldErrors } = result.error.flatten();
       setErrors({
-        firstName: fieldErrors.nombre?.[0] ?? '',
-        lastName: fieldErrors.apellido?.[0] ?? '',
-        phoneNumber: fieldErrors.telefono?.[0] ?? '',
-        birthDate: fieldErrors.fechaNacimiento?.[0] ?? '',
-        gender: fieldErrors.genero?.[0] ?? '',
+        firstName: fieldErrors.firstName?.[0] ?? '',
+        lastName: fieldErrors.lastName?.[0] ?? '',
+        phoneNumber: fieldErrors.phoneNumber?.[0] ?? '',
+        birthDate: fieldErrors.birthDate?.[0] ?? '',
+        gender: fieldErrors.gender?.[0] ?? '',
       });
       return;
     }
