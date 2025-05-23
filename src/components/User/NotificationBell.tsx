@@ -3,6 +3,7 @@
 import { BellIcon } from '@heroicons/react/24/outline';
 import NotificationList from '@/components/User/NotificationList';
 import type { NotificationResponse } from '@pharmatech/sdk';
+import { RefObject } from 'react';
 
 interface Props {
   isMobile?: boolean;
@@ -10,6 +11,7 @@ interface Props {
   isOpen: boolean;
   onToggle: () => void;
   notifications: NotificationResponse[];
+  panelRef: RefObject<HTMLDivElement | null>;
 }
 
 export default function NotificationBell({
@@ -18,6 +20,7 @@ export default function NotificationBell({
   isOpen,
   onToggle,
   notifications,
+  panelRef,
 }: Props) {
   return (
     <div className="relative">
@@ -34,6 +37,7 @@ export default function NotificationBell({
 
       {isOpen && (
         <div
+          ref={panelRef}
           className={`absolute right-0 z-50 mt-3 rounded-xl bg-white shadow-lg ${
             isMobile ? 'max-h-[500px] w-[300px]' : 'max-h-[600px] w-[400px]'
           } overflow-y-auto`}
