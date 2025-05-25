@@ -108,7 +108,10 @@ export default function Home() {
 
   useEffect(() => {
     const fetchRecommended = async () => {
-      if (!token || !user?.sub) return;
+      if (!token || !user?.sub) {
+        setRecommendedProducts([]);
+        return;
+      }
       try {
         const data = await api.product.getRecommendations(token);
         setRecommendedProducts(data.results);
@@ -121,7 +124,7 @@ export default function Home() {
 
   return (
     <div className="px-4">
-      <h1 className="mb-12 text-2xl font-bold text-white">Pharmatech</h1>
+      <h1 className="text-2xl font-bold text-white">Pharmatech</h1>
 
       {/* Carrusel principal */}
       <div className="md:max-w-8xl mx-auto mb-12 max-w-[75vw] md:p-2">
