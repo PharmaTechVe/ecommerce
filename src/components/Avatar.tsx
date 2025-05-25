@@ -56,6 +56,13 @@ export default function Avatar({
     setDropdownOpen(false);
   };
 
+  const handleSafeProfileClick = () => {
+    if (onProfileClick) {
+      setDropdownOpen(false);
+      onProfileClick();
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -116,7 +123,7 @@ export default function Avatar({
             {onProfileClick && (
               <li
                 className="cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={onProfileClick}
+                onClick={handleSafeProfileClick}
               >
                 Ir a mi perfil
               </li>

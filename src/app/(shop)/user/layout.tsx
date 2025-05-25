@@ -68,7 +68,7 @@ export default function UserProfileLayout({
     })();
   }, [user?.sub, token]);
 
-  if (!user?.sub || !userData) return; //<Loading />;
+  if (!user?.sub || !userData) return;
 
   const sidebarUser: SidebarUser = {
     name: `${userData.firstName} ${userData.lastName}`,

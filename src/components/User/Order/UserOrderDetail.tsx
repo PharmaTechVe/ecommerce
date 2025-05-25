@@ -47,7 +47,7 @@ export default function UserOrderDetail({
   }, 0);
 
   return (
-    <div className="mx-auto w-full max-w-[954px] bg-white px-2 py-6 sm:px-6">
+    <div className="mx-auto w-full max-w-[942px] bg-white px-2 py-6 sm:px-6">
       {/* Header */}
       <div className="space-around mb-4 flex items-center justify-between">
         <h2 className="font-medium text-gray-500">
@@ -170,8 +170,11 @@ export default function UserOrderDetail({
                   <h3 className="text-sm font-medium text-gray-900">
                     {product.name}
                   </h3>
-                  <p className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
-                    {product.description}
+                  <p className="h-5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
+                    {product.description?.substring(0, 50)}
+                    {product.description && product.description.length > 50 && (
+                      <span className="text-xs text-gray-500">...</span>
+                    )}
                   </p>
                   <Link
                     href={{
