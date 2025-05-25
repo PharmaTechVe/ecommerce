@@ -13,7 +13,7 @@ export default function NotificationList({ notifications }: Props) {
   return (
     <section
       className="max-h-[600px] overflow-y-auto rounded-lg bg-white p-6 shadow-md"
-      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDownCapture={(e) => e.stopPropagation()}
     >
       <h2 className="mb-6 text-2xl font-semibold text-gray-800">
         Notificaciones

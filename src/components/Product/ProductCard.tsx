@@ -67,7 +67,7 @@ export default function ProductCard({ product }: Props) {
           </p>
         </div>
 
-        <div className="flex items-center justify-between gap-x-2 pb-[10%] pr-[10%] pt-1">
+        <div className="relative flex items-center justify-between gap-x-2 pb-[10%] pt-1">
           <div className="flex flex-col items-start">
             {hasDiscount ? (
               <>
@@ -97,7 +97,7 @@ export default function ProductCard({ product }: Props) {
             )}
           </div>
 
-          <div className="max-w-[100px]">
+          <div className="absolute bottom-0 right-0">
             <CardButton
               product={{
                 productPresentationId: product.id,
