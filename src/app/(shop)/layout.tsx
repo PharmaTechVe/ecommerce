@@ -18,7 +18,7 @@ export default function ShopLayout({ children }: ShopLayoutProps) {
     <div>
       <div className="relative bg-white">
         {/* Nav */}
-        <div className="relative z-50">
+        <div className="sticky top-0 z-50 bg-white">
           <NavBar />
         </div>
         {children}
