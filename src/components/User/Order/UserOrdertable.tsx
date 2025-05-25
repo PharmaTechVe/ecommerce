@@ -66,7 +66,7 @@ export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
             <Badge
               variant="filled"
               color={badge.color}
-              size="small"
+              size="large"
               borderRadius="square"
             >
               {badge.label}
