@@ -34,15 +34,16 @@ export default function ProductDetailPage() {
   const presentationId = String(params?.presentationId || '');
 
   const [presentation, setPresentation] =
-    useState<ProductPresentationDetailResponse | null>(null);
+    useState<ProductPresentationDetailResponse>();
   const [genericProduct, setGenericProduct] =
-    useState<GenericProductResponse | null>(null);
+    useState<GenericProductResponse>();
   const [slides, setSlides] = useState<Slide[]>([]);
   const [products, setProducts] = useState<ProductPresentation[]>([]);
   const [presentationList, setPresentationList] = useState<
     ProductPresentationResponse[]
   >([]);
-  const [loading, setLoading] = useState(true);
+  const [presentationIsLoading, setPresentationIsLoading] = useState(true);
+  const [productIsLoading, setProductIsLoading] = useState(true);
 
   // 1) Load presentation detail
   useEffect(() => {
@@ -50,8 +51,11 @@ export default function ProductDetailPage() {
     api.productPresentation
       .getByPresentationId(productId, presentationId)
       .then((data) => setPresentation(data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        console.error(err);
+        setProductIsLoading(false);
+      })
+      .finally(() => setPresentationIsLoading(false));
   }, [productId, presentationId]);
 
   // 2) Load generic product info & variants
@@ -87,7 +91,10 @@ export default function ProductDetailPage() {
           { id: 1, imageUrl: '/images/product-detail.jpg' },
           { id: 2, imageUrl: '/images/product-detail-2.jpg' },
         ]),
-      );
+      )
+      .finally(() => {
+        setProductIsLoading(false);
+      });
   }, [genericProduct]);
 
   // 4) Fetch related products
@@ -105,8 +112,14 @@ export default function ProductDetailPage() {
       .then((res) => setProducts(res.results))
       .catch((err) => console.error(err));
   }, [genericProduct]);
-  if (loading) return <Loading />;
-  if (!presentation || !genericProduct) return <ProductNotFound />;
+
+  if (presentationIsLoading || productIsLoading) {
+    return <Loading />;
+  }
+
+  if (!presentation || !genericProduct) {
+    return <ProductNotFound />;
+  }
 
   // Breadcrumb con acción de "volver" si es búsqueda personalizada
   const breadcrumbItems = [
@@ -152,6 +165,9 @@ export default function ProductDetailPage() {
           </div>
           <p className="text-gray-600">
             {presentation.presentation.description}
+          </p>
+          <p className="text-md text-gray-600">
+            Existencia: {presentation.stock || 0}
           </p>
           <div className="flex items-center justify-between">
             <p className="text-lg text-gray-900">
