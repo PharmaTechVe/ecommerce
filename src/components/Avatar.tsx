@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Colors } from '@/styles/styles';
+import { useCart } from '@/context/CartContext';
 
 export type AvatarProps = {
   name: string;
@@ -33,6 +34,7 @@ export default function Avatar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { logout, token } = useAuth();
+  const { clearCart } = useCart();
 
   const initials = name
     .split(' ')
@@ -50,8 +52,8 @@ export default function Avatar({
 
   const handleLogoutClick = () => {
     logout();
+    clearCart();
     setDropdownOpen(false);
-    router.push('/');
   };
 
   useEffect(() => {

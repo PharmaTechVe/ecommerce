@@ -34,7 +34,7 @@ type NavBarProps = {
 export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const { cartItems } = useCart();
+  const { itemsCount } = useCart();
   const { token, user, isLoading } = useAuth();
   const {
     notifications,
@@ -43,8 +43,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     toggleNotifications,
     panelRef,
   } = useNotifications(token ?? undefined);
-
-  const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -131,28 +129,31 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               onClick={() => setIsCartOpen(true)}
             >
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-                {totalCount}
-              </span>
+              {itemsCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
+                  {itemsCount}
+                </span>
+              )}
             </div>
 
-            <NotificationBell
-              isMobile={false}
-              notificationCount={notificationCount}
-              isOpen={isNotificationsOpen}
-              onToggle={toggleNotifications}
-              notifications={notifications}
-              panelRef={panelRef}
-            />
-
             {isLoggedIn && userData ? (
-              <Avatar
-                name={`${userData.firstName} ${userData.lastName}`}
-                size={52}
-                imageUrl={userData.profile.profilePicture}
-                withDropdown={true}
-                onProfileClick={() => router.push('/user')}
-              />
+              <>
+                <NotificationBell
+                  isMobile={false}
+                  notificationCount={notificationCount}
+                  isOpen={isNotificationsOpen}
+                  onToggle={toggleNotifications}
+                  notifications={notifications}
+                  panelRef={panelRef}
+                />
+                <Avatar
+                  name={`${userData.firstName} ${userData.lastName}`}
+                  size={52}
+                  imageUrl={userData.profile.profilePicture}
+                  withDropdown={true}
+                  onProfileClick={() => router.push('/user')}
+                />
+              </>
             ) : showLogin ? (
               <Button
                 onClick={handleLoginClick}
@@ -197,19 +198,23 @@ export default function NavBar({ onCartClick }: NavBarProps) {
           </Link>
 
           <div className="flex items-center gap-4 justify-self-end">
-            <NotificationBell
-              isMobile
-              notificationCount={notificationCount}
-              isOpen={isNotificationsOpen}
-              onToggle={toggleNotifications}
-              notifications={notifications}
-              panelRef={panelRef}
-            />
+            {isLoggedIn && (
+              <NotificationBell
+                isMobile
+                notificationCount={notificationCount}
+                isOpen={isNotificationsOpen}
+                onToggle={toggleNotifications}
+                notifications={notifications}
+                panelRef={panelRef}
+              />
+            )}
             <div className="relative cursor-pointer" onClick={onCartClick}>
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-                {totalCount}
-              </span>
+              {itemsCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
+                  {itemsCount}
+                </span>
+              )}
             </div>
           </div>
         </div>

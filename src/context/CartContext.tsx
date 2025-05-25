@@ -23,6 +23,7 @@ export interface CartItem {
 
 interface CartContextProps {
   cartItems: CartItem[];
+  itemsCount: number;
   addItem: (item: CartItem) => void;
   updateItemQuantity: (id: string, quantity: number) => void;
   removeItem: (id: string) => void;
@@ -33,6 +34,7 @@ const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [itemsCount, setItemsCount] = useState(0);
   const alertShownRef = useRef(false);
 
   useEffect(() => {
@@ -59,6 +61,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }, 1000);
     }
   }, []);
+
+  useEffect(() => {
+    const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+    setItemsCount(totalItems);
+  }, [cartItems]);
 
   const addItem = useCallback((item: CartItem) => {
     setCartItems((prev) => {
@@ -118,7 +125,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addItem, updateItemQuantity, removeItem, clearCart }}
+      value={{
+        cartItems,
+        itemsCount,
+        addItem,
+        updateItemQuantity,
+        removeItem,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>
