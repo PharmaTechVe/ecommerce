@@ -42,8 +42,7 @@ export default function SearchSuggestions({
           page: 1,
           limit: 10,
           ...(query.trim() && { q: query.trim() }),
-          ...(category.id &&
-            category.id !== '1' && { categoryId: [category.id] }),
+          ...(category.id && { categoryId: [category.id] }),
         };
         const data = await api.product.getProducts(params);
         setProducts(data.results);
@@ -83,7 +82,9 @@ export default function SearchSuggestions({
           <h4 className="mb-2 border-b pb-2 font-semibold text-gray-500">
             Categoría
           </h4>
-          <p className="text-gray-700">{category.name}</p>
+          <p className="text-gray-700">
+            {category.name == 'Categorías' ? 'Todas' : category.name}
+          </p>
         </div>
         <div className="w-2/3 text-sm">
           <h4 className="px-4 pt-4 font-semibold text-gray-500">

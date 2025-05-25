@@ -13,7 +13,6 @@ import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
-import { CategoryResponse, Pagination } from '@pharmatech/sdk';
 import CartOverlay from './Cart/CartOverlay';
 import NotificationBell from '@/components/User/NotificationBell';
 import { useNotifications } from '@/lib/utils/helpers/useNotificationList';
@@ -33,7 +32,7 @@ type NavBarProps = {
 
 export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+
   const { itemsCount } = useCart();
   const { token, user, isLoading } = useAuth();
   const {
@@ -48,17 +47,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [showLogin, setShowLogin] = useState(false);
-
-  useEffect(() => {
-    api.category
-      .findAll({ page: 1, limit: 20 })
-      .then((resp: Pagination<CategoryResponse>) => {
-        if (resp?.results) setCategories(resp.results);
-      })
-      .catch((err) => {
-        console.error('Error al cargar categorías:', err);
-      });
-  }, []);
 
   useEffect(() => {
     if (token && user?.sub) {
@@ -85,10 +73,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
     return () => clearTimeout(timeout);
   }, []);
 
-  const handleSearch = (query: string, category: string) => {
-    console.log('Buscando:', query, 'en', category);
-  };
-
   const handleLoginClick = () => {
     router.push('/login');
   };
@@ -112,8 +96,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             />
           </Link>
           <SearchBar
-            categories={categories}
-            onSearch={handleSearch}
             width="100%"
             height="40px"
             borderRadius="8px"
@@ -221,8 +203,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
 
         <div className="mt-3">
           <SearchBar
-            categories={categories}
-            onSearch={handleSearch}
             width="100%"
             height="40px"
             borderRadius="8px"
