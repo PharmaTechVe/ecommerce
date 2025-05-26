@@ -141,7 +141,6 @@ export default function RegisterForm() {
         });
 
         login(loginResponse.accessToken, false);
-        window.location.reload();
         router.push('/');
       } catch (err) {
         console.error('Error creating account:', err);

@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '@/components/Button';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 interface Props {
   subtotal: number;
@@ -21,7 +22,7 @@ const CartSummary: React.FC<Props> = ({
           Subtotal
         </span>
         <span className="text-[18px] font-normal leading-[27px] text-[#393938]">
-          ${Number.isInteger(subtotal) ? subtotal : subtotal.toFixed(2)}
+          ${formatPrice(subtotal)}
         </span>
       </div>
       <div className="mb-2 flex justify-between">
@@ -29,7 +30,7 @@ const CartSummary: React.FC<Props> = ({
           Descuento
         </span>
         <span className="text-[18px] font-normal leading-[27px] text-[#2ECC71]">
-          - ${Number.isInteger(discount) ? discount : discount.toFixed(2)}
+          - ${formatPrice(discount)}
         </span>
       </div>
       <div className="mb-6 mt-6 flex justify-between">
@@ -37,7 +38,7 @@ const CartSummary: React.FC<Props> = ({
           Total
         </span>
         <span className="text-[20px] font-normal leading-[30px] text-[#393938]">
-          ${Number.isInteger(total) ? total : total.toFixed(2)}
+          ${formatPrice(total)}
         </span>
       </div>
       <Button

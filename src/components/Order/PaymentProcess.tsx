@@ -14,6 +14,7 @@ import Button from '@/components/Button';
 import { useAuth } from '@/context/AuthContext';
 import Dropdown from '../Dropdown';
 import { toast } from 'react-toastify';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 type Errors = {
   bank?: string;
@@ -27,30 +28,12 @@ type Props = {
   couponDiscount: number;
 };
 
-const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
+const PaymentProcess: React.FC<Props> = ({ order }) => {
   const { token } = useAuth();
   const totalProducts = order.details.reduce(
     (acc, item) => acc + item.quantity,
     0,
   );
-
-  const subtotal = order.details.reduce(
-    (acc, item) => acc + item.productPresentation.price * item.quantity,
-    0,
-  );
-  const itemDiscount = order.details.reduce(
-    (acc, item) =>
-      acc +
-      (item.productPresentation.promo?.discount
-        ? item.productPresentation.price *
-          item.quantity *
-          (item.productPresentation.promo.discount / 100)
-        : 0),
-    0,
-  );
-  const tax = (subtotal - itemDiscount - couponDiscount) * 0.16;
-  const totalAmount =
-    subtotal - itemDiscount - couponDiscount + (tax > 0 ? tax : 0);
 
   const [banks, setBanks] = useState<string[]>([]);
   const [selectedBank, setSelectedBank] = useState<string>('');
@@ -108,7 +91,7 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
     [paymentConfirmation, order.id, token],
   );
 
-  const isBank = false; //paymentMethod === 'bank';
+  const isBank = order.paymentMethod === PaymentMethod.BANK_TRANSFER;
 
   const description = isBank
     ? 'Debes hacer el pago del monto exacto, la orden se creará cuando se confirme el pago'
@@ -186,7 +169,7 @@ const PaymentProcess: React.FC<Props> = ({ order, couponDiscount }) => {
         <div>
           <p className="text-base text-gray-500">Monto</p>
           <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-            Bs.{totalAmount.toFixed(2)}
+            ${formatPrice(order.totalPrice)}
           </div>
         </div>
       </div>

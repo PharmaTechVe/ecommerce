@@ -9,6 +9,7 @@ import {
   OrderDetailProductPresentationResponse,
 } from '@pharmatech/sdk';
 import Button from '@/components/Button';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 interface OrderDetailProps {
   orderNumber: string;
@@ -47,7 +48,7 @@ export default function UserOrderDetail({
   }, 0);
 
   return (
-    <div className="mx-auto w-full max-w-[954px] bg-white px-2 py-6 sm:px-6">
+    <div className="mx-auto w-full max-w-[942px] bg-white px-2 py-6 sm:px-6">
       {/* Header */}
       <div className="space-around mb-4 flex items-center justify-between">
         <h2 className="font-medium text-gray-500">
@@ -76,12 +77,7 @@ export default function UserOrderDetail({
           const quantity = item.quantity;
           const promo = presentation.promo;
 
-          const isPromoActive =
-            promo &&
-            new Date(promo.startAt) <= now &&
-            now < new Date(promo.expiredAt);
-
-          const discountedPrice = isPromoActive
+          const discountedPrice = promo
             ? basePrice * (1 - promo.discount / 100)
             : basePrice;
 
@@ -119,13 +115,11 @@ export default function UserOrderDetail({
 
                     <div className="mt-1 flex items-center justify-between">
                       <div className="flex flex-col">
-                        {isPromoActive && (
-                          <span className="text-xs text-gray-400 line-through">
-                            ${(basePrice * quantity).toFixed(2)}
-                          </span>
-                        )}
+                        <span className="text-xs text-gray-400 line-through">
+                          ${formatPrice(basePrice * quantity)}
+                        </span>
                         <span className="text-sm font-medium text-gray-900">
-                          ${(discountedPrice * quantity).toFixed(2)}
+                          ${formatPrice(discountedPrice * quantity)}
                         </span>
                       </div>
                     </div>
@@ -170,8 +164,11 @@ export default function UserOrderDetail({
                   <h3 className="text-sm font-medium text-gray-900">
                     {product.name}
                   </h3>
-                  <p className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
-                    {product.description}
+                  <p className="h-5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
+                    {product.description?.substring(0, 50)}
+                    {product.description && product.description.length > 50 && (
+                      <span className="text-xs text-gray-500">...</span>
+                    )}
                   </p>
                   <Link
                     href={{
@@ -188,12 +185,10 @@ export default function UserOrderDetail({
                 <div className="flex items-center gap-10">
                   <div className="text-sm text-gray-500">{quantity}</div>
                   <div className="flex w-28 flex-col items-end text-right font-medium text-gray-900">
-                    {isPromoActive && (
-                      <span className="text-xs text-gray-400 line-through">
-                        ${(basePrice * quantity).toFixed(2)}
-                      </span>
-                    )}
-                    <span>${(discountedPrice * quantity).toFixed(2)}</span>
+                    <span className="text-xs text-gray-400 line-through">
+                      ${formatPrice(basePrice * quantity)}
+                    </span>
+                    <span>${formatPrice(discountedPrice * quantity)}</span>
                   </div>
                 </div>
               </div>
@@ -212,19 +207,19 @@ export default function UserOrderDetail({
                 ({products.length} productos)
               </span>
             </div>
-            <div className="text-gray-700">${subtotal.toFixed(2)}</div>
+            <div className="text-gray-700">${formatPrice(subtotal)}</div>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="text-[#2ECC71]">Descuentos</div>
-            <div className="text-[#2ECC71]">-${totalDiscount.toFixed(2)}</div>
+            <div className="text-[#2ECC71]">-${formatPrice(totalDiscount)}</div>
           </div>
 
           <div className="my-2 border-t border-gray-300" />
 
           <div className="flex items-center justify-between font-medium">
             <div className="text-gray-900">TOTAL</div>
-            <div className="text-gray-900">${total.toFixed(2)}</div>
+            <div className="text-gray-900">${formatPrice(total)}</div>
           </div>
 
           <div className="text-right text-xs text-gray-500">

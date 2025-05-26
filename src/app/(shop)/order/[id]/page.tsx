@@ -139,19 +139,27 @@ export default function OrderInProgress() {
       case OrderStatus.REQUESTED:
         return <WaitingApproval />;
       case OrderStatus.APPROVED:
-        return <PaymentProcess order={order} couponDiscount={0} />;
+        if (
+          [PaymentMethod.BANK_TRANSFER, PaymentMethod.MOBILE_PAYMENT].includes(
+            order.paymentMethod,
+          )
+        ) {
+          return <PaymentProcess order={order} couponDiscount={0} />;
+        } else {
+          return <ReviewOrder order={order} />;
+        }
       case OrderStatus.IN_PROGRESS:
         return order.type === OrderType.PICKUP ? (
           <ReviewOrder order={order} />
         ) : (
           <DeliveryInfo order={order} />
         );
+      case OrderStatus.READY_FOR_PICKUP:
+        return <ReviewOrder order={order} />;
       case OrderStatus.CANCELED:
         return <RejectedOrder deliveryMethod={order.type} />;
       case OrderStatus.COMPLETED:
         return <OrderCompleted order={order} />;
-      default:
-        return <div>Error</div>;
     }
   };
 

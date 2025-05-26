@@ -48,6 +48,13 @@ const decodeToken = (rawToken: string): JwtPayload | null => {
   }
 };
 
+const getToken = (): string | null => {
+  const storedToken =
+    localStorage.getItem('pharmatechToken') ||
+    sessionStorage.getItem('pharmatechToken');
+  return storedToken;
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<JwtPayload | null>(null);
@@ -56,9 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const storedToken =
-      localStorage.getItem('pharmatechToken') ||
-      sessionStorage.getItem('pharmatechToken');
+    const storedToken = getToken();
 
     if (storedToken) {
       setToken(storedToken);
@@ -70,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const syncLogout = () => {
-      const storedToken = localStorage.getItem('pharmatechToken');
+      const storedToken = getToken();
       setToken(storedToken);
 
       if (storedToken) {
@@ -86,9 +91,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (newToken: string, remember: boolean) => {
-    localStorage.setItem('pharmatechToken', newToken);
-    if (!remember) {
-      sessionStorage.setItem('pharmatechToken', newToken);
+    sessionStorage.setItem('pharmatechToken', newToken);
+    if (remember) {
+      localStorage.setItem('pharmatechToken', newToken);
     }
 
     setToken(newToken);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ChevronDownIcon,
@@ -8,11 +8,10 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import SearchSuggestions from './SuggestionProduct';
-import { CategoryResponse } from '@pharmatech/sdk';
+import { CategoryResponse, Pagination } from '@pharmatech/sdk';
+import { api } from '@/lib/sdkConfig';
 
 type SearchBarProps = {
-  categories: CategoryResponse[];
-  onSearch?: (query: string, category: string) => void;
   width?: string;
   height?: string;
   borderRadius?: string;
@@ -24,9 +23,13 @@ type SearchBarProps = {
   disableDropdown?: boolean;
 };
 
+const defaultCategory: CategoryResponse = {
+  name: 'Categorías',
+  id: '',
+  description: '',
+};
+
 export default function SearchBar({
-  categories,
-  onSearch,
   width = '100%',
   height = '2.5rem',
   borderRadius = '0.375rem',
@@ -38,20 +41,26 @@ export default function SearchBar({
   disableDropdown = false,
 }: SearchBarProps) {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState<CategoryResponse>({
-    name: 'Categorías',
-    id: '1',
-    description: '',
-  });
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryResponse>(defaultCategory);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    api.category
+      .findAll({ page: 1, limit: 20 })
+      .then((resp: Pagination<CategoryResponse>) => {
+        if (resp?.results) setCategories([defaultCategory, ...resp.results]);
+      })
+      .catch((err) => {
+        console.error('Error al cargar categorías:', err);
+      });
+  }, []);
 
   const handleSearch = () => {
     const term = searchTerm.trim();
     if (!term) return;
-
-    onSearch?.(term, selectedCategory.name);
-
     const q = encodeURIComponent(term);
     const categoryId = encodeURIComponent(selectedCategory.id.trim());
     router.push(`/search?query=${q}&categoryId=${categoryId}`);
