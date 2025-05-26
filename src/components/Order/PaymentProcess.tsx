@@ -169,7 +169,7 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
         <div>
           <p className="text-base text-gray-500">Monto</p>
           <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-            Bs.{formatPrice(order.totalPrice)}
+            ${formatPrice(order.totalPrice)}
           </div>
         </div>
       </div>

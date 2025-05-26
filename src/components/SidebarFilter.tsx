@@ -234,8 +234,8 @@ export default function SidebarFilter({
           <SliderThumb className="block h-5 w-5 rounded-full border-2 border-[#1C2143] bg-[#1C2143]" />
         </SliderRoot>
         <div className="mt-1 flex justify-between text-xs">
-          <span>Bs {priceRange[0] / 100}</span>
-          <span>Bs {priceRange[1] / 100}</span>
+          <span>${priceRange[0] / 100}</span>
+          <span>${priceRange[1] / 100}</span>
         </div>
       </section>
 
