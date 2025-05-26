@@ -7,6 +7,7 @@ import Input from '@/components/Input/Input';
 import { Colors } from '@/styles/styles';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 interface OrderSummaryProps {
   hideCoupon?: boolean;
@@ -153,22 +154,22 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               <div className="flex-1">
                 <p className="text-[14px] text-[#393938]">{item.name}</p>
                 <p className="text-[12px] text-[#6E6D6C]">
-                  ${discountedPrice.toFixed(2)} x {item.quantity}
+                  ${formatPrice(discountedPrice)} x {item.quantity}
                 </p>
               </div>
               <div className="text-right text-sm">
                 {item.discount ? (
                   <>
                     <p className="text-[16px] text-[#2ECC71]">
-                      ${(discountedPrice * item.quantity).toFixed(2)}
+                      ${formatPrice(discountedPrice * item.quantity)}
                     </p>
                     <p className="text-xs text-[#666666] line-through">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ${formatPrice(item.price * item.quantity)}
                     </p>
                   </>
                 ) : (
                   <p className="text-[16px] text-[#393938]">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ${formatPrice(item.price * item.quantity)}
                   </p>
                 )}
               </div>
@@ -180,21 +181,21 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-2 text-sm text-[#393938]">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>${formatPrice(subtotal)}</span>
         </div>
         <div className="flex justify-between text-[#2ECC71]">
           <span>Descuento</span>
-          <span>${itemDiscount.toFixed(2)}</span>
+          <span>${formatPrice(itemDiscount)}</span>
         </div>
         {couponDiscount > 0 && (
           <div className="flex justify-between text-[#2ECC71]">
             <span>Descuento Cupón</span>
-            <span>${couponDiscount.toFixed(2)}</span>
+            <span>${formatPrice(couponDiscount)}</span>
           </div>
         )}
         <div className="flex justify-between pt-2 text-[24px] font-semibold leading-[36px] text-[#393938]">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>${formatPrice(total)}</span>
         </div>
       </div>
     </aside>

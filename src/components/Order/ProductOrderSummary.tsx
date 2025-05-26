@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { OrderDetailedResponse } from '@pharmatech/sdk';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 interface ProductOrderSummaryProps {
   order: OrderDetailedResponse;
@@ -64,22 +65,22 @@ const ProductOrderSummary: React.FC<ProductOrderSummaryProps> = ({ order }) => {
                   {detail.productPresentation.product.name}
                 </p>
                 <p className="text-[12px] text-[#6E6D6C]">
-                  ${discountedUnit.toFixed(2)} x {qty}
+                  ${formatPrice(discountedUnit)} x {qty}
                 </p>
               </div>
               <div className="text-right text-sm">
                 {promo > 0 ? (
                   <React.Fragment>
                     <p className="text-[16px] text-[#2ECC71]">
-                      ${lineSubtotal.toFixed(2)}
+                      ${formatPrice(lineSubtotal)}
                     </p>
                     <p className="text-xs text-[#666666] line-through">
-                      ${(price * qty).toFixed(2)}
+                      ${formatPrice(price * qty)}
                     </p>
                   </React.Fragment>
                 ) : (
                   <p className="text-[16px] text-[#393938]">
-                    ${lineSubtotal.toFixed(2)}
+                    ${formatPrice(lineSubtotal)}
                   </p>
                 )}
               </div>
@@ -91,17 +92,17 @@ const ProductOrderSummary: React.FC<ProductOrderSummaryProps> = ({ order }) => {
       <div className="space-y-2 text-sm text-[#393938]">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>${formatPrice(subtotal)}</span>
         </div>
         {itemDiscount > 0 && (
           <div className="flex justify-between text-[#2ECC71]">
             <span>Descuento</span>
-            <span>-${itemDiscount.toFixed(2)}</span>
+            <span>-${formatPrice(itemDiscount)}</span>
           </div>
         )}
         <div className="flex justify-between pt-2 text-[24px] font-semibold leading-[36px] text-[#393938]">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>${formatPrice(total)}</span>
         </div>
       </div>
     </aside>

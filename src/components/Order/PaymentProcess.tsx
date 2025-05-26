@@ -14,6 +14,7 @@ import Button from '@/components/Button';
 import { useAuth } from '@/context/AuthContext';
 import Dropdown from '../Dropdown';
 import { toast } from 'react-toastify';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 type Errors = {
   bank?: string;
@@ -168,7 +169,7 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
         <div>
           <p className="text-base text-gray-500">Monto</p>
           <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-            Bs.{order.totalPrice.toFixed(2)}
+            Bs.{formatPrice(order.totalPrice)}
           </div>
         </div>
       </div>

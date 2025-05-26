@@ -20,6 +20,7 @@ import {
 } from '@pharmatech/sdk';
 import Loading from '@/app/loading';
 import ProductNotFound from '@/components/Product/NotFound';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -171,7 +172,7 @@ export default function ProductDetailPage() {
           </p>
           <div className="flex items-center justify-between">
             <p className="text-lg text-gray-900">
-              ${presentation.price.toFixed(2)}
+              ${formatPrice(presentation.price)}
             </p>
             <CardButton
               product={{

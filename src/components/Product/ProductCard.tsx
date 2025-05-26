@@ -5,6 +5,7 @@ import Link from 'next/link';
 import CardButton from '../CardButton';
 import Badge from '../Badge';
 import { ProductPresentation } from '@pharmatech/sdk';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 type Props = {
   product: ProductPresentation;
@@ -73,7 +74,7 @@ export default function ProductCard({ product }: Props) {
               <>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500 line-through">
-                    ${price.toFixed(2)}
+                    ${formatPrice(price)}
                   </span>
                   <Badge
                     variant="filled"
@@ -87,12 +88,12 @@ export default function ProductCard({ product }: Props) {
                   </Badge>
                 </div>
                 <span className="text-xl font-medium text-gray-900">
-                  ${finalPrice.toFixed(2)}
+                  ${formatPrice(finalPrice)}
                 </span>
               </>
             ) : (
               <span className="text-xl font-medium text-gray-900">
-                ${price.toFixed(2)}
+                ${formatPrice(price)}
               </span>
             )}
           </div>

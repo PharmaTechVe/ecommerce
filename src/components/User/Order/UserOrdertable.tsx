@@ -5,6 +5,7 @@ import type { BadgeProps } from '@/components/Badge';
 import Button from '@/components/Button';
 import Pagination from '@/components/Pagination';
 import { OrderResponse, OrderStatus } from '@pharmatech/sdk';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 interface OrderTableProps {
   orders: OrderResponse[];
@@ -35,8 +36,6 @@ const getBadgeProps = (
   }
 };
 
-const formatPrice = (price: number) => `$${price.toFixed(2)}`;
-
 export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -57,7 +56,7 @@ export default function OrderTable({ orders, onViewDetails }: OrderTableProps) {
             <div className="font-medium text-black">
               #{order.id.slice(0, 8)}
             </div>
-            <div className="text-black">{formatPrice(order.totalPrice)}</div>
+            <div className="text-black">${formatPrice(order.totalPrice)}</div>
           </div>
           <div className="mb-2 text-gray-400">
             {new Date(order.createdAt).toLocaleDateString('es-Es')}
