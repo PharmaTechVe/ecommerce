@@ -13,11 +13,11 @@ const ProductOrderSummary: React.FC<ProductOrderSummaryProps> = ({ order }) => {
   // Compute items, subtotal and discounts
   const { items, subtotal, itemDiscount, total } = useMemo(() => {
     const items = order.details.map((detail) => {
-      const price = detail.productPresentation.price;
+      const price = detail.price;
       const qty = detail.quantity;
-      const promo = detail.productPresentation.promo?.discount || 0;
+      const promo = detail.discount || 0;
       const discountedUnit = promo > 0 ? price * (1 - promo / 100) : price;
-      const lineSubtotal = discountedUnit * qty;
+      const lineSubtotal = detail.subtotal;
       const lineDiscount = promo > 0 ? (price - discountedUnit) * qty : 0;
       return {
         detail,
@@ -31,8 +31,8 @@ const ProductOrderSummary: React.FC<ProductOrderSummaryProps> = ({ order }) => {
     });
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const itemDiscount = items.reduce((sum, i) => sum + i.lineDiscount, 0);
-    const total = subtotal - itemDiscount;
+    const total = order.totalPrice;
+    const itemDiscount = subtotal - total;
 
     return { items, subtotal, itemDiscount, total };
   }, [order.details]);
