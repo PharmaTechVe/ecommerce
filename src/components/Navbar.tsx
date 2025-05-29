@@ -13,10 +13,12 @@ import Button from '@/components/Button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
-import { CategoryResponse, Pagination } from '@pharmatech/sdk';
 import CartOverlay from './Cart/CartOverlay';
+import NotificationBell from '@/components/User/NotificationBell';
+import { useNotifications } from '@/lib/utils/helpers/useNotificationList';
 
 interface UserProfile {
+  id: string;
   firstName: string;
   lastName: string;
   profile: {
@@ -30,64 +32,59 @@ type NavBarProps = {
 
 export default function NavBar({ onCartClick }: NavBarProps) {
   const router = useRouter();
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const { cartItems } = useCart();
-  const { token, user } = useAuth();
 
-  const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const { itemsCount } = useCart();
+  const { token, user, isLoading } = useAuth();
+  const {
+    notifications,
+    notificationCount,
+    isNotificationsOpen,
+    toggleNotifications,
+    panelRef,
+  } = useNotifications(token ?? undefined);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
-    api.category
-      .findAll({ page: 1, limit: 20 })
-      .then((resp: Pagination<CategoryResponse>) => {
-        if (resp && resp.results) {
-          setCategories(resp.results);
+    if (token && user?.sub) {
+      setIsLoggedIn(true);
+      (async () => {
+        try {
+          const profileResponse = await api.user.getProfile(user.sub, token);
+          setUserData(profileResponse);
+        } catch (error) {
+          console.error('Error al obtener perfil:', error);
+          setUserData(null);
         }
-      })
-      .catch((err: unknown) => {
-        console.error('Error al cargar categorías:', err);
-      });
-  }, []);
-
-  // Obtener perfil si está logueado
-  useEffect(() => {
-    if (!token || !user?.sub) {
+      })();
+    } else {
       setIsLoggedIn(false);
       setUserData(null);
-      return;
     }
-
-    setIsLoggedIn(true);
-
-    (async () => {
-      try {
-        const profileResponse = await api.user.getProfile(user.sub, token);
-        setUserData(profileResponse);
-        console.log('Perfil obtenido:', profileResponse);
-      } catch (error) {
-        console.error('Error al obtener perfil:', error);
-        setUserData(null);
-      }
-    })();
   }, [token, user]);
 
-  const handleSearch = (query: string, category: string) => {
-    console.log('Buscando:', query, 'en', category);
-  };
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowLogin(true);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleLoginClick = () => {
     router.push('/login');
   };
 
+  if (isLoading) return null;
+
   return (
     <>
-      {/* Cart Overlay */}
       <CartOverlay isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} />
-      {/* Versión Desktop */}
-      <nav className="mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
+
+      {/* Desktop Nav */}
+      <nav className="relative mx-auto my-4 hidden max-w-7xl rounded-2xl bg-white px-6 py-4 shadow sm:block">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6">
           <Link href="/">
             <Image
@@ -99,8 +96,6 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             />
           </Link>
           <SearchBar
-            categories={categories}
-            onSearch={handleSearch}
             width="100%"
             height="40px"
             borderRadius="8px"
@@ -111,27 +106,37 @@ export default function NavBar({ onCartClick }: NavBarProps) {
             inputPlaceholder="Buscar producto"
           />
           <div className="flex items-center gap-8">
-            {/* Carrito */}
             <div
               className="relative cursor-pointer"
               onClick={() => setIsCartOpen(true)}
             >
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-                {totalCount}
-              </span>
+              {itemsCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
+                  {itemsCount}
+                </span>
+              )}
             </div>
 
-            {/* Usuario */}
             {isLoggedIn && userData ? (
-              <Avatar
-                name={`${userData.firstName} ${userData.lastName}`}
-                size={52}
-                imageUrl={userData.profile.profilePicture}
-                withDropdown={true}
-                onProfileClick={() => router.push('/user')}
-              />
-            ) : (
+              <>
+                <NotificationBell
+                  isMobile={false}
+                  notificationCount={notificationCount}
+                  isOpen={isNotificationsOpen}
+                  onToggle={toggleNotifications}
+                  notifications={notifications}
+                  panelRef={panelRef}
+                />
+                <Avatar
+                  name={`${userData.firstName} ${userData.lastName}`}
+                  size={52}
+                  imageUrl={userData.profile.profilePicture}
+                  withDropdown={true}
+                  onProfileClick={() => router.push('/user')}
+                />
+              </>
+            ) : showLogin ? (
               <Button
                 onClick={handleLoginClick}
                 variant="submit"
@@ -141,14 +146,14 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               >
                 Iniciar sesión
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </nav>
 
-      {/* Versión Mobile */}
+      {/* Mobile Nav */}
       <nav className="mx-auto my-4 max-w-7xl rounded-2xl bg-white px-4 py-3 shadow sm:hidden">
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
           {isLoggedIn && userData ? (
             <Avatar
               name={`${userData.firstName} ${userData.lastName}`}
@@ -157,13 +162,14 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               withDropdown={true}
               onProfileClick={() => router.push('/user')}
             />
-          ) : (
+          ) : showLogin ? (
             <UserCircleIcon
               className="h-8 w-8 text-gray-700"
               onClick={handleLoginClick}
             />
-          )}
-          <Link href="/">
+          ) : null}
+
+          <Link href="/" className="justify-self-center">
             <Image
               src="/images/logo-horizontal.svg"
               alt="Logo Pharmatech"
@@ -172,17 +178,31 @@ export default function NavBar({ onCartClick }: NavBarProps) {
               priority
             />
           </Link>
-          <div className="relative cursor-pointer" onClick={onCartClick}>
-            <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
-            <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
-              {totalCount}
-            </span>
+
+          <div className="flex items-center gap-4 justify-self-end">
+            {isLoggedIn && (
+              <NotificationBell
+                isMobile
+                notificationCount={notificationCount}
+                isOpen={isNotificationsOpen}
+                onToggle={toggleNotifications}
+                notifications={notifications}
+                panelRef={panelRef}
+              />
+            )}
+            <div className="relative cursor-pointer" onClick={onCartClick}>
+              <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
+              {itemsCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
+                  {itemsCount}
+                </span>
+              )}
+            </div>
           </div>
         </div>
+
         <div className="mt-3">
           <SearchBar
-            categories={categories}
-            onSearch={handleSearch}
             width="100%"
             height="40px"
             borderRadius="8px"

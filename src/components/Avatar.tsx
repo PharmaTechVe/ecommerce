@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Colors } from '@/styles/styles';
+import { useCart } from '@/context/CartContext';
 
 export type AvatarProps = {
   name: string;
@@ -33,6 +34,7 @@ export default function Avatar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { logout, token } = useAuth();
+  const { clearCart } = useCart();
 
   const initials = name
     .split(' ')
@@ -50,8 +52,15 @@ export default function Avatar({
 
   const handleLogoutClick = () => {
     logout();
+    clearCart();
     setDropdownOpen(false);
-    router.push('/');
+  };
+
+  const handleSafeProfileClick = () => {
+    if (onProfileClick) {
+      setDropdownOpen(false);
+      onProfileClick();
+    }
   };
 
   useEffect(() => {
@@ -114,7 +123,7 @@ export default function Avatar({
             {onProfileClick && (
               <li
                 className="cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={onProfileClick}
+                onClick={handleSafeProfileClick}
               >
                 Ir a mi perfil
               </li>

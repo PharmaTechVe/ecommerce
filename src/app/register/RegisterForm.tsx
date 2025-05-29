@@ -26,25 +26,25 @@ export default function RegisterForm() {
   }, [token, router]);
 
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    cedula: '',
-    telefono: '',
-    fechaNacimiento: '',
-    genero: '',
+    documentId: '',
+    phoneNumber: '',
+    birthDate: '',
+    gender: '',
     password: '',
     confirmPassword: '',
   });
 
   const [errors, setErrors] = useState({
-    nombre: '',
-    apellido: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    cedula: '',
-    telefono: '',
-    fechaNacimiento: '',
-    genero: '',
+    documentId: '',
+    phoneNumber: '',
+    birthDate: '',
+    gender: '',
     password: '',
     confirmPassword: '',
   });
@@ -59,15 +59,15 @@ export default function RegisterForm() {
     };
 
   const handleGenderClick = (gender: 'hombre' | 'mujer') => {
-    if (formData.genero !== gender) {
-      setFormData({ ...formData, genero: gender });
-      setErrors({ ...errors, genero: '' });
+    if (formData.gender !== gender) {
+      setFormData({ ...formData, gender: gender });
+      setErrors({ ...errors, gender: '' });
     }
   };
 
   const handleDateSelect = (date: string) => {
-    setFormData({ ...formData, fechaNacimiento: date });
-    setErrors({ ...errors, fechaNacimiento: '' });
+    setFormData({ ...formData, birthDate: date });
+    setErrors({ ...errors, birthDate: '' });
   };
 
   const handleSubmit = useCallback(
@@ -80,13 +80,13 @@ export default function RegisterForm() {
       if (!result.success) {
         const { fieldErrors } = result.error.flatten();
         setErrors({
-          nombre: fieldErrors.nombre?.[0] ?? '',
-          apellido: fieldErrors.apellido?.[0] ?? '',
+          firstName: fieldErrors.firstName?.[0] ?? '',
+          lastName: fieldErrors.lastName?.[0] ?? '',
           email: fieldErrors.email?.[0] ?? '',
-          cedula: fieldErrors.cedula?.[0] ?? '',
-          telefono: fieldErrors.telefono?.[0] ?? '',
-          fechaNacimiento: fieldErrors.fechaNacimiento?.[0] ?? '',
-          genero: fieldErrors.genero?.[0] ?? '',
+          documentId: fieldErrors.documentId?.[0] ?? '',
+          phoneNumber: fieldErrors.phoneNumber?.[0] ?? '',
+          birthDate: fieldErrors.birthDate?.[0] ?? '',
+          gender: fieldErrors.gender?.[0] ?? '',
           password: fieldErrors.password?.[0] ?? '',
           confirmPassword: fieldErrors.confirmPassword?.[0] ?? '',
         });
@@ -101,20 +101,21 @@ export default function RegisterForm() {
 
       let mappedGender: UserGender | null = null;
 
-      if (formData.genero === 'hombre') {
+      if (formData.gender === 'hombre') {
         mappedGender = UserGender.MALE;
-      } else if (formData.genero === 'mujer') {
+      } else if (formData.gender === 'mujer') {
         mappedGender = UserGender.FEMALE;
       }
 
       const payload = {
-        firstName: formData.nombre,
-        lastName: formData.apellido,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        documentId: formData.cedula,
-        birthDate: formData.fechaNacimiento,
-        phoneNumber: formData.telefono.trim() !== '' ? formData.telefono : null,
+        documentId: formData.documentId,
+        birthDate: formData.birthDate,
+        phoneNumber:
+          formData.phoneNumber.trim() !== '' ? formData.phoneNumber : null,
         gender: mappedGender,
       };
 
@@ -123,13 +124,13 @@ export default function RegisterForm() {
         console.log('SignUp response:', response);
         toast.success('Cuenta creada correctamente');
         setFormData({
-          nombre: '',
-          apellido: '',
+          firstName: '',
+          lastName: '',
           email: '',
-          cedula: '',
-          telefono: '',
-          fechaNacimiento: '',
-          genero: '',
+          documentId: '',
+          phoneNumber: '',
+          birthDate: '',
+          gender: '',
           password: '',
           confirmPassword: '',
         });
@@ -140,7 +141,6 @@ export default function RegisterForm() {
         });
 
         login(loginResponse.accessToken, false);
-        window.location.reload();
         router.push('/');
       } catch (err) {
         console.error('Error creating account:', err);
@@ -180,30 +180,30 @@ export default function RegisterForm() {
             <Input
               label="Nombre"
               placeholder="Nombre"
-              value={formData.nombre}
-              onChange={handleInputChange('nombre')}
+              value={formData.firstName}
+              onChange={handleInputChange('firstName')}
               borderColor={Colors.stroke}
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${errors.nombre ? 'visible' : 'invisible'}`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.firstName ? 'visible' : 'invisible'}`}
             >
-              {errors.nombre}
+              {errors.firstName}
             </p>
           </div>
           <div>
             <Input
               label="Apellido"
               placeholder="Apellido"
-              value={formData.apellido}
-              onChange={handleInputChange('apellido')}
+              value={formData.lastName}
+              onChange={handleInputChange('lastName')}
               borderColor={Colors.stroke}
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${errors.apellido ? 'visible' : 'invisible'}`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.lastName ? 'visible' : 'invisible'}`}
             >
-              {errors.apellido}
+              {errors.lastName}
             </p>
           </div>
         </div>
@@ -229,15 +229,15 @@ export default function RegisterForm() {
             <Input
               label="Cédula"
               placeholder="12345678"
-              value={formData.cedula}
-              onChange={handleInputChange('cedula')}
+              value={formData.documentId}
+              onChange={handleInputChange('documentId')}
               borderColor={Colors.stroke}
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${errors.cedula ? 'visible' : 'invisible'}`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.documentId ? 'visible' : 'invisible'}`}
             >
-              {errors.cedula}
+              {errors.documentId}
             </p>
           </div>
         </div>
@@ -246,16 +246,16 @@ export default function RegisterForm() {
           <div>
             <Input
               label="Número de teléfono"
-              placeholder="+584141234567"
-              value={formData.telefono}
-              onChange={handleInputChange('telefono')}
+              placeholder="584141234567"
+              value={formData.phoneNumber}
+              onChange={handleInputChange('phoneNumber')}
               borderColor={Colors.stroke}
               borderSize="1px"
             />
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${errors.telefono ? 'visible' : 'invisible'}`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.phoneNumber ? 'visible' : 'invisible'}`}
             >
-              {errors.telefono}
+              {errors.phoneNumber}
             </p>
           </div>
           <div>
@@ -276,9 +276,9 @@ export default function RegisterForm() {
               </div>
             </div>
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${errors.fechaNacimiento ? 'visible' : 'invisible'}`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.birthDate ? 'visible' : 'invisible'}`}
             >
-              {errors.fechaNacimiento}
+              {errors.birthDate}
             </p>
           </div>
           <div>
@@ -288,19 +288,19 @@ export default function RegisterForm() {
             <div className="flex gap-6">
               <RadioButton
                 text="Hombre"
-                selected={formData.genero === 'hombre'}
+                selected={formData.gender === 'hombre'}
                 onSelect={() => handleGenderClick('hombre')}
               />
               <RadioButton
                 text="Mujer"
-                selected={formData.genero === 'mujer'}
+                selected={formData.gender === 'mujer'}
                 onSelect={() => handleGenderClick('mujer')}
               />
             </div>
             <p
-              className={`min-h-[16px] text-xs text-red-500 ${errors.genero ? 'visible' : 'invisible'}`}
+              className={`min-h-[16px] text-xs text-red-500 ${errors.gender ? 'visible' : 'invisible'}`}
             >
-              {errors.genero}
+              {errors.gender}
             </p>
           </div>
         </div>

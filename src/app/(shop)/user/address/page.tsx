@@ -61,7 +61,7 @@ export default function AddressPage() {
     }
   };
 
-  if (!user || loading) return; //<Loading />;
+  if (!user || loading) return;
 
   return (
     <>

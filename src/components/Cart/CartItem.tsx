@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { CartItem } from '@/context/CartContext';
 import CardButton from '../CardButton';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 interface CartItemProps {
   item: CartItem;
@@ -56,10 +57,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
 
       <div className="flex-grow">
         <h4 className="mt-1 text-lg font-normal text-gray-800">{item.name}</h4>
-        <p className="mt-3 text-gray-600">
-          (${Number.isInteger(item.price) ? item.price : item.price.toFixed(2)}{' '}
-          c/u)
-        </p>
+        <p className="mt-3 text-gray-600">(${formatPrice(item.price)} c/u)</p>
 
         <div className="mt-3 [&_.FontSizes_h5]:!text-sm [&_h5]:!text-sm [&_span]:!text-sm">
           <CardButton
@@ -75,25 +73,14 @@ const CartItemComponent: React.FC<CartItemProps> = ({
         {discount > 0 ? (
           <>
             <span className="font-semibold">
-              $
-              {Number.isInteger(discountedTotal)
-                ? discountedTotal
-                : discountedTotal.toFixed(2)}
+              ${formatPrice(discountedTotal)}
             </span>
             <span className="text-gray-500 line-through">
-              $
-              {Number.isInteger(originalTotal)
-                ? originalTotal
-                : originalTotal.toFixed(2)}
+              ${formatPrice(originalTotal)}
             </span>
           </>
         ) : (
-          <span className="font-semibold">
-            $
-            {Number.isInteger(originalTotal)
-              ? originalTotal
-              : originalTotal.toFixed(2)}
-          </span>
+          <span className="font-semibold">${formatPrice(originalTotal)}</span>
         )}
         <button
           onClick={() => onRemove(item.id)}
