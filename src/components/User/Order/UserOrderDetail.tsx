@@ -5,56 +5,31 @@ import Link from 'next/link';
 import { StarIcon } from '@heroicons/react/24/outline';
 import CheckButton from '@/components/CheckButton';
 import {
-  OrderDetailResponse,
   OrderDetailProductPresentationResponse,
+  OrderDetailedResponse,
 } from '@pharmatech/sdk';
 import Button from '@/components/Button';
 import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
-interface OrderDetailProps {
-  orderNumber: string;
-  products: OrderDetailResponse[];
-  subtotal: number;
-  total: number;
-}
-
 export default function UserOrderDetail({
-  orderNumber,
-  products,
-  subtotal,
-  total,
-}: OrderDetailProps) {
-  const now = new Date();
-
-  const totalDiscount = products.reduce((acc, item) => {
-    const presentation: OrderDetailProductPresentationResponse =
-      item.productPresentation;
-    const promo = presentation.promo;
-    const basePrice = presentation.price;
-    const quantity = item.quantity;
-
-    const isPromoActive =
-      promo &&
-      new Date(promo.startAt) <= now &&
-      now < new Date(promo.expiredAt);
-
-    if (isPromoActive) {
-      const discountedPrice = basePrice * (1 - promo.discount / 100);
-      const discountAmount = (basePrice - discountedPrice) * quantity;
-      return acc + discountAmount;
-    }
-
-    return acc;
-  }, 0);
+  order,
+}: {
+  order: OrderDetailedResponse;
+}) {
+  const subtotal = order.details.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
+  const totalDiscount = subtotal - order.totalPrice;
 
   return (
     <div className="mx-auto w-full max-w-[942px] bg-white px-2 py-6 sm:px-6">
       {/* Header */}
       <div className="space-around mb-4 flex items-center justify-between">
         <h2 className="font-medium text-gray-500">
-          Pedido #{orderNumber.slice(0, 8)}
+          Pedido #{order.id.slice(0, 8)}
         </h2>
-        <Link href={`/order/${orderNumber}`}>
+        <Link href={`/order/${order.id}`}>
           <Button
             className="rounded-md px-4 py-2 text-sm font-medium text-[#1C2143]"
             width="auto"
@@ -69,18 +44,12 @@ export default function UserOrderDetail({
 
       {/* Order Summary*/}
       <div className="max-h-[460px] space-y-6 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:max-h-none sm:overflow-visible [&::-webkit-scrollbar]:hidden">
-        {products.map((item, idx) => {
+        {order.details.map((item, idx) => {
           const presentation: OrderDetailProductPresentationResponse =
             item.productPresentation;
           const product = presentation.product;
-          const basePrice = presentation.price;
+          const basePrice = item.price;
           const quantity = item.quantity;
-          const promo = presentation.promo;
-
-          const discountedPrice = promo
-            ? basePrice * (1 - promo.discount / 100)
-            : basePrice;
-
           return (
             <div
               key={`${presentation.id}-${idx}`}
@@ -115,11 +84,13 @@ export default function UserOrderDetail({
 
                     <div className="mt-1 flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-400 line-through">
-                          ${formatPrice(basePrice * quantity)}
-                        </span>
+                        {item.discount > 0 && (
+                          <span className="text-xs text-gray-400 line-through">
+                            ${formatPrice(basePrice * quantity)}
+                          </span>
+                        )}
                         <span className="text-sm font-medium text-gray-900">
-                          ${formatPrice(discountedPrice * quantity)}
+                          ${formatPrice(item.subtotal)}
                         </span>
                       </div>
                     </div>
@@ -185,10 +156,12 @@ export default function UserOrderDetail({
                 <div className="flex items-center gap-10">
                   <div className="text-sm text-gray-500">{quantity}</div>
                   <div className="flex w-28 flex-col items-end text-right font-medium text-gray-900">
-                    <span className="text-xs text-gray-400 line-through">
-                      ${formatPrice(basePrice * quantity)}
-                    </span>
-                    <span>${formatPrice(discountedPrice * quantity)}</span>
+                    {item.discount > 0 && (
+                      <span className="text-xs text-gray-400 line-through">
+                        ${formatPrice(basePrice * quantity)}
+                      </span>
+                    )}
+                    <span>${formatPrice(item.subtotal)}</span>
                   </div>
                 </div>
               </div>
@@ -204,7 +177,7 @@ export default function UserOrderDetail({
             <div className="text-gray-700">
               Subtotal{' '}
               <span className="text-gray-500">
-                ({products.length} productos)
+                ({order.details.length} productos)
               </span>
             </div>
             <div className="text-gray-700">${formatPrice(subtotal)}</div>
@@ -219,7 +192,9 @@ export default function UserOrderDetail({
 
           <div className="flex items-center justify-between font-medium">
             <div className="text-gray-900">TOTAL</div>
-            <div className="text-gray-900">${formatPrice(total)}</div>
+            <div className="text-gray-900">
+              ${formatPrice(order.totalPrice)}
+            </div>
           </div>
 
           <div className="text-right text-xs text-gray-500">
