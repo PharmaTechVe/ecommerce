@@ -54,7 +54,6 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
         ...paymentConfirmation,
         [field]: e.target.value,
       });
-      setErrors({ ...errors, [field]: '' });
     };
 
   const handleSubmit = useCallback(
@@ -62,7 +61,6 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
       e.preventDefault();
       setErrors({});
 
-      // Construimos el payload incluyendo orderId aquí
       const payload: PaymentConfirmation = {
         ...paymentConfirmation,
         orderId: order.id,
