@@ -10,6 +10,7 @@ import type {
   ProductPaginationRequest,
   ProductPresentation,
 } from '@pharmatech/sdk';
+import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 
 export type SuggestionProduct = ProductPresentation;
 
@@ -119,7 +120,7 @@ export default function SearchSuggestions({
                   <p className="text-xs text-gray-500">
                     {item.product.description}
                   </p>
-                  <p className="font-semibold">$ {item.price}</p>
+                  <p className="font-semibold">$ {formatPrice(item.price)}</p>
                 </div>
               </div>
             ))}
