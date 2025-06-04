@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import theme from '@/styles/styles';
 
 type StepperProps = {
@@ -22,6 +22,24 @@ export default function Stepper({
   const b1Size = theme.FontSizes.b1.size;
 
   const totalSteps = steps.length;
+
+  const [responsiveStepSize, setResponsiveStepSize] = useState(stepSize);
+  const [responsiveFontSize, setResponsiveFontSize] = useState(b1Size);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setResponsiveStepSize(stepSize * 0.7);
+        setResponsiveFontSize(b1Size * 0.75);
+      } else {
+        setResponsiveStepSize(stepSize);
+        setResponsiveFontSize(b1Size);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [stepSize, b1Size]);
 
   return (
     <div style={{ position: 'relative', width: '100%', padding: '16px 0' }}>
@@ -65,9 +83,9 @@ export default function Stepper({
                   }
                 }}
                 style={{
-                  width: stepSize,
-                  height: stepSize,
-                  borderRadius: stepSize / 2,
+                  width: responsiveStepSize,
+                  height: responsiveStepSize,
+                  borderRadius: responsiveStepSize / 2,
                   border: `2px solid ${primary}`,
                   backgroundColor: isActive ? primary : 'white',
                   display: 'flex',
@@ -83,7 +101,7 @@ export default function Stepper({
               <div
                 style={{
                   marginTop: 8,
-                  fontSize: b1Size,
+                  fontSize: responsiveFontSize,
                   textAlign: 'center',
                   color: mainTextColor,
                   fontWeight: 400,
