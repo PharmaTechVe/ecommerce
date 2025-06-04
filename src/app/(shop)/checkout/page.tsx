@@ -89,10 +89,12 @@ const ShippingInfo: React.FC = () => {
     setSelectedUserAddressId('');
     setPaymentMethod(delivery === 'home' ? 'cash' : 'pos');
   };
+
   const isValidUUID = (id: string) =>
     /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
       id,
     );
+
   useEffect(() => {
     if (deliveryMethod === 'store') {
       api.branch
