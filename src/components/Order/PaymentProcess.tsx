@@ -27,10 +27,11 @@ type Errors = {
 
 type Props = {
   order: OrderDetailedResponse;
+  setOrder: (order: OrderDetailedResponse) => void;
   couponDiscount: number;
 };
 
-const PaymentProcess: React.FC<Props> = ({ order }) => {
+const PaymentProcess: React.FC<Props> = ({ order, setOrder }) => {
   const { token } = useAuth();
   const totalProducts = order.details.reduce(
     (acc, item) => acc + item.quantity,
@@ -74,6 +75,8 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
         toast.success(
           'El pago ha sido confirmado, por favor espera a que se procese la orden',
         );
+        const orderPayed = await api.order.getById(order.id, token!);
+        setOrder(orderPayed);
       } catch (error) {
         console.error('Error al confirmar pago:', error);
       }

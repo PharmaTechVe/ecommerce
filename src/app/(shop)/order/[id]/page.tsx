@@ -22,6 +22,7 @@ import {
 } from '@pharmatech/sdk';
 import WaitingApproval from '@/components/Order/WaitingApproval';
 import OrderCompleted from '@/components/Order/Completed';
+import WaitingPaymentApproval from '@/components/Order/WaitingPaymentApproval';
 
 export default function OrderInProgress() {
   const params = useParams<{ id: string }>();
@@ -144,7 +145,17 @@ export default function OrderInProgress() {
             order.paymentMethod,
           )
         ) {
-          return <PaymentProcess order={order} couponDiscount={0} />;
+          if (!order.paymentConfirmation) {
+            return (
+              <PaymentProcess
+                order={order}
+                setOrder={setOrder}
+                couponDiscount={0}
+              />
+            );
+          } else {
+            return <WaitingPaymentApproval />;
+          }
         } else {
           return <ReviewOrder order={order} />;
         }
