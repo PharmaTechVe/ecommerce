@@ -166,7 +166,7 @@ export default function OrderInProgress() {
   if (!token) return null;
 
   return (
-    <div className="mx-auto mb-36 max-w-7xl px-4 py-6 text-left md:px-8">
+    <div className="mx-auto mb-12 max-w-7xl px-4 py-6 text-left md:px-8">
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="lg:w-3/3 w-full">
           <div className="max-w-4xl">

@@ -8,7 +8,7 @@ export default function WaitingApproval() {
   return (
     <section className="space-y-8">
       <h2
-        className="sm:text-[20px] md:text-[40px]"
+        className="text-[24px] sm:text-[24px] md:text-[40px]"
         style={{ color: Colors.textMain }}
       >
         Confirmación de Orden
@@ -24,13 +24,13 @@ export default function WaitingApproval() {
         {/* Segunda columna: Texto dividido en dos filas */}
         <div className="flex flex-col">
           <p
-            className="sm:text-[14px] md:text-[28px]"
+            className="text-[14px] sm:text-[14px] md:text-[28px]"
             style={{ color: Colors.textMain }}
           >
             Orden En Espera
           </p>
           <p
-            className="sm:text-[14px] md:text-[28px]"
+            className="text-[14px] sm:text-[14px] md:text-[28px]"
             style={{ color: Colors.textMain }}
           >
             Estamos procesando tu orden
@@ -38,7 +38,7 @@ export default function WaitingApproval() {
         </div>
       </div>
       <p
-        className="mb-4 sm:text-[8px] md:text-[16px]"
+        className="mb-4 text-[10px] sm:text-[10px] md:text-[16px]"
         style={{ color: Colors.textMain }}
       >
         En un momento actualizaremos el estado de tu orden. Si tienes alguna
