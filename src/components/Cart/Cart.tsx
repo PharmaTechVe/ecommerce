@@ -36,7 +36,7 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
     if (!user) {
       toast.error('Por favor, inicia sesión para continuar con la compra.');
       closeCart();
-      router.push('/login');
+      router.push('/login?redirect=/checkout');
       return;
     }
     closeCart();

@@ -8,7 +8,7 @@ import Input from '@/components/Input/Input';
 import CheckButton from '@/components/CheckButton';
 import Image from 'next/image';
 import theme from '@/styles/styles';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 
@@ -23,6 +23,7 @@ export default function LoginForm() {
   const [generalError, setGeneralError] = useState<string | null>(null);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -48,7 +49,12 @@ export default function LoginForm() {
         const response = await api.auth.login({ email, password });
         login(response.accessToken, remember);
         toast.success('Inicio de sesión exitoso');
-        router.push('/');
+        const redirect = searchParams?.get('redirect');
+        if (redirect) {
+          router.push(redirect);
+        } else {
+          router.push('/');
+        }
         setEmail('');
         setPassword('');
       } catch (err) {

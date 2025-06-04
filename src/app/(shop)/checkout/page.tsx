@@ -274,7 +274,9 @@ const ShippingInfo: React.FC = () => {
                 <p
                   className="mt-2 cursor-pointer hover:underline"
                   style={{ color: Colors.primary }}
-                  onClick={() => router.push('/user/address/new')}
+                  onClick={() =>
+                    router.push('/user/address/new?redirect=/checkout')
+                  }
                 >
                   Agregar nueva dirección
                 </p>
@@ -285,7 +287,7 @@ const ShippingInfo: React.FC = () => {
               <p className="font-medium text-gray-700">
                 Seleccione el método de pago
               </p>
-              <div className="flex flex-wrap gap-6 rounded-md border px-4 py-4">
+              <div className="flex flex-col gap-4 rounded-md border px-4 py-4 sm:flex-row sm:flex-wrap sm:gap-6">
                 {deliveryMethod === 'store' ? (
                   <>
                     <RadioButton
@@ -352,7 +354,7 @@ const ShippingInfo: React.FC = () => {
             setCouponCode={setCouponCode}
           />
           <div className="mt-6 flex justify-end">
-            <Button onClick={handlePayClick}>Realizar pago</Button>
+            <Button onClick={handlePayClick}>Comprar</Button>
           </div>
         </div>
       </div>

@@ -229,7 +229,7 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
           variant="submit"
           className="w-full rounded-md bg-[#1C2143] px-7 py-2 text-[16px] text-white hover:opacity-60"
         >
-          Confirmar
+          Enviar Referencia
         </Button>
       </form>
     </section>
