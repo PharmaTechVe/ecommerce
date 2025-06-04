@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { api } from '@/lib/sdkConfig';
 import CheckButton from '@/components/CheckButton';
 import {
@@ -10,6 +9,7 @@ import {
   Range as SliderRange,
   Thumb as SliderThumb,
 } from '@radix-ui/react-slider';
+import Link from 'next/link';
 
 export interface Filters {
   categories: string[];
@@ -23,8 +23,6 @@ export interface Filters {
 
 interface SidebarFilterProps {
   initialFilters: Filters;
-  setFilters: (filters: Filters) => void;
-  onClearFilters: () => void;
 }
 
 interface Option {
@@ -32,18 +30,13 @@ interface Option {
   name: string;
 }
 
-export default function SidebarFilter({
-  initialFilters,
-  onClearFilters,
-  setFilters,
-}: SidebarFilterProps) {
+export default function SidebarFilter({ initialFilters }: SidebarFilterProps) {
   const priceRange = useMemo<[number, number]>(() => [0, 10000], []);
-  const router = useRouter();
-
   const [localFilters, setLocalFilters] = useState<Filters>(initialFilters);
   const [categoriesList, setCategoriesList] = useState<Option[]>([]);
   const [brandsList, setBrandsList] = useState<Option[]>([]);
   const [presentationsList, setPresentationsList] = useState<Option[]>([]);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const fetchOptions = async (
     serviceFn: (opts: { page: number; limit: number }) => Promise<{
@@ -94,11 +87,10 @@ export default function SidebarFilter({
     );
   }, []);
 
-  const handleApply = () => {
+  const buildSearchUrl = () => {
     const params = new URLSearchParams();
 
     if (localFilters.categories.length > 0)
-      // remove empty string from categories if length is greater than 1
       params.set(
         'categoryId',
         localFilters.categories.filter((c) => c !== '').join(','),
@@ -120,8 +112,8 @@ export default function SidebarFilter({
     params.set('priceMin', String(localFilters.priceMin));
     params.set('priceMax', String(localFilters.priceMax));
     params.set('query', localFilters.query || '');
-    setFilters(localFilters);
-    router.push(`/search?${params.toString()}`);
+
+    return `/search?${params.toString()}`;
   };
 
   const toggleSelection = (
@@ -145,35 +137,21 @@ export default function SidebarFilter({
     }));
   };
 
-  const handleClear = () => {
-    setLocalFilters({
-      categories: [],
-      brands: [],
-      presentations: [],
-      activeIngredients: [],
-      query: '',
-      priceMin: priceRange[0],
-      priceMax: priceRange[1],
-    });
-    onClearFilters();
-  };
-
   const scrollClass =
     'max-h-32 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-white bg-white';
 
-  return (
+  const filters = (
     <div className="w-full bg-white p-4 md:w-64">
-      <div className="mb-4 flex items-center justify-between rounded bg-[#D4F3EC] p-3">
+      <div className="mb-3 flex items-center justify-between rounded bg-[#D4F3EC] p-3">
         <h3 className="font-semibold text-gray-700">Filtros</h3>
-        <button
-          onClick={handleClear}
-          className="text-sm text-gray-600 hover:underline"
-        >
-          Limpiar
-        </button>
+        <Link href={`/search?query=`}>
+          <button className="text-sm text-gray-600 hover:underline">
+            Limpiar
+          </button>
+        </Link>
       </div>
 
-      <section className="mb-6">
+      <section className="mb-3">
         <h4 className="mb-2 font-medium">Categoría</h4>
         <div className={scrollClass}>
           {categoriesList.map((opt) => (
@@ -188,7 +166,7 @@ export default function SidebarFilter({
         </div>
       </section>
 
-      <section className="mb-6">
+      <section className="mb-3">
         <h4 className="mb-2 font-medium">Marca</h4>
         <div className={scrollClass}>
           {brandsList.map((opt) => (
@@ -203,7 +181,7 @@ export default function SidebarFilter({
         </div>
       </section>
 
-      <section className="mb-6">
+      <section className="mb-3">
         <h4 className="mb-2 font-medium">Presentación</h4>
         <div className={scrollClass}>
           {presentationsList.map((opt) => (
@@ -218,7 +196,7 @@ export default function SidebarFilter({
         </div>
       </section>
 
-      <section className="mb-6">
+      <section className="mb-3">
         <h4 className="mb-2 font-medium">Precio</h4>
         <SliderRoot
           className="relative flex h-5 w-full touch-none select-none items-center"
@@ -234,17 +212,53 @@ export default function SidebarFilter({
           <SliderThumb className="block h-5 w-5 rounded-full border-2 border-[#1C2143] bg-[#1C2143]" />
         </SliderRoot>
         <div className="mt-1 flex justify-between text-xs">
-          <span>${priceRange[0] / 100}</span>
-          <span>${priceRange[1] / 100}</span>
+          <span>
+            $
+            {typeof localFilters.priceMin === 'number'
+              ? (localFilters.priceMin / 100).toFixed(2)
+              : (priceRange[0] / 100).toFixed(2)}
+          </span>
+          <span>
+            $
+            {typeof localFilters.priceMax === 'number'
+              ? (localFilters.priceMax / 100).toFixed(2)
+              : (priceRange[1] / 100).toFixed(2)}
+          </span>
         </div>
       </section>
 
-      <button
-        onClick={handleApply}
-        className="w-full rounded bg-[#1C2143] py-2 text-sm text-white"
-      >
-        Aplicar filtros
-      </button>
+      <Link href={buildSearchUrl()}>
+        <button className="w-full rounded bg-[#1C2143] py-2 text-sm text-white">
+          Aplicar filtros
+        </button>
+      </Link>
     </div>
+  );
+
+  return (
+    <>
+      <button
+        onClick={() => setShowMobileFilters(true)}
+        className="mb-4 mt-6 block rounded bg-[#1C2143] px-4 py-2 text-white md:hidden"
+      >
+        Filtrar
+      </button>
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-50 flex bg-black/50">
+          <div className="w-full max-w-xs overflow-auto bg-white p-4">
+            <button
+              onClick={() => setShowMobileFilters(false)}
+              className="mb-4 w-full text-right font-semibold"
+            >
+              Cerrar ✕
+            </button>
+            {filters}
+          </div>
+        </div>
+      )}
+      <div className="hidden md:block md:w-64 md:flex-shrink-0">
+        <div className="sticky top-24">{filters}</div>
+      </div>
+    </>
   );
 }
