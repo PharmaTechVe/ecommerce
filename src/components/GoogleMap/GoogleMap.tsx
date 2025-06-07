@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   GoogleMap,
   useJsApiLoader,
@@ -41,6 +41,10 @@ const GoogleMaps = ({
   const { isLoaded } = useJsApiLoader(GOOGLE_MAPS_OPTIONS);
   const [activeMarker, setActiveMarker] = useState<string | null>(null);
   const [selectedPosition, setSelectedPosition] = useState(center);
+
+  useEffect(() => {
+    setSelectedPosition(center);
+  }, [center]);
 
   const handleMapClick = async (e: google.maps.MapMouseEvent) => {
     if (!draggable || !e.latLng) return;

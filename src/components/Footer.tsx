@@ -94,9 +94,9 @@ export default function Footer() {
                 className="h-4 w-4"
                 style={{ color: Colors.iconWhite }}
               />
-              <a href="#" className="hover:underline">
+              <Link href="/branch" className="hover:underline">
                 Ubicar tienda
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
