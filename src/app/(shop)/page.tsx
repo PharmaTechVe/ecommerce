@@ -30,11 +30,19 @@ export default async function Home() {
           Productos en Oferta Exclusiva
         </h3>
         <Suspense fallback={<ProductCarouselSkeleton />}>
-          <ProductsOffer />
+          <ProductsOffer withPromo={true} />
         </Suspense>
 
         {/* Sección recomendados */}
         <ProductsRecommended />
+
+        {/* Sección ofertas */}
+        <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">
+          Los mejores productos para ti
+        </h3>
+        <Suspense fallback={<ProductCarouselSkeleton />}>
+          <ProductsOffer />
+        </Suspense>
 
         {/* Sección categorías */}
         <h3 className="my-8 pt-4 text-[32px] text-[#1C2143]">Categorías</h3>

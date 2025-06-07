@@ -7,6 +7,7 @@ import {
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { Colors } from '@/styles/styles';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -20,14 +21,14 @@ export default function Footer() {
         style={{ borderColor: Colors.secondaryLight }}
       >
         <div className="flex justify-center gap-6">
-          <a href="#" aria-label="Instagram">
+          <Link href="https://instagram.com/andres15alvarez">
             <Image
               src="/icons/instagram.svg"
               alt="Instagram"
               width={20}
               height={20}
             />
-          </a>
+          </Link>
           <a href="#" aria-label="Facebook">
             <Image
               src="/icons/facebook.svg"

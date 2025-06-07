@@ -6,7 +6,6 @@ import { loginSchema } from '@/lib/validations/loginSchema';
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
 import CheckButton from '@/components/CheckButton';
-import Image from 'next/image';
 import theme from '@/styles/styles';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -169,19 +168,6 @@ export default function LoginForm() {
             aria-busy={loading}
           >
             {loading ? 'Cargando...' : 'Iniciar sesión'}
-          </Button>
-
-          <Button
-            variant="white"
-            className="flex w-full items-center justify-center gap-2 py-3"
-          >
-            <Image
-              src="/images/google-icon.svg"
-              alt="Google Icon"
-              width={20}
-              height={20}
-            />
-            Iniciar sesión con Google
           </Button>
 
           <p className="text-center text-sm">
