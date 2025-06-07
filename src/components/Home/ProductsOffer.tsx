@@ -5,6 +5,7 @@ export default async function ProductsOffer() {
   const products = await api.product.getProducts({
     page: 1,
     limit: 20,
+    isVisible: true,
   });
   return (
     <>

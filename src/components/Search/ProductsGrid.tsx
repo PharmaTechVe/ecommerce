@@ -20,6 +20,7 @@ export default async function ProductsGrid({ filters }: { filters: Filters }) {
   const req: ProductPaginationRequest = {
     page: 1,
     limit: 50,
+    isVisible: true,
     ...(query?.trim() && { q: query?.trim() }),
     ...(categories.length > 0 && {
       categoryId: categories.filter((c) => c != ''),

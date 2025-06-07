@@ -45,10 +45,21 @@ export default async function ProductDetailPage({
   const relatedProducts = await api.product.getProducts({
     page: 1,
     limit: 20,
+    isVisible: true,
     ...(genericProduct.manufacturer.id && {
       manufacturerId: [genericProduct.manufacturer.id],
     }),
   });
+  let finalPrice = presentation.price;
+  let hasDiscount = false;
+  if (presentation.promo) {
+    const now = new Date();
+    const start = new Date(presentation.promo.startAt);
+    const end = new Date(presentation.promo.expiredAt);
+    const activePromo = start <= now && now < end;
+    hasDiscount = presentation.promo.discount > 0 && activePromo;
+    finalPrice = presentation.price * (1 - presentation.promo.discount / 100);
+  }
 
   // Breadcrumb con acción de "volver" si es búsqueda personalizada
   const breadcrumbItems = [
@@ -92,9 +103,33 @@ export default async function ProductDetailPage({
             Existencia: {presentation.stock || 0}
           </p>
           <div className="flex items-center justify-between">
-            <p className="text-lg text-gray-900">
-              ${formatPrice(presentation.price)}
-            </p>
+            {hasDiscount ? (
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 line-through">
+                    ${formatPrice(presentation.price)}
+                  </span>
+                  <Badge
+                    variant="filled"
+                    color="warning"
+                    size="small"
+                    borderRadius="square"
+                  >
+                    <span style={{ color: '#000' }}>
+                      -{presentation.promo?.discount}%
+                    </span>
+                  </Badge>
+                </div>
+                <span className="text-xl font-medium text-gray-900">
+                  ${formatPrice(finalPrice)}
+                </span>
+              </div>
+            ) : (
+              <p className="text-lg text-gray-900">
+                ${formatPrice(presentation.price)}
+              </p>
+            )}
+
             <CardButton
               product={{
                 productPresentationId: presentation.id,
