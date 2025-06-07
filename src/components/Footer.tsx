@@ -54,26 +54,35 @@ export default function Footer() {
             height={40}
             className="mx-auto md:mx-0"
           />
-          <ul className="space-y-2 text-sm text-gray-200">
-            <li className="flex items-center justify-center gap-1 md:justify-start">
-              <ChevronRightIcon
-                className="h-4 w-4"
-                style={{ color: Colors.iconWhite }}
-              />
-              <a href="#" className="hover:underline">
-                Sobre Nosotros
+          {/* Redes sociales en desktop – debajo del botón, alineadas a la izquierda */}
+          <div className="hidden md:block">
+            <p className="mb-2 mt-4 text-sm">
+              Síguenos en nuestras
+              <br />
+              Redes Sociales
+            </p>
+            <div className="flex gap-4">
+              <a href="#" aria-label="Instagram">
+                <Image
+                  src="/icons/instagram.svg"
+                  alt="Instagram"
+                  width={20}
+                  height={20}
+                />
               </a>
-            </li>
-            <li className="flex items-center justify-center gap-1 md:justify-start">
-              <ChevronRightIcon
-                className="h-4 w-4"
-                style={{ color: Colors.iconWhite }}
-              />
-              <a href="#" className="hover:underline">
-                Contáctanos
+              <a href="#" aria-label="Facebook">
+                <Image
+                  src="/icons/facebook.svg"
+                  alt="Facebook"
+                  width={20}
+                  height={20}
+                />
               </a>
-            </li>
-          </ul>
+              <a href="#" aria-label="X">
+                <Image src="/icons/x.svg" alt="X" width={20} height={20} />
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* Nuestras tiendas */}
@@ -94,28 +103,26 @@ export default function Footer() {
 
         {/* Categorías */}
         <div className="space-y-2">
-          <h4 className="font-semibold text-white">Categorías</h4>
+          <h4 className="font-semibold text-white">Compañia</h4>
           <ul className="space-y-2 text-sm text-gray-200">
-            {[
-              'Salud y Medicamentos',
-              'Belleza',
-              'Cuidado Personal',
-              'Alimentos y Bebidas',
-              'Bebé',
-            ].map((cat) => (
-              <li
-                key={cat}
-                className="flex items-center justify-center gap-1 md:justify-start"
-              >
-                <ChevronRightIcon
-                  className="h-4 w-4"
-                  style={{ color: Colors.iconWhite }}
-                />
-                <a href="#" className="hover:underline">
-                  {cat}
-                </a>
-              </li>
-            ))}
+            <li className="flex items-center justify-center gap-1 md:justify-start">
+              <ChevronRightIcon
+                className="h-4 w-4"
+                style={{ color: Colors.iconWhite }}
+              />
+              <a href="#" className="hover:underline">
+                Sobre Nosotros
+              </a>
+            </li>
+            <li className="flex items-center justify-center gap-1 md:justify-start">
+              <ChevronRightIcon
+                className="h-4 w-4"
+                style={{ color: Colors.iconWhite }}
+              />
+              <a href="#" className="hover:underline">
+                Contáctanos
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -150,36 +157,6 @@ export default function Footer() {
             Descargar
             <ArrowDownTrayIcon className="h-4 w-4 text-[#1C2143]" />
           </button>
-
-          {/* Redes sociales en desktop – debajo del botón, alineadas a la izquierda */}
-          <div className="hidden md:block">
-            <p className="mb-2 mt-4 text-sm">
-              Síguenos en nuestras
-              <br />
-              Redes Sociales
-            </p>
-            <div className="flex gap-4">
-              <a href="#" aria-label="Instagram">
-                <Image
-                  src="/icons/instagram.svg"
-                  alt="Instagram"
-                  width={20}
-                  height={20}
-                />
-              </a>
-              <a href="#" aria-label="Facebook">
-                <Image
-                  src="/icons/facebook.svg"
-                  alt="Facebook"
-                  width={20}
-                  height={20}
-                />
-              </a>
-              <a href="#" aria-label="X">
-                <Image src="/icons/x.svg" alt="X" width={20} height={20} />
-              </a>
-            </div>
-          </div>
         </div>
       </div>
 
