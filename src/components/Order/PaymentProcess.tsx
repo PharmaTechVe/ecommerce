@@ -17,6 +17,7 @@ import Dropdown from '../Dropdown';
 import { toast } from 'react-toastify';
 import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
 import copyToClipboard from '@/lib/utils/helpers/clipboard';
+import useDollarRate from '@/hooks/useDollarRate';
 
 type Errors = {
   bank?: string;
@@ -33,6 +34,7 @@ type Props = {
 
 const PaymentProcess: React.FC<Props> = ({ order, setOrder }) => {
   const { token } = useAuth();
+  const { dollarRate, loading } = useDollarRate();
   const totalProducts = order.details.reduce(
     (acc, item) => acc + item.quantity,
     0,
@@ -191,9 +193,21 @@ const PaymentProcess: React.FC<Props> = ({ order, setOrder }) => {
         )}
         <div>
           <p className="text-base text-gray-500">Monto</p>
-          <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-            ${formatPrice(order.totalPrice)}
-          </div>
+          {!loading && dollarRate && (
+            <div className="mt-1 flex items-center justify-between rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
+              Bs. {formatPrice(order.totalPrice * dollarRate)}
+              <button
+                type="button"
+                onClick={() =>
+                  copyToClipboard(formatPrice(order.totalPrice * dollarRate))
+                }
+                className="ml-1"
+                title="Copiar Monto"
+              >
+                <ClipboardIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

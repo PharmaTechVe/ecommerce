@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { OrderDetailedResponse } from '@pharmatech/sdk';
 import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
+import useDollarRate from '@/hooks/useDollarRate';
 
 interface ProductOrderSummaryProps {
   order: OrderDetailedResponse;
@@ -11,6 +12,7 @@ interface ProductOrderSummaryProps {
 
 const ProductOrderSummary: React.FC<ProductOrderSummaryProps> = ({ order }) => {
   // Compute items, subtotal and discounts
+  const { dollarRate, loading } = useDollarRate();
   const { items, subtotal, itemDiscount, total } = useMemo(() => {
     const items = order.details.map((detail) => {
       const price = detail.price;
@@ -104,6 +106,12 @@ const ProductOrderSummary: React.FC<ProductOrderSummaryProps> = ({ order }) => {
           <span>Total</span>
           <span>${formatPrice(total)}</span>
         </div>
+        {!loading && (
+          <div className="flex justify-between pt-2 text-[20px] leading-[36px] text-[#393938]">
+            <span>Total Bs</span>
+            <span>Bs. {formatPrice(total * dollarRate!)}</span>
+          </div>
+        )}
       </div>
     </aside>
   );
