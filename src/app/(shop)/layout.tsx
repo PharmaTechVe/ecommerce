@@ -16,8 +16,8 @@ export default function ShopLayout({ children }: ShopLayoutProps) {
   if (isLoading) return null;
 
   return (
-    <div>
-      <div className="relative bg-white">
+    <div className="flex min-h-screen flex-col">
+      <div className="relative flex flex-1 flex-col bg-white">
         {/* Nav */}
         <div className="sticky top-0 z-50 bg-white">
           <NavBar />

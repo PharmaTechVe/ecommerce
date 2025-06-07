@@ -119,9 +119,9 @@ export default function Footer() {
                 className="h-4 w-4"
                 style={{ color: Colors.iconWhite }}
               />
-              <a href="#" className="hover:underline">
+              <Link href="/contact-us" className="hover:underline">
                 Contáctanos
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
