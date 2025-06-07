@@ -9,6 +9,7 @@ import { Suspense } from 'react';
 import ProductsRecommended from '@/components/Home/ProductsRecommended';
 import ProductsOffer from '@/components/Home/ProductsOffer';
 import Categories from '@/components/Home/Categories';
+import NearestBranch from '@/components/Home/NearestBranch';
 
 export default async function Home() {
   const slides = [
@@ -49,6 +50,8 @@ export default async function Home() {
         <Suspense fallback={<ProductCarouselSkeleton />}>
           <Categories />
         </Suspense>
+
+        <NearestBranch />
       </div>
 
       {/* Modal de verificación de email */}
