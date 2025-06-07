@@ -16,7 +16,7 @@ export default function Branches() {
   if (loading) return <Loading />;
 
   return (
-    <main className="mx-auto mb-12 max-w-7xl p-4">
+    <main className="mb-12 ml-10 max-w-7xl p-4">
       <h3 className="my-4 text-[32px] text-[#1C2143]">Sucursales Pharmatech</h3>
       <div className="flex flex-col gap-6 md:flex-row">
         {/* Info de la sucursal */}

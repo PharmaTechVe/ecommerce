@@ -110,9 +110,9 @@ export default function Footer() {
                 className="h-4 w-4"
                 style={{ color: Colors.iconWhite }}
               />
-              <a href="#" className="hover:underline">
+              <Link href="/about-us" className="hover:underline">
                 Sobre Nosotros
-              </a>
+              </Link>
             </li>
             <li className="flex items-center justify-center gap-1 md:justify-start">
               <ChevronRightIcon

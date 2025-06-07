@@ -16,7 +16,7 @@ export default async function Home() {
   ];
 
   return (
-    <div className="px-4">
+    <div>
       <h1 className="text-2xl font-bold text-white">Pharmatech</h1>
 
       {/* Carrusel principal */}
