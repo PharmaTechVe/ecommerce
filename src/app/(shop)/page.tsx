@@ -1,7 +1,4 @@
 import Carousel from '@/components/Carousel';
-import Banner1 from '@/lib/utils/images/banner-v2.jpg';
-import Banner2 from '@/lib/utils/images/banner-v1.jpg';
-import Banner3 from '@/lib/utils/images/banner_final.jpg';
 import 'react-toastify/dist/ReactToastify.css';
 import ProductCarouselSkeleton from '@/components/Product/ProductCarouselSkelete';
 import EmailConfirmation from '@/components/Home/EmailConfirmation';
@@ -13,9 +10,9 @@ import NearestBranch from '@/components/Home/NearestBranch';
 
 export default async function Home() {
   const slides = [
-    { id: 1, imageUrl: Banner1 },
-    { id: 2, imageUrl: Banner2 },
-    { id: 3, imageUrl: Banner3 },
+    { id: 1, imageUrl: '/images/banner/1.jpg' },
+    { id: 2, imageUrl: '/images/banner/2.jpg' },
+    { id: 3, imageUrl: '/images/banner/3.jpg' },
   ];
 
   return (
