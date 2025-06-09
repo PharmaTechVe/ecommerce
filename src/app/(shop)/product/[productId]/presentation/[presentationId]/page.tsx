@@ -66,7 +66,7 @@ export default async function ProductDetailPage({
     { label: 'Inicio', href: '/' },
     {
       label: genericProduct.categories?.[0]?.name ?? 'Categoría',
-      href: `/search?category=${genericProduct.categories?.[0]?.name}`,
+      href: `/search?categoryId=${genericProduct.categories?.[0]?.id}`,
     },
     { label: presentation.presentation.name },
   ];
@@ -77,18 +77,23 @@ export default async function ProductDetailPage({
   }));
 
   return (
-    <main className="mx-auto mb-12 max-w-7xl p-4">
+    <main className="md:max-w-8xl mx-auto mb-12 max-w-[95vw] md:p-2">
       <Breadcrumb items={breadcrumbItems} />
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Carousel slides={slides} />
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div>
+          <Carousel slides={slides} />
+        </div>
         <div className="flex flex-col space-y-4">
           <div>
             <Badge variant="filled" color="info" size="medium">
               {genericProduct.manufacturer.name}
             </Badge>
           </div>
-          <h1 className="text-3xl" style={{ color: Colors.textMain }}>
+          <h1
+            className="text-2xl md:text-3xl"
+            style={{ color: Colors.textMain }}
+          >
             {`${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name} ${presentation.presentation.quantity} ${presentation.presentation.measurementUnit}`}
           </h1>
           <div className="flex gap-1">
@@ -96,13 +101,13 @@ export default async function ProductDetailPage({
               <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
             ))}
           </div>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600 md:text-base">
             {presentation.presentation.description}
           </p>
           <p className="text-md text-gray-600">
             Existencia: {presentation.stock || 0}
           </p>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {hasDiscount ? (
               <div>
                 <div className="flex items-center gap-2">
@@ -129,16 +134,17 @@ export default async function ProductDetailPage({
                 ${formatPrice(presentation.price)}
               </p>
             )}
-
-            <CardButton
-              product={{
-                productPresentationId: presentation.id,
-                name: `${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name}`,
-                price: presentation.price,
-                stock: presentation.stock || 0,
-                image: slides[0]?.imageUrl || '',
-              }}
-            />
+            <div className="mt-2 sm:mt-0">
+              <CardButton
+                product={{
+                  productPresentationId: presentation.id,
+                  name: `${genericProduct.genericName} ${genericProduct.name} ${presentation.presentation.name}`,
+                  price: presentation.price,
+                  stock: presentation.stock || 0,
+                  image: slides[0]?.imageUrl || '',
+                }}
+              />
+            </div>
           </div>
           <PresentationDropdown
             options={variantOptions}

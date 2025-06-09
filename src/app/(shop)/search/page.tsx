@@ -37,7 +37,9 @@ export default async function SearchPage(props: {
 
   const breadcrumbItems = [
     { label: 'Inicio', href: '/' },
-    ...(query ? [{ label: 'Búsqueda', href: `/search?query=${query}` }] : []),
+    ...(query
+      ? [{ label: 'Búsqueda', href: `/search?query=${query}` }]
+      : [{ label: 'Búsqueda Personalizada', href: `/search` }]),
   ];
 
   return (
