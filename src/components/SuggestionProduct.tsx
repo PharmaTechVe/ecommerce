@@ -42,6 +42,7 @@ export default function SearchSuggestions({
         const params: ProductPaginationRequest = {
           page: 1,
           limit: 10,
+          isVisible: true,
           ...(query.trim() && { q: query.trim() }),
           ...(category.id && { categoryId: [category.id] }),
         };

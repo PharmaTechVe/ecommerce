@@ -8,6 +8,7 @@ import { Colors } from '@/styles/styles';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/sdkConfig';
 import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
+import useDollarRate from '@/hooks/useDollarRate';
 
 interface OrderSummaryProps {
   hideCoupon?: boolean;
@@ -25,6 +26,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   const [couponError, setCouponError] = React.useState<string>('');
   const [couponSuccess, setCouponSuccess] = React.useState(false);
   const [couponDiscount, setCouponDiscount] = React.useState<number>(0);
+  const { dollarRate, loading } = useDollarRate();
 
   useEffect(() => {
     if (!hideCoupon) {
@@ -197,6 +199,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <span>Total</span>
           <span>${formatPrice(total)}</span>
         </div>
+        {!loading && (
+          <div className="flex justify-between pt-2 text-[20px] leading-[36px] text-[#393938]">
+            <span>Total Bs</span>
+            <span>Bs. {formatPrice(total * dollarRate!)}</span>
+          </div>
+        )}
       </div>
     </aside>
   );

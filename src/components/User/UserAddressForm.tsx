@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Input from '@/components/Input/Input';
 import Dropdown from '@/components/Dropdown';
@@ -31,6 +31,8 @@ export default function EditAddressForm({
 }: EditFormProps) {
   const { user, token } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get('redirect');
   const [states, setStates] = useState<StateResponse[]>([]);
   const [cities, setCities] = useState<CityResponse[]>([]);
   const [selectedState, setSelectedState] = useState('');
@@ -116,6 +118,10 @@ export default function EditAddressForm({
   };
 
   const handleSubmit = async () => {
+    if (!user?.sub || !token) {
+      toast.error('Sesión inválida. Inicia sesión nuevamente.');
+      return;
+    }
     const result = addressSchema.safeParse({
       state: selectedState,
       city: selectedCity,
@@ -136,13 +142,13 @@ export default function EditAddressForm({
       return;
     }
 
-    if (latitude === null || longitude === null || !selectedCityId) {
-      toast.error('Debes seleccionar una ciudad y ubicación en el mapa');
+    if (!selectedCityId) {
+      toast.error('Debes seleccionar una ciudad válida');
       return;
     }
 
-    if (!user?.sub || !token) {
-      toast.error('Sesión inválida. Inicia sesión nuevamente.');
+    if (latitude == 0 || longitude == 0) {
+      setShowLocationPopup(true);
       return;
     }
 
@@ -159,7 +165,11 @@ export default function EditAddressForm({
       try {
         await api.userAdress.createAddress(user.sub, addressData, token);
         toast.success('Dirección creada exitosamente');
-        router.push('/user/address');
+        if (redirect) {
+          router.push(redirect);
+        } else {
+          router.push('/user/address');
+        }
       } catch (error) {
         console.error('Error creando dirección:', error);
         toast.error('Hubo un error al crear la dirección');
@@ -278,8 +288,8 @@ export default function EditAddressForm({
         <LocationPopup
           onAdd={handleLocationAdded}
           onBack={() => setShowLocationPopup(false)}
-          latitude={latitude ? latitude : 10.3121}
-          longitude={longitude ? longitude : -69.3026}
+          latitude={latitude ? latitude : 10.066785}
+          longitude={longitude ? longitude : -69.362805}
           setLatitude={setLatitude}
           setLongitude={setLongitude}
         />

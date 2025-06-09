@@ -24,7 +24,7 @@ const DeliveryInfo: React.FC<Props> = ({ order }) => {
   return (
     <section className="space-y-8">
       <h2
-        className="sm:text-[20px] md:text-[40px]"
+        className="text-[24px] sm:text-[24px] md:text-[40px]"
         style={{ color: Colors.textMain }}
       >
         Información del Repartidor

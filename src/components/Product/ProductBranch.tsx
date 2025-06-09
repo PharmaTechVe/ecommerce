@@ -104,12 +104,7 @@ export default function ProductBranch({ productPresentationId }: Props) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <GoogleMaps
-          markers={markers}
-          center={mapCenter}
-          mapWidth="100%"
-          mapHeight="600px"
-        />
+        <GoogleMaps markers={markers} center={mapCenter} mapWidth="100%" />
 
         <div className="space-y-6">
           <div className="space-y-2">

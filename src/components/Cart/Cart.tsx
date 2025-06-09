@@ -5,6 +5,8 @@ import CartSummary from './CartSummary';
 import { useCart, CartItem } from '@/context/CartContext';
 import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ModalConfirm from '../ModalConfirm';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'react-toastify';
 
 interface CartProps {
   closeCart: () => void;
@@ -12,6 +14,7 @@ interface CartProps {
 
 const Cart: React.FC<CartProps> = ({ closeCart }) => {
   const router = useRouter();
+  const { user } = useAuth();
   const { cartItems, updateItemQuantity, removeItem, clearCart } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -30,6 +33,12 @@ const Cart: React.FC<CartProps> = ({ closeCart }) => {
   const total = subtotal - discount;
 
   const handleCheckout = () => {
+    if (!user) {
+      toast.error('Por favor, inicia sesión para continuar con la compra.');
+      closeCart();
+      router.push('/login?redirect=/checkout');
+      return;
+    }
     closeCart();
     router.push('/checkout');
   };

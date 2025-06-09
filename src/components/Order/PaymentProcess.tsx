@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { ClipboardIcon } from '@heroicons/react/24/outline';
 import Input from '@/components/Input/Input';
 import { api } from '@/lib/sdkConfig';
 import {
@@ -15,6 +16,8 @@ import { useAuth } from '@/context/AuthContext';
 import Dropdown from '../Dropdown';
 import { toast } from 'react-toastify';
 import { formatPrice } from '@/lib/utils/helpers/priceFormatter';
+import copyToClipboard from '@/lib/utils/helpers/clipboard';
+import useDollarRate from '@/hooks/useDollarRate';
 
 type Errors = {
   bank?: string;
@@ -25,11 +28,13 @@ type Errors = {
 
 type Props = {
   order: OrderDetailedResponse;
+  setOrder: (order: OrderDetailedResponse) => void;
   couponDiscount: number;
 };
 
-const PaymentProcess: React.FC<Props> = ({ order }) => {
+const PaymentProcess: React.FC<Props> = ({ order, setOrder }) => {
   const { token } = useAuth();
+  const { dollarRate, loading } = useDollarRate();
   const totalProducts = order.details.reduce(
     (acc, item) => acc + item.quantity,
     0,
@@ -56,38 +61,36 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
       });
     };
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setErrors({});
+  const handleSubmit = useCallback(async () => {
+    setErrors({});
 
-      const payload: PaymentConfirmation = {
-        ...paymentConfirmation,
-        orderId: order.id,
-      };
+    const payload: PaymentConfirmation = {
+      ...paymentConfirmation,
+      orderId: order.id,
+    };
 
-      const result = checkoutPaymentProcessSchema.safeParse(payload);
+    const result = checkoutPaymentProcessSchema.safeParse(payload);
 
-      if (result.success) {
-        try {
-          await api.paymentConfirmation.create(paymentConfirmation, token!);
-          toast.success(
-            'El pago ha sido confirmado, por favor espera a que se procese la orden',
-          );
-        } catch (error) {
-          console.error('Error al confirmar pago:', error);
-        }
-      } else {
-        setErrors({
-          bank: result.error.formErrors.fieldErrors.bank?.[0],
-          reference: result.error.formErrors.fieldErrors.reference?.[0],
-          documentId: result.error.formErrors.fieldErrors.documentId?.[0],
-          phoneNumber: result.error.formErrors.fieldErrors.phoneNumber?.[0],
-        });
+    if (result.success) {
+      try {
+        await api.paymentConfirmation.create(paymentConfirmation, token!);
+        toast.success(
+          'El pago ha sido confirmado, por favor espera a que se procese la orden',
+        );
+        const orderPayed = await api.order.getById(order.id, token!);
+        setOrder(orderPayed);
+      } catch (error) {
+        console.error('Error al confirmar pago:', error);
       }
-    },
-    [paymentConfirmation, order.id, token],
-  );
+    } else {
+      setErrors({
+        bank: result.error.formErrors.fieldErrors.bank?.[0],
+        reference: result.error.formErrors.fieldErrors.reference?.[0],
+        documentId: result.error.formErrors.fieldErrors.documentId?.[0],
+        phoneNumber: result.error.formErrors.fieldErrors.phoneNumber?.[0],
+      });
+    }
+  }, [paymentConfirmation, order.id, token]);
 
   const isBank = order.paymentMethod === PaymentMethod.BANK_TRANSFER;
 
@@ -136,7 +139,7 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
         <p className="text-base text-gray-500">{description}</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-6">
         <div>
           <p className="text-base text-gray-500">Banco Asociado</p>
           <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
@@ -145,34 +148,70 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
         </div>
         <div>
           <p className="text-base text-gray-500">RIF</p>
-          <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
+          <div className="mt-1 flex items-center justify-between rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
             {paymentDetails?.documentId}
+            <button
+              type="button"
+              onClick={() => copyToClipboard(paymentDetails?.documentId)}
+              className="ml-1"
+              title="Copiar RIF"
+            >
+              <ClipboardIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+            </button>
           </div>
         </div>
         {isBank ? (
           <div>
             <p className="text-base text-gray-500">Nº de Cuenta</p>
-            <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
+            <div className="mt-1 flex items-center justify-between rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
               {paymentDetails?.account}
+              <button
+                type="button"
+                onClick={() => copyToClipboard(paymentDetails?.account)}
+                className="ml-1"
+                title="Copiar cuenta"
+              >
+                <ClipboardIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+              </button>
             </div>
           </div>
         ) : (
           <div>
             <p className="text-base text-gray-500">Teléfono Móvil</p>
-            <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
+            <div className="mt-1 flex items-center justify-between rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
               {paymentDetails?.phoneNumber}
+              <button
+                type="button"
+                onClick={() => copyToClipboard(paymentDetails?.phoneNumber)}
+                className="ml-1"
+                title="Copiar teléfono"
+              >
+                <ClipboardIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+              </button>
             </div>
           </div>
         )}
         <div>
           <p className="text-base text-gray-500">Monto</p>
-          <div className="mt-1 rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
-            ${formatPrice(order.totalPrice)}
-          </div>
+          {!loading && dollarRate && (
+            <div className="mt-1 flex items-center justify-between rounded-md bg-gray-200 px-3 py-2 text-base text-gray-700">
+              Bs. {formatPrice(order.totalPrice * dollarRate)}
+              <button
+                type="button"
+                onClick={() =>
+                  copyToClipboard(formatPrice(order.totalPrice * dollarRate))
+                }
+                className="ml-1"
+                title="Copiar Monto"
+              >
+                <ClipboardIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-4">
         <p className="font-medium text-gray-700">
           Ingrese los datos para validar el pago
         </p>
@@ -228,10 +267,11 @@ const PaymentProcess: React.FC<Props> = ({ order }) => {
         <Button
           variant="submit"
           className="w-full rounded-md bg-[#1C2143] px-7 py-2 text-[16px] text-white hover:opacity-60"
+          onClick={handleSubmit}
         >
-          Confirmar
+          Enviar Referencia
         </Button>
-      </form>
+      </div>
     </section>
   );
 };

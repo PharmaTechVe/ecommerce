@@ -4,7 +4,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { registerSchema } from '@/lib/validations/registerSchema';
 import Button from '@/components/Button';
 import Input from '@/components/Input/Input';
-import Image from 'next/image';
 import Calendar from '@/components/Calendar';
 import { Colors } from '@/styles/styles';
 import RadioButton from '@/components/RadioButton';
@@ -350,21 +349,6 @@ export default function RegisterForm() {
           {loading ? 'Cargando...' : 'Registrarse'}
         </Button>
       </form>
-
-      <div className="mt-4">
-        <Button
-          variant="white"
-          className="flex w-full items-center justify-center gap-2 py-3"
-        >
-          <Image
-            src="/images/google-icon.svg"
-            alt="Google"
-            width={20}
-            height={20}
-          />
-          Crear cuenta con Google
-        </Button>
-      </div>
 
       <p className="mt-4 text-left text-sm text-gray-600">
         ¿Ya tienes cuenta?{' '}

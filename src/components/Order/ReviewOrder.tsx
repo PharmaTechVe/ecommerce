@@ -51,7 +51,7 @@ const ReviewOrder: React.FC<Props> = ({ order }) => {
   return (
     <section className="space-y-8">
       <h2
-        className="sm:text-[20px] md:text-[40px]"
+        className="text-[24px] sm:text-[24px] md:text-[40px]"
         style={{ color: Colors.textMain }}
       >
         Confirmación de Orden
@@ -63,13 +63,13 @@ const ReviewOrder: React.FC<Props> = ({ order }) => {
         />
         <div className="flex flex-col">
           <p
-            className="sm:text-[14px] md:text-[28px]"
+            className="text-[14px] sm:text-[14px] md:text-[28px]"
             style={{ color: Colors.textMain }}
           >
             Orden #{order.id.slice(0, 8)}
           </p>
           <p
-            className="sm:text-[14px] md:text-[28px]"
+            className="text-[14px] sm:text-[14px] md:text-[28px]"
             style={{ color: Colors.textMain }}
           >
             ¡Gracias por tu compra {userName}!
@@ -77,7 +77,7 @@ const ReviewOrder: React.FC<Props> = ({ order }) => {
         </div>
       </div>
       <p
-        className="mb-4 sm:text-[8px] md:text-[16px]"
+        className="mb-4 text-[10px] sm:text-[10px] md:text-[16px]"
         style={{ color: Colors.textMain }}
       >
         Tu pedido ya está listo para que pases por él en la sucursal indicada.
@@ -89,7 +89,7 @@ const ReviewOrder: React.FC<Props> = ({ order }) => {
         <div className="flex flex-col gap-4 lg:flex-row">
           <div className="w-full lg:w-2/3">
             <p
-              className="mb-2 mt-2 sm:text-[8px] md:text-[16px]"
+              className="mb-2 mt-2 text-[10px] sm:text-[10px] md:text-[16px]"
               style={{ color: Colors.textMain }}
             >
               Sucursal de retiro: {order.branch?.name}

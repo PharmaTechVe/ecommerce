@@ -26,11 +26,7 @@ interface UserProfile {
   };
 }
 
-type NavBarProps = {
-  onCartClick?: () => void;
-};
-
-export default function NavBar({ onCartClick }: NavBarProps) {
+export default function NavBar() {
   const router = useRouter();
 
   const { itemsCount } = useCart();
@@ -190,7 +186,10 @@ export default function NavBar({ onCartClick }: NavBarProps) {
                 panelRef={panelRef}
               />
             )}
-            <div className="relative cursor-pointer" onClick={onCartClick}>
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setIsCartOpen(true)}
+            >
               <ShoppingCartIcon className="h-8 w-8 text-gray-700 hover:text-black" />
               {itemsCount > 0 && (
                 <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#1C2143] text-xs font-semibold text-white">
